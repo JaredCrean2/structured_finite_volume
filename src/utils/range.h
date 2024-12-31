@@ -127,6 +127,18 @@ class Range
 
     RangeIter end() const { return RangeIter(m_end + 1); }
 
+    UInt size() const { return m_end - m_start + 1; }
+
+    bool operator==(const Range& rhs) const
+    {
+      return m_start == rhs.m_start && m_end == rhs.m_end;
+    }
+
+    bool operator!=(const Range& rhs) const
+    {
+      return !(*this == rhs);
+    }    
+
   private:
     UInt m_start;
     UInt m_end;
@@ -143,6 +155,12 @@ class Range2D
     const Range& getXRange() const { return m_xrange; }
 
     const Range& getYRange() const { return m_yrange; }
+
+    bool operator==(const Range2D& rhs) const
+    {
+      return m_xrange == rhs.m_xrange &&
+             m_yrange == rhs.m_yrange;
+    }
 
   private:
     Range m_xrange;

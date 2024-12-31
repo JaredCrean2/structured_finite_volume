@@ -18,7 +18,7 @@ target_link_libraries(test_utils
 # Unit tests
 file(GLOB unit_src_files unit/*.cc)
 
-add_executable(unit_tests ${unit_src_files})
+add_executable(unit_tests ${unit_src_files} gtest_main.cc)
 target_include_directories(unit_tests PUBLIC
   "${PROJECT_BINARY_DIR}"
   "${PROJECT_SOURCE_DIR}/src"
@@ -29,13 +29,14 @@ target_link_libraries(unit_tests
                      ${GTEST_BOTH_LIBRARIES}
                      pthread 
                      mesh
+                     utils
                      test_utils)
 
 
 # integration tests
 file(GLOB integration_src_files integration/*.cc)
 
-add_executable(integration_tests ${integration_src_files})
+add_executable(integration_tests ${integration_src_files} gtest_main.cc)
 target_include_directories(unit_tests PUBLIC
   "${PROJECT_BINARY_DIR}"
   "${PROJECT_SOURCE_DIR}/src"
@@ -46,4 +47,5 @@ target_link_libraries(integration_tests
                      ${GTEST_BOTH_LIBRARIES}
                      pthread 
                      mesh
+                     utils
                      test_utils)                  

@@ -121,6 +121,22 @@ TEST(Range, RangeFor)
   EXPECT_EQ(vals, vals_expected);
 }
 
+TEST(Range, Length)
+{
+  EXPECT_EQ(Range(2, 4).size(), 3);
+}
+
+TEST(Range, Equality)
+{
+  EXPECT_TRUE(Range(2, 4) == Range(2, 4));
+  EXPECT_FALSE(Range(2, 4) == Range(2, 5));
+  EXPECT_FALSE(Range(2, 5) == Range(2, 4));
+
+  EXPECT_FALSE(Range(2, 4) != Range(2, 4));
+  EXPECT_TRUE(Range(2, 4) != Range(2, 5));
+  EXPECT_TRUE(Range(2, 5) != Range(2, 4));  
+}
+
 TEST(Range2D, RangeFor)
 {
   Range2D range(2, 4, 5, 6);
@@ -134,4 +150,13 @@ TEST(Range2D, RangeFor)
                                                        {3, 5}, {3, 6},
                                                        {4, 5}, {4, 6}};
   EXPECT_EQ(vals, vals_expected);
+}
+
+TEST(Range2D, Equality)
+{
+  EXPECT_TRUE(Range2D(0, 1, 0, 2) == Range2D(0, 1, 0, 2));
+  EXPECT_FALSE(Range2D(0, 1, 0, 2) == Range2D(1, 1, 0, 2));
+  EXPECT_FALSE(Range2D(0, 1, 0, 2) == Range2D(0, 2, 0, 2));
+  EXPECT_FALSE(Range2D(0, 1, 0, 2) == Range2D(1, 1, 1, 2));
+  EXPECT_FALSE(Range2D(0, 1, 0, 2) == Range2D(1, 1, 0, 3));
 }
