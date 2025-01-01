@@ -168,3 +168,4 @@ TEST(StructuredBlock, SimpleBlockTransform3)
   EXPECT_DOUBLE_EQ(coords(4, 2, 0), 1);
   EXPECT_DOUBLE_EQ(coords(4, 2, 1), 0);  
 }
+
