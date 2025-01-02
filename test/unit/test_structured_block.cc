@@ -20,8 +20,8 @@ TEST(StructuredBlock, SimpleBlock)
 
   EXPECT_EQ(block.getBlockId(), 2);
   EXPECT_EQ(block.getBlockType(), BlockType::Regular);
-  EXPECT_EQ(block.getOwnedVerts(), Range2D(0, 2, 0, 4));
-  EXPECT_EQ(block.getOwnedCells(), Range2D(0, 1, 0, 3));
+  EXPECT_EQ(block.getOwnedVerts(), Range2D(0, 3, 0, 5));
+  EXPECT_EQ(block.getOwnedCells(), Range2D(0, 2, 0, 4));
   EXPECT_EQ(block.getOffsetIntoBlock(), make_array({0, 0}));
   EXPECT_EQ(block.getAllBlockSize(), make_array({2, 4}));
 
@@ -102,8 +102,8 @@ TEST(StructuredBlock, SimpleBlockTransform1)
 
   EXPECT_EQ(block.getBlockId(), 2);
   EXPECT_EQ(block.getBlockType(), BlockType::Regular);
-  EXPECT_EQ(block.getOwnedVerts(), Range2D(0, 4, 0, 2));
-  EXPECT_EQ(block.getOwnedCells(), Range2D(0, 3, 0, 1));
+  EXPECT_EQ(block.getOwnedVerts(), Range2D(0, 5, 0, 3));
+  EXPECT_EQ(block.getOwnedCells(), Range2D(0, 4, 0, 2));
   EXPECT_EQ(block.getOffsetIntoBlock(), make_array({0, 0}));
   EXPECT_EQ(block.getAllBlockSize(), make_array({4, 2}));
 
@@ -127,8 +127,8 @@ TEST(StructuredBlock, SimpleBlockTransform2)
 
   EXPECT_EQ(block.getBlockId(), 2);
   EXPECT_EQ(block.getBlockType(), BlockType::Regular);
-  EXPECT_EQ(block.getOwnedVerts(), Range2D(0, 2, 0, 4));
-  EXPECT_EQ(block.getOwnedCells(), Range2D(0, 1, 0, 3));
+  EXPECT_EQ(block.getOwnedVerts(), Range2D(0, 3, 0, 5));
+  EXPECT_EQ(block.getOwnedCells(), Range2D(0, 2, 0, 4));
   EXPECT_EQ(block.getOffsetIntoBlock(), make_array({0, 0}));
   EXPECT_EQ(block.getAllBlockSize(), make_array({2, 4}));
 
@@ -152,8 +152,8 @@ TEST(StructuredBlock, SimpleBlockTransform3)
 
   EXPECT_EQ(block.getBlockId(), 2);
   EXPECT_EQ(block.getBlockType(), BlockType::Regular);
-  EXPECT_EQ(block.getOwnedVerts(), Range2D(0, 4, 0, 2));
-  EXPECT_EQ(block.getOwnedCells(), Range2D(0, 3, 0, 1));
+  EXPECT_EQ(block.getOwnedVerts(), Range2D(0, 5, 0, 3));
+  EXPECT_EQ(block.getOwnedCells(), Range2D(0, 4, 0, 2));
   EXPECT_EQ(block.getOffsetIntoBlock(), make_array({0, 0}));
   EXPECT_EQ(block.getAllBlockSize(), make_array({4, 2}));
 

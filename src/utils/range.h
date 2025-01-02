@@ -4,6 +4,7 @@
 #include "project_defs.h"
 #include <iterator>
 #include <limits>
+#include <iostream>
 
 namespace structured_fv {
 
@@ -111,27 +112,32 @@ class RangeIter
     UInt m_idx;
 };
 
+
 class Range
 {
   public:
     using iterator = RangeIter;
 
-    Range(UInt start, UInt end) :
+    Range(UInt start, UInt past_the_end) :
       m_start(start),
-      m_end(end)
+      m_past_the_end(past_the_end)
     {}
 
-    UInt operator()(UInt i) const { return m_start + i; }
+    UInt operator()(UInt i) const 
+    {
+      assert (i < size());
+      return m_start + i;
+    }
 
     RangeIter begin() const { return RangeIter(m_start); }
 
-    RangeIter end() const { return RangeIter(m_end + 1); }
+    RangeIter end() const { return RangeIter(m_past_the_end); }
 
-    UInt size() const { return m_end - m_start + 1; }
+    UInt size() const { return m_past_the_end - m_start; }
 
     bool operator==(const Range& rhs) const
     {
-      return m_start == rhs.m_start && m_end == rhs.m_end;
+      return m_start == rhs.m_start && m_past_the_end == rhs.m_past_the_end;
     }
 
     bool operator!=(const Range& rhs) const
@@ -141,15 +147,22 @@ class Range
 
   private:
     UInt m_start;
-    UInt m_end;
+    UInt m_past_the_end;
 };
+
+inline std::ostream& operator<<(std::ostream& os, const Range& range)
+{
+  os << "[" << *(range.begin()) << ", " << *(range.end()) << ")";
+  return os;
+}
+
 
 class Range2D
 {
   public:
-    Range2D(UInt xstart=0, UInt xend=0, UInt ystart=0, UInt yend=0) :
-      m_xrange(xstart, xend),
-      m_yrange(ystart, yend)
+    Range2D(UInt xstart=0, UInt x_past_the_end=0, UInt ystart=0, UInt y_past_the_end=0) :
+      m_xrange(xstart, x_past_the_end),
+      m_yrange(ystart, y_past_the_end)
     {}
 
     const Range& getXRange() const { return m_xrange; }
@@ -166,6 +179,13 @@ class Range2D
     Range m_xrange;
     Range m_yrange;
 };
+
+inline std::ostream& operator<<(std::ostream& os, const Range2D& range)
+{
+  os << range.getXRange() << " x " << range.getYRange();
+  return os;
+}
+
 }
 
 #endif

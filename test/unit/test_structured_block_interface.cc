@@ -18,7 +18,7 @@ TEST(StructuredBlockInterface, East)
 {
   UInt left_block_id = 0;
   UInt left_block_constant_index = 3;
-  Range left_block_variable_index(0, 5);
+  Range left_block_variable_index(0, 6);
   NeighborDirection dir = NeighborDirection::East;
   std::array<Int, 2> transform{1, 2};
 
@@ -31,7 +31,7 @@ TEST(StructuredBlockInterface, East)
   EXPECT_EQ(iface.getLeftBlockId(), left_block_id);
   EXPECT_EQ(iface.getRightBlockId(), right_block_id);
   EXPECT_EQ(iface.getNeighborDirection(), dir);
-  EXPECT_EQ(iface.getLeftBlockBoundaryCells(), Range2D(3, 3, 0, 5));
+  EXPECT_EQ(iface.getLeftBlockBoundaryCells(), Range2D(3, 4, 0, 6));
 
   const AdjacentBlockIndexer& indexer = iface.getAdjacentBlockIndexer();
   EXPECT_EQ(indexer(left_block_constant_index+1, left_block_variable_index(0)), make_array({0, 0}));
@@ -43,7 +43,7 @@ TEST(StructuredBlockInterface, North)
 {
   UInt left_block_id = 0;
   UInt left_block_constant_index = 5;
-  Range left_block_variable_index(0, 3);
+  Range left_block_variable_index(0, 4);
   NeighborDirection dir = NeighborDirection::North;
   std::array<Int, 2> transform{1, 2};
 
@@ -56,7 +56,7 @@ TEST(StructuredBlockInterface, North)
   EXPECT_EQ(iface.getLeftBlockId(), left_block_id);
   EXPECT_EQ(iface.getRightBlockId(), right_block_id);
   EXPECT_EQ(iface.getNeighborDirection(), dir);
-  EXPECT_EQ(iface.getLeftBlockBoundaryCells(), Range2D(0, 3, 5, 5));
+  EXPECT_EQ(iface.getLeftBlockBoundaryCells(), Range2D(0, 4, 5, 6));
 
   const AdjacentBlockIndexer& indexer = iface.getAdjacentBlockIndexer();
   EXPECT_EQ(indexer(left_block_variable_index(0), left_block_constant_index+1), make_array({0, 0}));

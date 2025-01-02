@@ -102,7 +102,7 @@ TEST(RangeIter, RelationalOperators)
 
 TEST(Range, CallOperator)
 {
-  Range range(2, 4);
+  Range range(2, 5);
   EXPECT_EQ(range(0), 2);
   EXPECT_EQ(range(1), 3);
   EXPECT_EQ(range(2), 4);
@@ -110,7 +110,7 @@ TEST(Range, CallOperator)
 
 TEST(Range, RangeFor)
 {
-  Range range(2, 4);
+  Range range(2, 5);
   std::vector<UInt> vals;
 
   for (UInt i : range)
@@ -123,7 +123,7 @@ TEST(Range, RangeFor)
 
 TEST(Range, Length)
 {
-  EXPECT_EQ(Range(2, 4).size(), 3);
+  EXPECT_EQ(Range(2, 5).size(), 3);
 }
 
 TEST(Range, Equality)
@@ -139,7 +139,7 @@ TEST(Range, Equality)
 
 TEST(Range2D, RangeFor)
 {
-  Range2D range(2, 4, 5, 6);
+  Range2D range(2, 5, 5, 7);
   std::vector<std::pair<UInt, UInt>> vals;
 
   for (UInt i : range.getXRange())
