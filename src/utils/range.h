@@ -147,7 +147,7 @@ class Range
 class Range2D
 {
   public:
-    Range2D(UInt xstart, UInt xend, UInt ystart, UInt yend) :
+    Range2D(UInt xstart=0, UInt xend=0, UInt ystart=0, UInt yend=0) :
       m_xrange(xstart, xend),
       m_yrange(ystart, yend)
     {}

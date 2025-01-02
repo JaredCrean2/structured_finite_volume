@@ -117,37 +117,6 @@ class StructuredBlock
 };
 
 
-/*
-class StructuredBlockInterface
-{
-  public:
-    UInt getLeftBlockId() const { return m_left_block_id; }
-
-    UInt getRightBlockId() const { return m_right_block_id; }
-
-    //TODO: indexer
-
-  private:
-    UInt m_left_block_id;
-    //NeighborDirection m_left_block_direction;  // gives the side of the block the
-                                               // interface is one, from the left block perspective
-    UInt m_left_block_constant_index;
-    Range m_left_block_variable_index;
-
-    UInt m_right_block_id;
-    UInt m_right_block_constant_index;
-    Range m_right_block_variable_index;
-    std::array<Int, 2> m_transform;  // for each direction in the left block, gives the
-                                     // corresponding direction in the right block
-                                     // ex. if the +x direction in the left block is
-                                     // the negative y direction in right block, then
-                                     // m_transform[0] = -1;
-};
-*/
-
-
-
-
 }
 }
 

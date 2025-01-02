@@ -58,6 +58,10 @@ class AdjacentBlockIndexer
       m_transform_matrix(1, 1) = sgn(transform[1])*del(transform[1], 2);
     }
 
+    AdjacentBlockIndexer() :
+      AdjacentBlockIndexer({1, 2}, {0, 0}, NeighborDirection::East, {0, 0})
+    {}
+
     // i and j are used to index into the adjacent block as though it
     // were a continuation of the current block.  For example, if
     // the current block is connected to the adjacent block to the East
