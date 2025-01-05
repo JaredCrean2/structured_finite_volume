@@ -4,38 +4,10 @@
 #include "utils/project_defs.h"
 #include "utils/range.h"
 #include <iostream>
+#include "block_spec.h"
 
 namespace structured_fv {
 namespace mesh {
-
-
-struct MeshBlockSpec
-{
-  // Note: num_cells_x and num_cells_y are the number of cells in each
-  //       direction in a rotation=0 coordinate system.
-  //       The rotation argument changes the block-local coordinate
-  //       system but does not change the number of cells in each direction.
-  //       This allows specifying a multi-block mesh using a rotation=0
-  //       global coordinate system
-  //       The coord_func should also be defined in the rotation=0 global
-  //       coordinate system, and should map from the unit square into
-  //       the desired shape
-  MeshBlockSpec(UInt num_cells_x, UInt num_cells_y, UInt rotation,
-                std::function<std::array<double, 2>(double x, double y)> coord_func = 
-                  [](double x, double y) {return std::array<double, 2>{x, y};}) :
-    num_cells_x(num_cells_x),
-    num_cells_y(num_cells_y),
-    rotation(rotation),
-    coord_func(coord_func)
-  {}
-
-  UInt num_cells_x;
-  UInt num_cells_y;
-
-  UInt rotation;  // 0 = no rotation, 1 = rotate 90 degrees counter-clockwise, 2 = 180 degrees, 3 = 270 degrees
-                  // this allows testing the transform between block interfaces
-  std::function<std::array<double, 2>(double x, double y)> coord_func;
-};
 
 enum class BlockType
 {
@@ -45,7 +17,7 @@ enum class BlockType
 
 // given an index (i, j) in the standard orientation (ie rotation=0), compute
 // the location of the corresponding point under the rotation
-std::pair<UInt, UInt> applyRotation(UInt rotation, UInt i, UInt j, UInt dimx,  UInt dimy)
+inline std::pair<UInt, UInt> applyRotation(UInt rotation, UInt i, UInt j, UInt dimx,  UInt dimy)
 {
   switch (rotation)
   {
@@ -88,6 +60,20 @@ class StructuredBlock
           m_owned_vert_coords(iprime, jprime, 1) = yprime;
         }
     }
+
+    StructuredBlock(Kokkos::View<Real**[2], HostMemorySpace> ghost_coords, UInt block_id) :
+      m_block_id(block_id),
+      m_block_type(BlockType::GhostBC),
+      m_owned_cell_range(0, ghost_coords.extent(0)-1, 0, ghost_coords.extent(1)-1),
+      m_owned_vert_range(0, ghost_coords.extent(0),    0, ghost_coords.extent(1)),
+      m_owned_vert_coords(ghost_coords),
+      m_offset_into_block{0, 0},
+      m_all_block_size{static_cast<UInt>(ghost_coords.extent(0)-1), static_cast<UInt>(ghost_coords.extent(1)-1)}
+    {}
+
+    StructuredBlock(const StructuredBlock& rhs) = delete;
+
+    StructuredBlock& operator=(const StructuredBlock& rhs) = delete;
 
     UInt getBlockId() const { return m_block_id;};  // block IDs are global
 

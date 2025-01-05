@@ -15,6 +15,18 @@ enum class NeighborDirection
   West
 };
 
+// given a direction for a block with rotation=0, computes the direction
+// of the same side (in the global coordinate system) of the block
+// after a given rotation.
+// Ex. Given the East side of a block and a rotation 1,
+//     this function returns South because the block was rotated
+//     90 degrees counter clockwise, so the rightmost side of the block
+//     is now the South side
+inline NeighborDirection rotate(NeighborDirection dir, UInt rotation)
+{
+  return static_cast<NeighborDirection>(static_cast<int>(dir) + rotation);
+}
+
 
 template <typename T>
 constexpr Int sgn(T val)
