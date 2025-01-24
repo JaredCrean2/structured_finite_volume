@@ -120,7 +120,7 @@ class Range
 
     Range(UInt start, UInt past_the_end) :
       m_start(start),
-      m_past_the_end(past_the_end)
+      m_past_the_end(std::max(start, past_the_end))
     {}
 
     UInt operator()(UInt i) const 

@@ -3,6 +3,7 @@
 #include "mesh/block_spec.h"
 #include "mesh/structured_block.h"
 #include "utils/project_defs.h"
+#include "utils/math.h"
 
 namespace structured_fv {
 namespace mesh {
@@ -197,6 +198,37 @@ Kokkos::View<double**[2], HostMemorySpace> computeGhostBCCoords(const Structured
 
 void StructuredMesh::createBCGhosts(const MeshSpec& spec)
 {
+  std::array<NeighborDirection, 4> directions = {NeighborDirection::North,
+                                                 NeighborDirection::East,
+                                                 NeighborDirection::South,
+                                                 NeighborDirection::West};
+  std::array<Range2D, 4> ranges = {Range2D(0, spec.blocks.extent(0), spec.blocks.extent(1)-1, spec.blocks.extent(1)),
+                                   Range2D(spec.blocks.extent(0)-1, spec.blocks.extent(0), 0, spec.blocks.extent(1)),
+                                   Range2D(0, spec.blocks.extent(0), 0, 1),
+                                   Range2D(0, 1, 0, spec.blocks.extent(1))};
+
+  for (int dir=0; dir < 4; ++dir)
+  {
+    UInt ghost_block_id_start = m_blocks.size();
+    UInt ghost_iface_start = m_block_interfaces.size();    
+    for (UInt i : ranges[dir].getXRange())
+      for (UInt j : ranges[dir].getYRange())
+      {
+        UInt regular_block_id = i + j * spec.blocks.extent(0);
+        const MeshBlockSpec& block_spec = spec.blocks(i, j);
+        createBCGhost(block_spec, regular_block_id, directions[dir]);
+      }
+
+    UInt ghost_block_id_end = m_blocks.size();
+    UInt ghost_iface_end = m_block_interfaces.size();
+    m_bc_block_ranges.push_back(Range(ghost_block_id_start, ghost_block_id_end));
+    m_bc_iface_ranges.push_back(Range(ghost_iface_start, ghost_iface_end));
+  }
+}
+
+/*
+void StructuredMesh::createBCGhosts(const MeshSpec& spec)
+{
   Range block_x_range(0, spec.blocks.extent(0));
   Range block_y_range(0, spec.blocks.extent(1));
 
@@ -213,7 +245,7 @@ void StructuredMesh::createBCGhosts(const MeshSpec& spec)
   UInt ghost_block_id_end = m_blocks.size();
   UInt ghost_iface_end = m_block_interfaces.size();
   m_bc_block_ranges.push_back(Range(ghost_block_id_start, ghost_block_id_end));
-  m_bc_iface_ranges.push_back(Range(ghost_iface_end, ghost_iface_end));
+  m_bc_iface_ranges.push_back(Range(ghost_iface_start, ghost_iface_end));
 
   // East
   ghost_block_id_start = m_blocks.size();
@@ -228,7 +260,7 @@ void StructuredMesh::createBCGhosts(const MeshSpec& spec)
   ghost_block_id_end = m_blocks.size();
   ghost_iface_end = m_block_interfaces.size();
   m_bc_block_ranges.push_back(Range(ghost_block_id_start, ghost_block_id_end));
-  m_bc_iface_ranges.push_back(Range(ghost_iface_end, ghost_iface_end));
+  m_bc_iface_ranges.push_back(Range(ghost_iface_start, ghost_iface_end));
 
   // South
   ghost_block_id_start = m_blocks.size();
@@ -243,7 +275,7 @@ void StructuredMesh::createBCGhosts(const MeshSpec& spec)
   ghost_block_id_end = m_blocks.size();
   ghost_iface_end = m_block_interfaces.size();
   m_bc_block_ranges.push_back(Range(ghost_block_id_start, ghost_block_id_end));
-  m_bc_iface_ranges.push_back(Range(ghost_iface_end, ghost_iface_end));
+  m_bc_iface_ranges.push_back(Range(ghost_iface_start, ghost_iface_end));
 
   // West
   ghost_block_id_start = m_blocks.size();
@@ -258,8 +290,9 @@ void StructuredMesh::createBCGhosts(const MeshSpec& spec)
   ghost_block_id_end = m_blocks.size();
   ghost_iface_end = m_block_interfaces.size();
   m_bc_block_ranges.push_back(Range(ghost_block_id_start, ghost_block_id_end));
-  m_bc_iface_ranges.push_back(Range(ghost_iface_end, ghost_iface_end));       
+  m_bc_iface_ranges.push_back(Range(ghost_iface_start, ghost_iface_end));       
 }
+*/
 
 void StructuredMesh::createBCGhost(const MeshBlockSpec& spec, UInt regular_block_id, NeighborDirection domain_boundary)
 {

@@ -121,6 +121,28 @@ TEST(Range, RangeFor)
   EXPECT_EQ(vals, vals_expected);
 }
 
+TEST(Range, RangeForEmptyRange)
+{
+  Range range(2, 2);
+  std::vector<UInt> vals;
+
+  for (UInt i : range)
+    vals.push_back(i);
+
+  EXPECT_EQ(vals.size(), 0);  
+}
+
+TEST(Range, RangeForNegativeRange)
+{
+  Range range(2, 1);
+  std::vector<UInt> vals;
+
+  for (UInt i : range)
+    vals.push_back(i);
+
+  EXPECT_EQ(vals.size(), 0);  
+}
+
 TEST(Range, Length)
 {
   EXPECT_EQ(Range(2, 5).size(), 3);

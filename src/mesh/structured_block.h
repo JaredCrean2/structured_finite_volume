@@ -73,7 +73,11 @@ class StructuredBlock
 
     StructuredBlock(const StructuredBlock& rhs) = delete;
 
+    StructuredBlock(StructuredBlock&& rhs) = default;
+
     StructuredBlock& operator=(const StructuredBlock& rhs) = delete;
+
+    StructuredBlock& operator=(StructuredBlock&& rhs) = default;
 
     UInt getBlockId() const { return m_block_id;};  // block IDs are global
 
