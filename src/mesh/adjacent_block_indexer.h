@@ -24,7 +24,7 @@ enum class NeighborDirection
 //     is now the South side
 inline NeighborDirection rotate(NeighborDirection dir, UInt rotation)
 {
-  return static_cast<NeighborDirection>(static_cast<int>(dir) + rotation);
+  return static_cast<NeighborDirection>((static_cast<int>(dir) + rotation) % 4);
 }
 
 

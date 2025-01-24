@@ -32,6 +32,8 @@ inline std::pair<UInt, UInt> applyRotation(UInt rotation, UInt i, UInt j, UInt d
 class StructuredBlock
 {
   public:
+    //TODO: the datatype should be const
+    using CoordsHostView = Kokkos::View<Real**[2], HostMemorySpace>;
     StructuredBlock(const MeshBlockSpec& spec, UInt block_id, BlockType block_type) :
       m_block_id(block_id),
       m_block_type(block_type),
@@ -89,9 +91,9 @@ class StructuredBlock
 
     Range2D getOwnedCells() const { return m_owned_cell_range; };
 
-    const Kokkos::View<Real**[2], HostMemorySpace>& getOwnedVertCoords() const { return m_owned_vert_coords; };
+    const CoordsHostView& getOwnedVertCoords() const { return m_owned_vert_coords; };
 
-    std::array<UInt, 2> getOffsetIntoBlock() { return m_offset_into_block; };  // owned idx + offset = block idx
+    std::array<UInt, 2> getOffsetIntoBlock() const { return m_offset_into_block; };  // owned idx + offset = block idx
 
     // returns size of the entire block (including non-owned cells)
     std::array<UInt, 2> getAllBlockSize() const { return m_all_block_size; };
@@ -101,7 +103,7 @@ class StructuredBlock
     BlockType m_block_type;
     Range2D m_owned_cell_range;
     Range2D m_owned_vert_range;
-    Kokkos::View<Real**[2], HostMemorySpace> m_owned_vert_coords;
+    CoordsHostView m_owned_vert_coords;
     std::array<UInt, 2> m_offset_into_block;
     std::array<UInt, 2> m_all_block_size;
 };

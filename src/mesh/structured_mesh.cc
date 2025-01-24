@@ -130,14 +130,18 @@ StructuredMesh::StructuredMesh(const MeshSpec& spec)
 // dir is the direction of the interface from the ghost block perspective
 Kokkos::View<double**[2], HostMemorySpace> computeGhostBCCoords(const StructuredBlock& block, NeighborDirection dir, UInt num_ghost_cells)
 {
+  std::cout << "\nEntered computeGhostBCCoords" << std::endl;
   //TODO: assert block size
 
-  Range xrange = static_cast<int>(dir) % 2 == 0 ? block.getOwnedVerts().getXRange() : Range(0, num_ghost_cells);
-  Range yrange = static_cast<int>(dir) % 2 == 0 ? Range(0, num_ghost_cells) : block.getOwnedVerts().getYRange();
+
+  Range xrange = static_cast<int>(dir) % 2 == 0 ? block.getOwnedVerts().getXRange() : Range(0, num_ghost_cells+1);
+  Range yrange = static_cast<int>(dir) % 2 == 0 ? Range(0, num_ghost_cells+1) : block.getOwnedVerts().getYRange();
   Kokkos::View<double**[2], HostMemorySpace> ghost_coords("ghost_bc_coords", xrange.size(), yrange.size());
   auto block_coords = block.getOwnedVertCoords();
   UInt block_nx = block.getOwnedVerts().getXRange().size();
   UInt block_ny = block.getOwnedVerts().getYRange().size();
+
+  std::cout << "ghost coords.shape = " << ghost_coords.extent(0) << ", " << ghost_coords.extent(1) << std::endl;
 
   for (UInt i : xrange)
     for (UInt j : yrange)
@@ -149,23 +153,30 @@ Kokkos::View<double**[2], HostMemorySpace> computeGhostBCCoords(const Structured
       {
         case NeighborDirection::North: 
         {
+          UInt j2 = num_ghost_cells - j;
           x0 = {block_coords(i, 0, 0), block_coords(i, 0, 1)};
           x1 = {block_coords(i, 1, 0), block_coords(i, 1, 1)};
           auto normal = x0 - x1;
+          std::cout << "using point " << x0 << " and " << x1 << std::endl;
+          std::cout << "normal = " << normal << std::endl;  
 
-          ghost_coords(i, j, 0) = (j+1)*normal[0] + x0[0];
-          ghost_coords(i, j, 1) = (j+1)*normal[1] + x0[1];
+          std::cout << "writing to index " << i << ", " << j << std::endl;
+          std::cout << "j2 = " << j2 << std::endl;
+          ghost_coords(i, j, 0) = j2*normal[0] + x0[0];          
+          ghost_coords(i, j, 1) = j2*normal[1] + x0[1];
+          std::cout << "wrote coords " << ghost_coords(i, j, 0) << ", " << ghost_coords(i, j, 1) << " to index " << i << ", " << j << std::endl;
           break;
         }
 
         case NeighborDirection::East: 
         {
+          UInt i2 = num_ghost_cells - i;
           x0 = {block_coords(0, j, 0), block_coords(0, j, 1)};
           x1 = {block_coords(1, j, 0), block_coords(1, j, 1)};
           auto normal = x0 - x1;
 
-          ghost_coords(i, j, 0) = (i+1)*normal[0] + x0[0];
-          ghost_coords(i, j, 1) = (i+1)*normal[1] + x0[1];
+          ghost_coords(i, j, 0) = i2*normal[0] + x0[0];
+          ghost_coords(i, j, 1) = i2*normal[1] + x0[1];
           break;
         }
 
@@ -175,19 +186,20 @@ Kokkos::View<double**[2], HostMemorySpace> computeGhostBCCoords(const Structured
           x1 = {block_coords(i, block_ny-2, 0), block_coords(i, block_ny-2, 1)};
           auto normal = x0 - x1;
 
-          ghost_coords(i, j, 0) = (j+1)*normal[0] + x0[0];
-          ghost_coords(i, j, 1) = (j+1)*normal[1] + x0[1];
+
+          ghost_coords(i, j, 0) = j*normal[0] + x0[0];
+          ghost_coords(i, j, 1) = j*normal[1] + x0[1];
           break;
         }
 
         case NeighborDirection::West: 
-        {
+        {          
           x0 = {block_coords(block_nx-1, j, 0), block_coords(block_nx-1, j, 1)};
           x1 = {block_coords(block_nx-2, j, 0), block_coords(block_nx-2, j, 1)};
           auto normal = x0 - x1;
 
-          ghost_coords(i, j, 1) = (j+1)*normal[0] + x0[0];   
-          ghost_coords(i, j, 1) = (j+1)*normal[1] + x0[1];
+          ghost_coords(i, j, 0) = i*normal[0] + x0[0];   
+          ghost_coords(i, j, 1) = i*normal[1] + x0[1];
           break;
         }
       }
@@ -296,25 +308,32 @@ void StructuredMesh::createBCGhosts(const MeshSpec& spec)
 
 void StructuredMesh::createBCGhost(const MeshBlockSpec& spec, UInt regular_block_id, NeighborDirection domain_boundary)
 {
+  std::cout << "\nEntered createBCGhost" << std::endl;
   UInt ghost_block_id = m_blocks.size();
-  NeighborDirection ghost_block_dir = static_cast<NeighborDirection>((static_cast<int>(domain_boundary) + 2) % 4);
-  const StructuredBlock& regular_block = m_blocks[regular_block_id];
   UInt regular_block_rotation = spec.rotation;
+  // the ghost block always has the same coordinate system as the regular block
+  UInt ghost_block_rotation = regular_block_rotation;
+  std::array<Int, 2> transform = {1, 2};
+
+  NeighborDirection regular_block_dir = rotate(domain_boundary, regular_block_rotation);
+  NeighborDirection ghost_block_dir = static_cast<NeighborDirection>((static_cast<int>(domain_boundary) + 2) % 4);
   ghost_block_dir = rotate(ghost_block_dir, regular_block_rotation);
 
-  auto ghost_coords = computeGhostBCCoords(regular_block, ghost_block_dir, 2);
+  auto ghost_coords = computeGhostBCCoords(m_blocks[regular_block_id], ghost_block_dir, 2);
 
   m_blocks.emplace_back(ghost_coords, ghost_block_id);
   const StructuredBlock& ghost_block = m_blocks[ghost_block_id];
   m_block_counts[1]++;
 
-  UInt left_block_constant_index = getConstantIndexAlongBoundary(ghost_block,  ghost_block_dir);
-  Range left_block_variable_index = getVariableIndexAlongBoundary(ghost_block, ghost_block_dir);
-  std::array<Int, 2> transform = {1, 2};
-  std::array<UInt, 2> min_cell_on_boundary = getMinCellOnBoundary(regular_block, ghost_block_dir, regular_block_rotation);
+  const StructuredBlock& regular_block = m_blocks[regular_block_id];
+  std::cout << "ghost_block_dir = " << static_cast<int>(ghost_block_dir) << std::endl;
+  UInt left_block_constant_index = getConstantIndexAlongBoundary(regular_block,  regular_block_dir);
+  Range left_block_variable_index = getVariableIndexAlongBoundary(regular_block, regular_block_dir);
+  std::cout << "left_block_variable_index = " << left_block_variable_index << std::endl;
+  std::array<UInt, 2> min_cell_on_boundary = getMinCellOnBoundary(ghost_block, regular_block_dir, ghost_block_rotation);
 
-  m_block_interfaces.emplace_back(ghost_block_id, left_block_constant_index, left_block_variable_index, ghost_block_dir,
-                                  transform, regular_block_id, min_cell_on_boundary);
+  m_block_interfaces.emplace_back(regular_block_id, left_block_constant_index, left_block_variable_index, regular_block_dir,
+                                  transform, ghost_block_id, min_cell_on_boundary);
   m_block_iface_counts[1]++;
 }
   

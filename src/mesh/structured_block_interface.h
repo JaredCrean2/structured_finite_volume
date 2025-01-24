@@ -23,13 +23,15 @@ class StructuredBlockInterface
     {
       if (static_cast<int>(direction) % 2 == 0)
       {
-        m_left_block_boundary_cells = Range2D(left_block_variable_index(0), left_block_variable_index(left_block_variable_index.size()-1)+1,
+        m_left_block_boundary_cells = Range2D(*(left_block_variable_index.begin()), *(left_block_variable_index.end()),
                                               left_block_constant_index, left_block_constant_index+1);
       } else
       {
         m_left_block_boundary_cells = Range2D(left_block_constant_index, left_block_constant_index+1,
-                                              left_block_variable_index(0), left_block_variable_index(left_block_variable_index.size()-1)+1);
+                                              *(left_block_variable_index.begin()), *(left_block_variable_index.end()));
       }
+
+      std::cout << "left_block_boundary_cells = " << m_left_block_boundary_cells << std::endl;
 
       std::array<UInt, 2> left_block_min_cell = {m_left_block_boundary_cells.getXRange()(0), m_left_block_boundary_cells.getYRange()(0)};
       m_indexer = AdjacentBlockIndexer(transform, left_block_min_cell, direction, right_block_min_cell);
