@@ -51,7 +51,6 @@ class StructuredBlock
         {
           auto [x, y] = applyRotation(spec.rotation, double(i) / (dimx - 1), double(j) / (dimy - 1));
           auto [xprime, yprime] = spec.coord_func(x, y);
-          std::cout << "x, y = " << x << ", " << y << ", xprime, yprime = " << xprime << ", " << yprime << std::endl;
 
           m_owned_vert_coords(i, j, 0) = xprime;
           m_owned_vert_coords(i, j, 1) = yprime;

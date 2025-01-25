@@ -13,7 +13,6 @@ void checkCoords(double x0, double y0, const std::array<double, 4>& mat, Structu
   for (UInt i=0; i < coords.extent(0); ++i)
     for (UInt j=0; j < coords.extent(1); ++j)
     {
-      std::cout << "\ni = " << i << ", j = " << j << std::endl;
       double x = mat[0] * i + mat[1]*j + x0;
       double y = mat[2] * i + mat[3]*j + y0;
       EXPECT_NEAR(coords(i, j, 0), x, 1e-13);
@@ -130,7 +129,6 @@ TEST(StructuredMesh, SingleBlock) {
   }    
 
   {
-    std::cout << "\nchecking south block" << std::endl;
     // West ghost block
     const StructuredBlock& block = mesh.getBlock(4);
     EXPECT_EQ(block.getBlockId(), 4);

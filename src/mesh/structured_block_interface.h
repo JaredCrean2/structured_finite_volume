@@ -31,8 +31,6 @@ class StructuredBlockInterface
                                               *(left_block_variable_index.begin()), *(left_block_variable_index.end()));
       }
 
-      std::cout << "left_block_boundary_cells = " << m_left_block_boundary_cells << std::endl;
-
       std::array<UInt, 2> left_block_min_cell = {m_left_block_boundary_cells.getXRange()(0), m_left_block_boundary_cells.getYRange()(0)};
       m_indexer = AdjacentBlockIndexer(transform, left_block_min_cell, direction, right_block_min_cell);
     }

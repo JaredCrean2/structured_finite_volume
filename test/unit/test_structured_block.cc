@@ -50,51 +50,6 @@ TEST(StructuredBlock, SimpleBlock)
   EXPECT_DOUBLE_EQ(coords(2, 1, 1), 1.0);    
 }
 
-/*
-TEST(StructuredBlock, applyRotation0)
-{
-  UInt rotation = 0;
-  UInt dimx = 5;
-  UInt dimy = 4;
-  EXPECT_EQ(applyRotation(rotation, 0, 0, dimx, dimy), std::make_pair(UInt(0), UInt(0)));
-  EXPECT_EQ(applyRotation(rotation, 4, 0, dimx, dimy), std::make_pair(UInt(4), UInt(0)));
-  EXPECT_EQ(applyRotation(rotation, 0, 3, dimx, dimy), std::make_pair(UInt(0), UInt(3)));
-  EXPECT_EQ(applyRotation(rotation, 2, 1, dimx, dimy), std::make_pair(UInt(2), UInt(1)));
-}
-
-TEST(StructuredBlock, applyRotation1)
-{
-  UInt rotation = 1;
-  UInt dimx = 5;
-  UInt dimy = 4;
-  EXPECT_EQ(applyRotation(rotation, 0, 0, dimx, dimy), std::make_pair(UInt(0), UInt(4)));
-  EXPECT_EQ(applyRotation(rotation, 4, 0, dimx, dimy), std::make_pair(UInt(0), UInt(0)));
-  EXPECT_EQ(applyRotation(rotation, 0, 3, dimx, dimy), std::make_pair(UInt(3), UInt(4)));
-  EXPECT_EQ(applyRotation(rotation, 2, 1, dimx, dimy), std::make_pair(UInt(1), UInt(2)));
-}
-
-TEST(StructuredBlock, applyRotation2)
-{
-  UInt rotation = 2;
-  UInt dimx = 5;
-  UInt dimy = 4;
-  EXPECT_EQ(applyRotation(rotation, 0, 0, dimx, dimy), std::make_pair(UInt(4), UInt(3)));
-  EXPECT_EQ(applyRotation(rotation, 4, 0, dimx, dimy), std::make_pair(UInt(0), UInt(3)));
-  EXPECT_EQ(applyRotation(rotation, 0, 3, dimx, dimy), std::make_pair(UInt(4), UInt(0)));
-  EXPECT_EQ(applyRotation(rotation, 2, 1, dimx, dimy), std::make_pair(UInt(2), UInt(2)));
-}
-
-TEST(StructuredBlock, applyRotation3)
-{
-  UInt rotation = 3;
-  UInt dimx = 5;
-  UInt dimy = 4;
-  EXPECT_EQ(applyRotation(rotation, 0, 0, dimx, dimy), std::make_pair(UInt(3), UInt(0)));
-  EXPECT_EQ(applyRotation(rotation, 4, 0, dimx, dimy), std::make_pair(UInt(3), UInt(4)));
-  EXPECT_EQ(applyRotation(rotation, 0, 3, dimx, dimy), std::make_pair(UInt(0), UInt(0)));
-  EXPECT_EQ(applyRotation(rotation, 2, 1, dimx, dimy), std::make_pair(UInt(2), UInt(2)));
-}
-*/
 
 TEST(StructuredBlock, SimpleBlockTransform1)
 {
