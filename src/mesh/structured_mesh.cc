@@ -131,6 +131,7 @@ StructuredMesh::StructuredMesh(const MeshSpec& spec)
 Kokkos::View<double**[2], HostMemorySpace> computeGhostBCCoords(const StructuredBlock& block, NeighborDirection dir, UInt num_ghost_cells)
 {
   std::cout << "\nEntered computeGhostBCCoords" << std::endl;
+  std::cout << "dir = " << static_cast<int>(dir) << std::endl;
   //TODO: assert block size
 
 
@@ -157,14 +158,14 @@ Kokkos::View<double**[2], HostMemorySpace> computeGhostBCCoords(const Structured
           x0 = {block_coords(i, 0, 0), block_coords(i, 0, 1)};
           x1 = {block_coords(i, 1, 0), block_coords(i, 1, 1)};
           auto normal = x0 - x1;
-          std::cout << "using point " << x0 << " and " << x1 << std::endl;
-          std::cout << "normal = " << normal << std::endl;  
+          //std::cout << "using point " << x0 << " and " << x1 << std::endl;
+          //std::cout << "normal = " << normal << std::endl;  
 
-          std::cout << "writing to index " << i << ", " << j << std::endl;
-          std::cout << "j2 = " << j2 << std::endl;
+          //std::cout << "writing to index " << i << ", " << j << std::endl;
+          //std::cout << "j2 = " << j2 << std::endl;
           ghost_coords(i, j, 0) = j2*normal[0] + x0[0];          
           ghost_coords(i, j, 1) = j2*normal[1] + x0[1];
-          std::cout << "wrote coords " << ghost_coords(i, j, 0) << ", " << ghost_coords(i, j, 1) << " to index " << i << ", " << j << std::endl;
+          //std::cout << "wrote coords " << ghost_coords(i, j, 0) << ", " << ghost_coords(i, j, 1) << " to index " << i << ", " << j << std::endl;
           break;
         }
 
@@ -309,6 +310,7 @@ void StructuredMesh::createBCGhosts(const MeshSpec& spec)
 void StructuredMesh::createBCGhost(const MeshBlockSpec& spec, UInt regular_block_id, NeighborDirection domain_boundary)
 {
   std::cout << "\nEntered createBCGhost" << std::endl;
+  std::cout << "global direction = " << static_cast<int>(domain_boundary) << std::endl;
   UInt ghost_block_id = m_blocks.size();
   UInt regular_block_rotation = spec.rotation;
   // the ghost block always has the same coordinate system as the regular block
@@ -316,8 +318,11 @@ void StructuredMesh::createBCGhost(const MeshBlockSpec& spec, UInt regular_block
   std::array<Int, 2> transform = {1, 2};
 
   NeighborDirection regular_block_dir = rotate(domain_boundary, regular_block_rotation);
+  std::cout << "regular_block_dir = " << static_cast<int>(regular_block_dir) << std::endl;
   NeighborDirection ghost_block_dir = static_cast<NeighborDirection>((static_cast<int>(domain_boundary) + 2) % 4);
   ghost_block_dir = rotate(ghost_block_dir, regular_block_rotation);
+  std::cout << "ghost_block_dir = " << static_cast<int>(ghost_block_dir) << std::endl;
+
 
   auto ghost_coords = computeGhostBCCoords(m_blocks[regular_block_id], ghost_block_dir, 2);
 

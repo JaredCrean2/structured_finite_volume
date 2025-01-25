@@ -17,14 +17,14 @@ enum class BlockType
 
 // given an index (i, j) in the standard orientation (ie rotation=0), compute
 // the location of the corresponding point under the rotation
-inline std::pair<UInt, UInt> applyRotation(UInt rotation, UInt i, UInt j, UInt dimx,  UInt dimy)
+inline std::pair<double, double> applyRotation(UInt rotation, double x, double y)
 {
   switch (rotation)
   {
-    case 0: { return {i,   j}; }
-    case 1: { return {j,  dimx -1 - i}; }
-    case 2: { return {dimx -1 - i, dimy -1 - j}; }
-    case 3: { return {dimy -1 - j, i}; }
+    case 0: { return {x,   y}; }
+    case 1: { return {1 - y,  x}; }
+    case 2: { return {1 - x, 1 - y}; }
+    case 3: { return {y, 1-x}; }
     default: { throw std::runtime_error("invalid rotation"); }
   }
 }
@@ -37,29 +37,24 @@ class StructuredBlock
     StructuredBlock(const MeshBlockSpec& spec, UInt block_id, BlockType block_type) :
       m_block_id(block_id),
       m_block_type(block_type),
-      m_owned_cell_range(0, spec.rotation % 2 == 0 ? spec.num_cells_x : spec.num_cells_y,
-                         0, spec.rotation % 2 == 0 ? spec.num_cells_y : spec.num_cells_x),
-      m_owned_vert_range(0, spec.rotation % 2 == 0 ? spec.num_cells_x+1 : spec.num_cells_y+1, 
-                         0, spec.rotation % 2 == 0 ? spec.num_cells_y+1 : spec.num_cells_x+1),
-      m_owned_vert_coords("block_coords", spec.rotation % 2 == 0 ? spec.num_cells_x+1 : spec.num_cells_y+1,
-                                          spec.rotation % 2 == 0 ? spec.num_cells_y+1 : spec.num_cells_x+1),
+      m_owned_cell_range(0,  spec.num_cells_x, 0,spec.num_cells_y),
+      m_owned_vert_range(0, spec.num_cells_x+1, 0, spec.num_cells_y+1),
+      m_owned_vert_coords("block_coords", spec.num_cells_x+1, spec.num_cells_y+1),
       m_offset_into_block{0, 0},
-      m_all_block_size{spec.rotation % 2 == 0 ? spec.num_cells_x : spec.num_cells_y,
-                       spec.rotation % 2 == 0 ? spec.num_cells_y : spec.num_cells_x}
-    { 
+      m_all_block_size{spec.num_cells_x, spec.num_cells_y}
+    {
       UInt dimx = spec.num_cells_x + 1;
       UInt dimy = spec.num_cells_y + 1;
 
       for (UInt i : Range(0, dimx))
         for (UInt j : Range(0, dimy))
         {
-          auto [iprime, jprime] = applyRotation(spec.rotation, i, j, dimx, dimy);
-          double x = double(i) / (dimx - 1);
-          double y = double(j) / (dimy - 1);
+          auto [x, y] = applyRotation(spec.rotation, double(i) / (dimx - 1), double(j) / (dimy - 1));
           auto [xprime, yprime] = spec.coord_func(x, y);
+          std::cout << "x, y = " << x << ", " << y << ", xprime, yprime = " << xprime << ", " << yprime << std::endl;
 
-          m_owned_vert_coords(iprime, jprime, 0) = xprime;
-          m_owned_vert_coords(iprime, jprime, 1) = yprime;
+          m_owned_vert_coords(i, j, 0) = xprime;
+          m_owned_vert_coords(i, j, 1) = yprime;
         }
     }
 
