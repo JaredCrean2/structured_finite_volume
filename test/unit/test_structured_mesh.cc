@@ -25,6 +25,11 @@ void checkCoords(double x0, double y0, double dx, double dy, StructuredBlock::Co
   checkCoords(x0, y0, {dx, 0, 0, dy}, coords);
 }
 
+std::array<Int, 4> make_array(const std::array<Int, 4>& vals)
+{
+  return vals;
+}
+
 }
 
 TEST(StructuredMesh, SingleBlock) {
@@ -54,6 +59,13 @@ TEST(StructuredMesh, SingleBlock) {
     EXPECT_EQ(coords.extent(0), 3);
     EXPECT_EQ(coords.extent(1), 4);
     checkCoords(0, 0, 0.5, 1.0/3, coords);
+    EXPECT_EQ(mesh.getBlockInterfaces(0), make_array({0, 1, 2, 3}));
+    for (int i=0; i < 4; ++i)
+    {
+      const StructuredBlockInterface& iface = mesh.getBlockInterface(mesh.getBlockInterfaces(0)[i]);
+      EXPECT_EQ(iface.getLeftBlockId(), 0);
+      EXPECT_EQ(iface.getRightBlockId(), i+1);
+    }
   }
 
   {
@@ -77,7 +89,9 @@ TEST(StructuredMesh, SingleBlock) {
     EXPECT_EQ(iface.getLeftBlockId(), 0);
     EXPECT_EQ(iface.getRightBlockId(), 1);
     EXPECT_EQ(iface.getNeighborDirection(), NeighborDirection::North);
-    EXPECT_EQ(iface.getLeftBlockBoundaryCells(), Range2D(0, 2, 2, 3));  
+    EXPECT_EQ(iface.getOtherBlockNeighborDirection(), NeighborDirection::South);
+    EXPECT_EQ(iface.getLeftBlockBoundaryCells(), Range2D(0, 2, 2, 3));
+    EXPECT_EQ(mesh.getBlockInterfaces(1), make_array({-1, -1, 0, -1}));
   }
 
   {
@@ -101,7 +115,10 @@ TEST(StructuredMesh, SingleBlock) {
     EXPECT_EQ(iface.getLeftBlockId(), 0);
     EXPECT_EQ(iface.getRightBlockId(), 2);
     EXPECT_EQ(iface.getNeighborDirection(), NeighborDirection::East);
-    EXPECT_EQ(iface.getLeftBlockBoundaryCells(), Range2D(1, 2, 0, 3));    
+    EXPECT_EQ(iface.getOtherBlockNeighborDirection(), NeighborDirection::West);
+    EXPECT_EQ(iface.getLeftBlockBoundaryCells(), Range2D(1, 2, 0, 3));
+    EXPECT_EQ(mesh.getBlockInterfaces(2), make_array({-1, -1, -1, 1}));
+
   }
 
   {
@@ -125,7 +142,9 @@ TEST(StructuredMesh, SingleBlock) {
     EXPECT_EQ(iface.getLeftBlockId(), 0);
     EXPECT_EQ(iface.getRightBlockId(), 3);
     EXPECT_EQ(iface.getNeighborDirection(), NeighborDirection::South);
-    EXPECT_EQ(iface.getLeftBlockBoundaryCells(), Range2D(0, 2, 0, 1));    
+    EXPECT_EQ(iface.getOtherBlockNeighborDirection(), NeighborDirection::North);
+    EXPECT_EQ(iface.getLeftBlockBoundaryCells(), Range2D(0, 2, 0, 1));
+    EXPECT_EQ(mesh.getBlockInterfaces(3), make_array({2, -1, -1, -1}));
   }    
 
   {
@@ -149,7 +168,9 @@ TEST(StructuredMesh, SingleBlock) {
     EXPECT_EQ(iface.getLeftBlockId(), 0);
     EXPECT_EQ(iface.getRightBlockId(), 4);
     EXPECT_EQ(iface.getNeighborDirection(), NeighborDirection::West);
-    EXPECT_EQ(iface.getLeftBlockBoundaryCells(), Range2D(0, 1, 0, 3));    
+    EXPECT_EQ(iface.getOtherBlockNeighborDirection(), NeighborDirection::East);
+    EXPECT_EQ(iface.getLeftBlockBoundaryCells(), Range2D(0, 1, 0, 3));  
+    EXPECT_EQ(mesh.getBlockInterfaces(4), make_array({-1, 3, -1, -1}));
   }
 }
 
@@ -204,6 +225,7 @@ TEST(StructuredMesh, SingleBlockRotation1)
     EXPECT_EQ(iface.getLeftBlockId(), 0);
     EXPECT_EQ(iface.getRightBlockId(), 4);
     EXPECT_EQ(iface.getNeighborDirection(), NeighborDirection::North);
+    EXPECT_EQ(iface.getOtherBlockNeighborDirection(), NeighborDirection::South);
     EXPECT_EQ(iface.getLeftBlockBoundaryCells(), Range2D(0, 2, 2, 3));  
   }
 
@@ -229,6 +251,7 @@ TEST(StructuredMesh, SingleBlockRotation1)
     EXPECT_EQ(iface.getLeftBlockId(), 0);
     EXPECT_EQ(iface.getRightBlockId(), 1);
     EXPECT_EQ(iface.getNeighborDirection(), NeighborDirection::East);
+    EXPECT_EQ(iface.getOtherBlockNeighborDirection(), NeighborDirection::West);
     EXPECT_EQ(iface.getLeftBlockBoundaryCells(), Range2D(1, 2, 0, 3));    
   }
 
@@ -253,6 +276,7 @@ TEST(StructuredMesh, SingleBlockRotation1)
     EXPECT_EQ(iface.getLeftBlockId(), 0);
     EXPECT_EQ(iface.getRightBlockId(), 2);
     EXPECT_EQ(iface.getNeighborDirection(), NeighborDirection::South);
+    EXPECT_EQ(iface.getOtherBlockNeighborDirection(), NeighborDirection::North);
     EXPECT_EQ(iface.getLeftBlockBoundaryCells(), Range2D(0, 2, 0, 1));    
   }    
 
@@ -277,6 +301,7 @@ TEST(StructuredMesh, SingleBlockRotation1)
     EXPECT_EQ(iface.getLeftBlockId(), 0);
     EXPECT_EQ(iface.getRightBlockId(), 3);
     EXPECT_EQ(iface.getNeighborDirection(), NeighborDirection::West);
+    EXPECT_EQ(iface.getOtherBlockNeighborDirection(), NeighborDirection::East);
     EXPECT_EQ(iface.getLeftBlockBoundaryCells(), Range2D(0, 1, 0, 3));    
   }
 

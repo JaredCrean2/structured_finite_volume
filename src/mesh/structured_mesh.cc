@@ -2,6 +2,7 @@
 #include "mesh/adjacent_block_indexer.h"
 #include "mesh/block_spec.h"
 #include "mesh/structured_block.h"
+#include "mesh/structured_block_interface.h"
 #include "utils/project_defs.h"
 #include "utils/math.h"
 
@@ -125,6 +126,14 @@ StructuredMesh::StructuredMesh(const MeshSpec& spec)
     }
 
   createBCGhosts(spec);
+
+  m_block_interface_connectivity.resize(getNumBlocks(), {-1, -1, -1, -1});
+  for (UInt i=0; i < getNumBlockInterfaces(); ++i)
+  {
+    const StructuredBlockInterface& iface = getBlockInterface(i);
+    m_block_interface_connectivity[iface.getLeftBlockId()][to_int(iface.getNeighborDirection())] = i;
+    m_block_interface_connectivity[iface.getRightBlockId()][to_int(iface.getOtherBlockNeighborDirection())] = i;
+  }
 }
 
 // dir is the direction of the interface from the ghost block perspective
