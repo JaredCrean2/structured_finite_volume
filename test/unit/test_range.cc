@@ -159,6 +159,14 @@ TEST(Range, Equality)
   EXPECT_TRUE(Range(2, 5) != Range(2, 4));  
 }
 
+TEST(Range, In)
+{
+  EXPECT_FALSE(in(Range(2, 4), 1));
+  EXPECT_TRUE( in(Range(2, 4), 2));
+  EXPECT_TRUE( in(Range(2, 4), 3));
+  EXPECT_FALSE(in(Range(2, 4), 4));  
+}
+
 TEST(Range2D, RangeFor)
 {
   Range2D range(2, 5, 5, 7);
@@ -181,4 +189,25 @@ TEST(Range2D, Equality)
   EXPECT_FALSE(Range2D(0, 1, 0, 2) == Range2D(0, 2, 0, 2));
   EXPECT_FALSE(Range2D(0, 1, 0, 2) == Range2D(1, 1, 1, 2));
   EXPECT_FALSE(Range2D(0, 1, 0, 2) == Range2D(1, 1, 0, 3));
+
+  EXPECT_FALSE(Range2D(0, 1, 0, 2) != Range2D(0, 1, 0, 2));
+  EXPECT_TRUE(Range2D(0, 1, 0, 2)  != Range2D(1, 1, 0, 2));
+  EXPECT_TRUE(Range2D(0, 1, 0, 2)  != Range2D(0, 2, 0, 2));
+  EXPECT_TRUE(Range2D(0, 1, 0, 2)  != Range2D(1, 1, 1, 2));
+  EXPECT_TRUE(Range2D(0, 1, 0, 2)  != Range2D(1, 1, 0, 3));  
+}
+
+TEST(Range2D, In)
+{
+  Range2D range(2, 4, 3, 5);
+  EXPECT_FALSE(in(range, 1, 2));
+  EXPECT_FALSE(in(range, 2, 2));
+  EXPECT_FALSE(in(range, 2, 2));
+
+  EXPECT_TRUE(in(range, 2, 3));
+  EXPECT_TRUE(in(range, 3, 4));
+
+  EXPECT_FALSE(in(range, 4, 4));  
+  EXPECT_FALSE(in(range, 3, 5));
+  EXPECT_FALSE(in(range, 4, 5));
 }

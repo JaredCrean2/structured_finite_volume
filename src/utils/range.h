@@ -18,77 +18,77 @@ class RangeIter
     using const_reference = const value_type&;
     using iterator_catagory = std::random_access_iterator_tag;
 
-    RangeIter() :
+    constexpr RangeIter() :
       m_idx(std::numeric_limits<UInt>::max())
     {}
 
-    RangeIter(UInt idx) :
+    constexpr RangeIter(UInt idx) :
       m_idx(idx)
     {}
 
     // prefix
-    RangeIter& operator++()
+    constexpr RangeIter& operator++()
     {
       ++m_idx;
       return *this;
     }
 
-    RangeIter& operator--()
+    constexpr RangeIter& operator--()
     {
       --m_idx;
       return *this;
     }
 
     // postfix
-    RangeIter operator++(int)
+    constexpr RangeIter operator++(int)
     {
       RangeIter tmp = *this;
       m_idx++;
       return tmp;
     }
 
-    RangeIter operator--(int)
+    constexpr RangeIter operator--(int)
     {
       RangeIter tmp = *this;
       m_idx--;
       return tmp;
     }
 
-    reference operator*()
+    constexpr reference operator*()
     {
       return m_idx;
     }
 
-    const_reference operator*() const
+    constexpr const_reference operator*() const
     {
       return m_idx;
     }
 
-    RangeIter& operator+=(const difference_type rhs)
+    constexpr RangeIter& operator+=(const difference_type rhs)
     {
       m_idx += rhs;
       return *this;
     }
 
-    RangeIter& operator-=(const difference_type rhs)
+    constexpr RangeIter& operator-=(const difference_type rhs)
     {
       m_idx -= rhs;
       return *this;
     }
 
-    RangeIter operator+(const difference_type rhs)
+    constexpr RangeIter operator+(const difference_type rhs)
     {
       RangeIter tmp = *this;
       return tmp += rhs;
     }
 
-    RangeIter operator-(const difference_type rhs)
+    constexpr RangeIter operator-(const difference_type rhs)
     {
       RangeIter tmp = *this;
       return tmp -= rhs;
     }
 
-    difference_type operator-(const RangeIter& rhs)
+    constexpr difference_type operator-(const RangeIter& rhs)
     {
       return difference_type(m_idx) - difference_type(rhs.m_idx);
     }
@@ -96,17 +96,17 @@ class RangeIter
     //TODO: should have operator[n] here, but I'm not sure how to implement it
     //      because it returns a reference
 
-    bool operator<(const RangeIter& rhs) const { return m_idx < rhs.m_idx; }
+    constexpr bool operator<(const RangeIter& rhs) const { return m_idx < rhs.m_idx; }
 
-    bool operator<=(const RangeIter& rhs) const { return m_idx <= rhs.m_idx; }
+    constexpr bool operator<=(const RangeIter& rhs) const { return m_idx <= rhs.m_idx; }
 
-    bool operator>(const RangeIter& rhs) const { return m_idx > rhs.m_idx; }
+    constexpr bool operator>(const RangeIter& rhs) const { return m_idx > rhs.m_idx; }
 
-    bool operator>=(const RangeIter& rhs) const { return m_idx >= rhs.m_idx; }
+    constexpr bool operator>=(const RangeIter& rhs) const { return m_idx >= rhs.m_idx; }
 
-    bool operator==(const RangeIter& rhs) const { return m_idx == rhs.m_idx; }
+    constexpr bool operator==(const RangeIter& rhs) const { return m_idx == rhs.m_idx; }
 
-    bool operator!=(const RangeIter& rhs) const { return m_idx != rhs.m_idx; }
+    constexpr bool operator!=(const RangeIter& rhs) const { return m_idx != rhs.m_idx; }
 
   private:
     UInt m_idx;
@@ -118,29 +118,29 @@ class Range
   public:
     using iterator = RangeIter;
 
-    Range(UInt start, UInt past_the_end) :
+    constexpr Range(UInt start, UInt past_the_end) :
       m_start(start),
       m_past_the_end(std::max(start, past_the_end))
     {}
 
-    UInt operator()(UInt i) const 
+    constexpr UInt operator()(UInt i) const 
     {
       assert (i < size());
       return m_start + i;
     }
 
-    RangeIter begin() const { return RangeIter(m_start); }
+    constexpr RangeIter begin() const { return RangeIter(m_start); }
 
-    RangeIter end() const { return RangeIter(m_past_the_end); }
+    constexpr RangeIter end() const { return RangeIter(m_past_the_end); }
 
-    UInt size() const { return m_past_the_end - m_start; }
+    constexpr UInt size() const { return m_past_the_end - m_start; }
 
-    bool operator==(const Range& rhs) const
+    constexpr bool operator==(const Range& rhs) const
     {
       return m_start == rhs.m_start && m_past_the_end == rhs.m_past_the_end;
     }
 
-    bool operator!=(const Range& rhs) const
+    constexpr bool operator!=(const Range& rhs) const
     {
       return !(*this == rhs);
     }    
@@ -156,23 +156,34 @@ inline std::ostream& operator<<(std::ostream& os, const Range& range)
   return os;
 }
 
+constexpr bool in(const Range& range, UInt val)
+{
+  return val >= *range.begin() && val < *range.end();
+
+}
+
 
 class Range2D
 {
   public:
-    Range2D(UInt xstart=0, UInt x_past_the_end=0, UInt ystart=0, UInt y_past_the_end=0) :
+    constexpr Range2D(UInt xstart=0, UInt x_past_the_end=0, UInt ystart=0, UInt y_past_the_end=0) :
       m_xrange(xstart, x_past_the_end),
       m_yrange(ystart, y_past_the_end)
     {}
 
-    const Range& getXRange() const { return m_xrange; }
+    constexpr const Range& getXRange() const { return m_xrange; }
 
-    const Range& getYRange() const { return m_yrange; }
+    constexpr const Range& getYRange() const { return m_yrange; }
 
-    bool operator==(const Range2D& rhs) const
+    constexpr bool operator==(const Range2D& rhs) const
     {
       return m_xrange == rhs.m_xrange &&
              m_yrange == rhs.m_yrange;
+    }
+
+    constexpr bool operator!=(const Range2D& rhs) const
+    {
+      return !(*this == rhs);
     }
 
   private:
@@ -184,6 +195,11 @@ inline std::ostream& operator<<(std::ostream& os, const Range2D& range)
 {
   os << range.getXRange() << " x " << range.getYRange();
   return os;
+}
+
+constexpr bool in(const Range2D range, UInt x, UInt y)
+{
+  return in(range.getXRange(), x) && in(range.getYRange(), y);
 }
 
 }

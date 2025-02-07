@@ -15,6 +15,11 @@ enum class NeighborDirection
   West
 };
 
+constexpr int to_int(NeighborDirection dir)
+{
+  return static_cast<int>(dir);
+}
+
 // given a direction for a block with rotation=0, computes the direction
 // of the same side (in the global coordinate system) of the block
 // after a given rotation.
