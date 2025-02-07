@@ -65,6 +65,8 @@ class StructuredMesh
     // (ie. one of the blocks in a ghost BC block)
     Range getBCInterfaceRange(UInt bc) const { return m_bc_iface_ranges.at(bc); }
 
+    //std::array<Int, 4> getBlockInterfaces(UInt block) const
+
   private:
     void createBCGhosts(const MeshSpec& spec);
 
@@ -77,6 +79,7 @@ class StructuredMesh
     std::vector<Range> m_bc_iface_ranges;
     std::vector<StructuredBlock> m_blocks;
     std::vector<StructuredBlockInterface> m_block_interfaces;
+    std::vector<std::array<UInt, 4>> m_block_interface_connectivity;
 };
 
 }

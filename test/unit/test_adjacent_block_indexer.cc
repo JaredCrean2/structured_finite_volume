@@ -128,3 +128,32 @@ TEST(AdjacentBlockIndexer, ReversedCoordSystemSouth)
   EXPECT_EQ(indexer(0, -2), make_array({1, 3}));
   EXPECT_EQ(indexer(1, -1), make_array({0, 2}));
 }
+
+TEST(AdjacentBlockIndexer, ToSignedAxis)
+{
+  EXPECT_EQ(toSignedAxis(NeighborDirection::North),  2);
+  EXPECT_EQ(toSignedAxis(NeighborDirection::East),   1);
+  EXPECT_EQ(toSignedAxis(NeighborDirection::South), -2);
+  EXPECT_EQ(toSignedAxis(NeighborDirection::West),  -1);
+}
+
+TEST(AdjacentBlockIndexer, ToNeighborDirection)
+{
+  EXPECT_EQ(toNeighborDirection(2),  NeighborDirection::North);
+  EXPECT_EQ(toNeighborDirection(1),  NeighborDirection::East);
+  EXPECT_EQ(toNeighborDirection(-2), NeighborDirection::South);
+  EXPECT_EQ(toNeighborDirection(-1), NeighborDirection::West);
+}
+
+TEST(AdjacentBlockIndexer, getNeighborImage)
+{
+  EXPECT_EQ(getNeighborImage(NeighborDirection::East, { 1,  2}), NeighborDirection::West);
+  EXPECT_EQ(getNeighborImage(NeighborDirection::East, {-2,  1}), NeighborDirection::North);
+  EXPECT_EQ(getNeighborImage(NeighborDirection::East, {-1, -2}), NeighborDirection::East);
+  EXPECT_EQ(getNeighborImage(NeighborDirection::East, { 2, -1}), NeighborDirection::South);  
+
+  EXPECT_EQ(getNeighborImage(NeighborDirection::West, { 1,  2}), NeighborDirection::East);
+  EXPECT_EQ(getNeighborImage(NeighborDirection::West, {-2,  1}), NeighborDirection::South);
+  EXPECT_EQ(getNeighborImage(NeighborDirection::West, {-1, -2}), NeighborDirection::West);
+  EXPECT_EQ(getNeighborImage(NeighborDirection::West, { 2, -1}), NeighborDirection::North);  
+}

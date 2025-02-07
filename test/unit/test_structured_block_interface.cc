@@ -32,6 +32,7 @@ TEST(StructuredBlockInterface, East)
   EXPECT_EQ(iface.getRightBlockId(), right_block_id);
   EXPECT_EQ(iface.getNeighborDirection(), dir);
   EXPECT_EQ(iface.getLeftBlockBoundaryCells(), Range2D(3, 4, 0, 6));
+  EXPECT_EQ(iface.getOtherBlockNeighborDirection(), NeighborDirection::West);
 
   const AdjacentBlockIndexer& indexer = iface.getAdjacentBlockIndexer();
   EXPECT_EQ(indexer(left_block_constant_index+1, left_block_variable_index(0)), make_array({0, 0}));

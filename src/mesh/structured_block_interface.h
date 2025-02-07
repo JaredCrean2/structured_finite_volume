@@ -19,6 +19,7 @@ class StructuredBlockInterface
       m_left_block_id(left_block_id),
       m_left_block_direction(direction),
       m_right_block_id(right_block_id),
+      m_transform(transform),
       m_indexer()
     {
       if (static_cast<int>(direction) % 2 == 0)
@@ -41,6 +42,8 @@ class StructuredBlockInterface
 
     NeighborDirection getNeighborDirection() const { return m_left_block_direction; }
 
+    NeighborDirection getOtherBlockNeighborDirection() const { return getNeighborImage(m_left_block_direction, m_transform); }
+
     const Range2D& getLeftBlockBoundaryCells() const { return m_left_block_boundary_cells; }
 
     const AdjacentBlockIndexer& getAdjacentBlockIndexer() const { return m_indexer; }
@@ -52,6 +55,7 @@ class StructuredBlockInterface
     Range2D m_left_block_boundary_cells;                                                 
 
     UInt m_right_block_id;
+    const std::array<Int, 2> m_transform;
     AdjacentBlockIndexer m_indexer;
 
 };
