@@ -12,52 +12,49 @@ class StructuredBlockInterface
 {
   public:
 
-  StructuredBlockInterface(UInt left_block_id, UInt left_block_constant_index,
-                           Range left_block_variable_index,
-                           NeighborDirection direction, const std::array<Int, 2>& transform,
-                           UInt right_block_id, const std::array<UInt, 2>& right_block_min_cell) :
-      m_left_block_id(left_block_id),
-      m_left_block_direction(direction),
-      m_right_block_id(right_block_id),
-      m_transform(transform),
-      m_indexer()
-    {
-      if (static_cast<int>(direction) % 2 == 0)
-      {
-        m_left_block_boundary_cells = Range2D(*(left_block_variable_index.begin()), *(left_block_variable_index.end()),
-                                              left_block_constant_index, left_block_constant_index+1);
-      } else
-      {
-        m_left_block_boundary_cells = Range2D(left_block_constant_index, left_block_constant_index+1,
-                                              *(left_block_variable_index.begin()), *(left_block_variable_index.end()));
-      }
+  // rangeL and ranger give corresponding the ranges of indices along the boundary
+  // this allows supporting T junctions
+  StructuredBlockInterface(const StructuredBlock& blockL,
+                          NeighborDirection dirL,
+                          const Range& rangeL,
+                          const std::array<Int, 2>& transformL,
+                          const StructuredBlock& blockR,
+                          const Range& rangeR);
 
-      std::array<UInt, 2> left_block_min_cell = {m_left_block_boundary_cells.getXRange()(0), m_left_block_boundary_cells.getYRange()(0)};
-      m_indexer = AdjacentBlockIndexer(transform, left_block_min_cell, direction, right_block_min_cell);
-    }
-      
-    UInt getLeftBlockId() const { return m_left_block_id; }
+    UInt getBlockIdL() const { return m_left_block_id; }
 
-    UInt getRightBlockId() const { return m_right_block_id; }
+    UInt getBlockIdR() const { return m_right_block_id; }
 
-    NeighborDirection getNeighborDirection() const { return m_left_block_direction; }
+    NeighborDirection getNeighborDirectionL() const { return m_dirL; }
 
-    NeighborDirection getOtherBlockNeighborDirection() const { return getNeighborImage(m_left_block_direction, m_transform); }
+    NeighborDirection getNeighborDirectionR() const { return m_dirR; }
 
-    const Range2D& getLeftBlockBoundaryCells() const { return m_left_block_boundary_cells; }
+    const Range2D& getBoundaryCellsL() const { return m_boundary_cellsL; }
 
-    const AdjacentBlockIndexer& getAdjacentBlockIndexer() const { return m_indexer; }
+    const Range2D& getBoundaryCellsR() const { return m_boundary_cellsR; };
+
+    const AdjacentBlockIndexer& getAdjacentBlockIndexerL() const { return m_indexerL; }
+
+    const AdjacentBlockIndexer& getAdjacentBlockIndexerR() const { return m_indexerR; };
 
   private:
+
+    std::pair<Range2D, AdjacentBlockIndexer> createAdjacentBlockIndexer( const StructuredBlock& blockL, NeighborDirection dirL, 
+       const Range& rangeL, const std::array<Int, 2>& transformL,
+       const StructuredBlock& blockR, NeighborDirection dirR, const Range& rangeR);
+
     UInt m_left_block_id;
-    NeighborDirection m_left_block_direction;  // gives the side of the block the
-                                               // interface is one, from the left block perspective
-    Range2D m_left_block_boundary_cells;                                                 
+    NeighborDirection m_dirL;  // gives the side of the block the
+                               // interface is on, from the left block perspective
+    std::array<Int, 2> m_transformL;
+    Range2D m_boundary_cellsL;
+    AdjacentBlockIndexer m_indexerL;
 
     UInt m_right_block_id;
-    const std::array<Int, 2> m_transform;
-    AdjacentBlockIndexer m_indexer;
-
+    NeighborDirection m_dirR;
+    std::array<Int, 2> m_transformR;
+    Range2D m_boundary_cellsR;
+    AdjacentBlockIndexer m_indexerR;
 };
 
 

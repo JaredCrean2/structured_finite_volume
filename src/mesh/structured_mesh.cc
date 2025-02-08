@@ -9,67 +9,7 @@
 namespace structured_fv {
 namespace mesh {
 
-UInt getConstantIndexAlongBoundary(const StructuredBlock& block, NeighborDirection dir)
-{
-  switch (dir)
-  {
-    case NeighborDirection::North: { return *(block.getOwnedCells().getYRange().end())-1; }
-    case NeighborDirection::East:  { return *(block.getOwnedCells().getXRange().end())-1; }
-    case NeighborDirection::South: { return *(block.getOwnedCells().getXRange().begin()); }
-    case NeighborDirection::West:  { return *(block.getOwnedCells().getYRange().begin()); }
-  }
-}
 
-Range getVariableIndexAlongBoundary(const StructuredBlock& block, NeighborDirection dir)
-{
-  if (static_cast<int>(dir) % 2 == 0)
-  {
-    return block.getOwnedCells().getXRange();
-  } else
-  {
-    return block.getOwnedCells().getYRange();
-  }
-}
-
-std::array<UInt, 2> getMinCellOnBoundary(const StructuredBlock& right_block, NeighborDirection left_block_dir, int right_block_rotation)
-{
-  UInt nx = right_block.getOwnedCells().getXRange().size();
-  UInt ny = right_block.getOwnedCells().getYRange().size();
-  std::array<std::array<UInt, 2>, 4> min_cells;
-  if (left_block_dir == NeighborDirection::North || left_block_dir == NeighborDirection::East)
-  {
-    min_cells[0] = {0, 0};
-    min_cells[1] = {0, ny-1};
-    min_cells[2] = {nx-1, ny-1};
-    min_cells[3] = {nx-1, 0};
-  } else if (left_block_dir == NeighborDirection::South)
-  {
-    min_cells[0] = {0, ny-1};
-    min_cells[1] = {nx-1, ny-1};
-    min_cells[2] = {nx-1, 0};
-    min_cells[3] = {0, 0};
-  } else if (left_block_dir == NeighborDirection::West)
-  {
-    min_cells[0] = {nx-1, 0};
-    min_cells[1] = {0, 0};
-    min_cells[2] = {0, ny-1};
-    min_cells[3] = {nx-1, ny-1};    
-  }
-
-  return min_cells[right_block_rotation];
-}
-
-std::array<Int, 2> getTransform(Int rotation_left, Int rotation_right)
-{
-  Int delta_r = (rotation_right - rotation_left + 4) % 4;
-  std::array<std::array<Int, 2>, 4> transforms;
-  transforms[0] = {1, 2};
-  transforms[1] = {-2, 1};
-  transforms[2] = {-1, -2};
-  transforms[3] = {2, -1};
-
-  return transforms[delta_r];
-}
 
 StructuredMesh::StructuredMesh(const MeshSpec& spec)
 {
@@ -92,17 +32,19 @@ StructuredMesh::StructuredMesh(const MeshSpec& spec)
       UInt left_block_id = (i-1) + j * spec.blocks.extent(0);
       UInt right_block_id = left_block_id + 1;
 
-      NeighborDirection dir = rotate(NeighborDirection::East, spec.blocks(i-1, j).rotation);
-      UInt left_block_constant_index = getConstantIndexAlongBoundary(m_blocks[left_block_id], dir);
-      Range left_block_variable_index = getVariableIndexAlongBoundary(m_blocks[left_block_id], dir);
-      std::array<Int, 2> transform = getTransform(spec.blocks(i-1, j).rotation, spec.blocks(i, j).rotation);
+      const StructuredBlock& blockL = m_blocks[left_block_id];
+      const StructuredBlock& blockR = m_blocks[right_block_id];
 
-      std::array<UInt, 2> right_block_min_cell = getMinCellOnBoundary(m_blocks[right_block_id], dir, spec.blocks(i, j).rotation);
+      NeighborDirection dirL = rotate(NeighborDirection::East, spec.blocks(i-1, j).rotation);
+      Range rangeL = to_int(dirL) % 2 == 0 ? blockL.getOwnedCells().getXRange() : 
+                                             blockL.getOwnedCells().getYRange();
+      std::array<Int, 2> transformL = getTransform(spec.blocks(i-1, j).rotation, spec.blocks(i, j).rotation);
 
-      m_block_interfaces.emplace_back(left_block_id, left_block_constant_index, 
-                                      left_block_variable_index, dir, transform,
-                                      right_block_id, right_block_min_cell);
+      NeighborDirection dirR = getNeighborImage(dirL, transformL);
+      Range rangeR = to_int(dirR) % 2 == 0 ?  m_blocks[right_block_id].getOwnedCells().getXRange() : 
+                                              m_blocks[right_block_id].getOwnedCells().getYRange();
 
+      m_block_interfaces.emplace_back(blockL, dirL, rangeL, transformL, blockR, rangeR);
       m_block_iface_counts[0]++;
     }
 
@@ -112,16 +54,19 @@ StructuredMesh::StructuredMesh(const MeshSpec& spec)
       UInt bottom_block_id = i + (j-1) * spec.blocks.extent(0);
       UInt top_block_id = bottom_block_id + spec.blocks.extent(0);
 
-      NeighborDirection dir = rotate(NeighborDirection::North, spec.blocks(i, j-1).rotation);
-      UInt bottom_block_constant_index = getConstantIndexAlongBoundary(m_blocks[bottom_block_id], dir);
-      Range bottom_block_variable_index = getVariableIndexAlongBoundary(m_blocks[bottom_block_id], dir);
-      std::array<Int, 2> transform = getTransform(spec.blocks(i, j-1).rotation, spec.blocks(i, j).rotation);
+      const StructuredBlock& blockB = m_blocks[bottom_block_id];
+      const StructuredBlock& blockT = m_blocks[top_block_id];
 
-      std::array<UInt, 2> top_block_min_cell = getMinCellOnBoundary(m_blocks[top_block_id], dir, spec.blocks(i, j).rotation);
+      NeighborDirection dirB = rotate(NeighborDirection::North, spec.blocks(i, j-1).rotation);
+      Range rangeB = to_int(dirB) % 2 == 0 ? blockB.getOwnedCells().getXRange() : 
+                                             blockB.getOwnedCells().getYRange();      
+      std::array<Int, 2> transformB = getTransform(spec.blocks(i, j-1).rotation, spec.blocks(i, j).rotation);
 
-      m_block_interfaces.emplace_back(bottom_block_id, bottom_block_constant_index, 
-                                      bottom_block_variable_index, dir, transform,
-                                      top_block_id, top_block_min_cell);
+      NeighborDirection dirT = getNeighborImage(dirB, transformB);
+      Range rangeT = to_int(dirT) % 2 == 0 ?  m_blocks[top_block_id].getOwnedCells().getXRange() : 
+                                              m_blocks[top_block_id].getOwnedCells().getYRange();
+
+      m_block_interfaces.emplace_back(blockB, dirB, rangeB, transformB, blockT, rangeT);
       m_block_iface_counts[0]++;
     }
 
@@ -130,9 +75,10 @@ StructuredMesh::StructuredMesh(const MeshSpec& spec)
   m_block_interface_connectivity.resize(getNumBlocks(), {-1, -1, -1, -1});
   for (UInt i=0; i < getNumBlockInterfaces(); ++i)
   {
+    //TODO: this does not work for T junctions
     const StructuredBlockInterface& iface = getBlockInterface(i);
-    m_block_interface_connectivity[iface.getLeftBlockId()][to_int(iface.getNeighborDirection())] = i;
-    m_block_interface_connectivity[iface.getRightBlockId()][to_int(iface.getOtherBlockNeighborDirection())] = i;
+    m_block_interface_connectivity[iface.getBlockIdL()][to_int(iface.getNeighborDirectionL())] = i;
+    m_block_interface_connectivity[iface.getBlockIdR()][to_int(iface.getNeighborDirectionR())] = i;
   }
 }
 
@@ -238,100 +184,37 @@ void StructuredMesh::createBCGhosts(const MeshSpec& spec)
   }
 }
 
-/*
-void StructuredMesh::createBCGhosts(const MeshSpec& spec)
-{
-  Range block_x_range(0, spec.blocks.extent(0));
-  Range block_y_range(0, spec.blocks.extent(1));
-
-  // North
-  UInt ghost_block_id_start = m_blocks.size();
-  UInt ghost_iface_start = m_block_interfaces.size();
-  for (UInt i : block_x_range)
-  {
-    UInt j = spec.blocks.extent(1)-1;
-    UInt regular_block_id = i + j * spec.blocks.extent(0);
-    const MeshBlockSpec& block_spec = spec.blocks(i, j);
-    createBCGhost(block_spec, regular_block_id, NeighborDirection::North);
-  }
-  UInt ghost_block_id_end = m_blocks.size();
-  UInt ghost_iface_end = m_block_interfaces.size();
-  m_bc_block_ranges.push_back(Range(ghost_block_id_start, ghost_block_id_end));
-  m_bc_iface_ranges.push_back(Range(ghost_iface_start, ghost_iface_end));
-
-  // East
-  ghost_block_id_start = m_blocks.size();
-  ghost_iface_start = m_block_interfaces.size();  
-  for (UInt j : block_y_range)
-  {
-    UInt i = spec.blocks.extent(0) - 1;
-    UInt regular_block_id = i + j*spec.blocks.extent(0);
-    const MeshBlockSpec& block_spec = spec.blocks(i, j);
-    createBCGhost(block_spec, regular_block_id, NeighborDirection::East);
-  }  
-  ghost_block_id_end = m_blocks.size();
-  ghost_iface_end = m_block_interfaces.size();
-  m_bc_block_ranges.push_back(Range(ghost_block_id_start, ghost_block_id_end));
-  m_bc_iface_ranges.push_back(Range(ghost_iface_start, ghost_iface_end));
-
-  // South
-  ghost_block_id_start = m_blocks.size();
-  ghost_iface_start = m_block_interfaces.size();   
-  for (UInt i : block_x_range)
-  {
-    UInt j = 0 ;
-    UInt regular_block_id = i;
-    const MeshBlockSpec& block_spec = spec.blocks(i, j);
-    createBCGhost(block_spec, regular_block_id, NeighborDirection::South);
-  }
-  ghost_block_id_end = m_blocks.size();
-  ghost_iface_end = m_block_interfaces.size();
-  m_bc_block_ranges.push_back(Range(ghost_block_id_start, ghost_block_id_end));
-  m_bc_iface_ranges.push_back(Range(ghost_iface_start, ghost_iface_end));
-
-  // West
-  ghost_block_id_start = m_blocks.size();
-  ghost_iface_start = m_block_interfaces.size();   
-  for (UInt j : block_y_range)
-  {
-    UInt i = 0;
-    UInt regular_block_id = i + j*spec.blocks.extent(0);
-    const MeshBlockSpec& block_spec = spec.blocks(i, j);
-    createBCGhost(block_spec, regular_block_id, NeighborDirection::West);
-  }
-  ghost_block_id_end = m_blocks.size();
-  ghost_iface_end = m_block_interfaces.size();
-  m_bc_block_ranges.push_back(Range(ghost_block_id_start, ghost_block_id_end));
-  m_bc_iface_ranges.push_back(Range(ghost_iface_start, ghost_iface_end));       
-}
-*/
-
 void StructuredMesh::createBCGhost(const MeshBlockSpec& spec, UInt regular_block_id, NeighborDirection domain_boundary)
 {
   UInt ghost_block_id = m_blocks.size();
   UInt regular_block_rotation = spec.rotation;
   // the ghost block always has the same coordinate system as the regular block
-  UInt ghost_block_rotation = regular_block_rotation;
   std::array<Int, 2> transform = {1, 2};
 
   NeighborDirection regular_block_dir = rotate(domain_boundary, regular_block_rotation);
-  NeighborDirection ghost_block_dir = static_cast<NeighborDirection>((static_cast<int>(domain_boundary) + 2) % 4);
-  ghost_block_dir = rotate(ghost_block_dir, regular_block_rotation);
-
+  NeighborDirection ghost_block_dir = getNeighborImage(regular_block_dir, transform);
 
   auto ghost_coords = computeGhostBCCoords(m_blocks[regular_block_id], ghost_block_dir, 2);
 
   m_blocks.emplace_back(ghost_coords, ghost_block_id);
-  const StructuredBlock& ghost_block = m_blocks[ghost_block_id];
   m_block_counts[1]++;
 
   const StructuredBlock& regular_block = m_blocks[regular_block_id];
-  UInt left_block_constant_index = getConstantIndexAlongBoundary(regular_block,  regular_block_dir);
-  Range left_block_variable_index = getVariableIndexAlongBoundary(regular_block, regular_block_dir);
-  std::array<UInt, 2> min_cell_on_boundary = getMinCellOnBoundary(ghost_block, regular_block_dir, ghost_block_rotation);
+  const StructuredBlock& ghost_block = m_blocks[ghost_block_id];
 
-  m_block_interfaces.emplace_back(regular_block_id, left_block_constant_index, left_block_variable_index, regular_block_dir,
-                                  transform, ghost_block_id, min_cell_on_boundary);
+  Range regular_block_range, ghost_block_range;
+  if (to_int(regular_block_dir) % 2 == 0)
+  {
+    regular_block_range = regular_block.getOwnedCells().getXRange();
+    ghost_block_range   = ghost_block.getOwnedCells().getXRange();
+  } else
+  {
+    regular_block_range = regular_block.getOwnedCells().getYRange();
+    ghost_block_range   = ghost_block.getOwnedCells().getYRange();
+  }
+
+  m_block_interfaces.emplace_back(regular_block, regular_block_dir, regular_block_range, transform,
+                                  ghost_block, ghost_block_range);
   m_block_iface_counts[1]++;
 }
   

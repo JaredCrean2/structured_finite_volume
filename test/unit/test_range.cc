@@ -4,6 +4,13 @@
 
 using namespace structured_fv;
 
+namespace {
+constexpr std::array<UInt, 2> make_array(const std::array<UInt, 2>& arr)
+{
+  return arr;
+}
+}
+
 TEST(RangeIter, Dereference)
 {
   RangeIter iter(2);
@@ -165,6 +172,12 @@ TEST(Range, In)
   EXPECT_TRUE( in(Range(2, 4), 2));
   EXPECT_TRUE( in(Range(2, 4), 3));
   EXPECT_FALSE(in(Range(2, 4), 4));  
+}
+
+TEST(Range2D, Dimension)
+{
+  EXPECT_EQ(Range2D(2, 4, 3, 6).getDimensions(), make_array({2, 3}));
+  EXPECT_EQ(Range2D(2, 1, 3, 6).getDimensions(), make_array({0, 3}));
 }
 
 TEST(Range2D, RangeFor)

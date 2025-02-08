@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include "utils/project_defs.h"
+#include "structured_block.h"
 
 namespace structured_fv {
 namespace mesh {
@@ -80,6 +81,81 @@ constexpr NeighborDirection getNeighborImage(NeighborDirection dir, const std::a
   return toNeighborDirection(other_block_axis);
 }
 
+constexpr std::array<Int, 2> computeIndices(NeighborDirection dir, UInt offset, Int i, Int j)
+{
+  std::array<Int, 2> idxs = {i, j};
+  //Int sign = to_int(dir) < 2 ? 1 : -1;
+  Int sign = 1 - 2*(to_int(dir)/2);
+  idxs[0] += sign * (to_int(dir) % 2) * offset;
+  idxs[1] += sign * ((to_int(dir) + 1) % 2) * offset;
+
+  return idxs;
+}
+
+inline UInt getConstantIndexAlongBoundary(const StructuredBlock& block, NeighborDirection dir)
+{
+  switch (dir)
+  {
+    case NeighborDirection::North: { return *(block.getOwnedCells().getYRange().end())-1; }
+    case NeighborDirection::East:  { return *(block.getOwnedCells().getXRange().end())-1; }
+    case NeighborDirection::South: { return *(block.getOwnedCells().getXRange().begin()); }
+    case NeighborDirection::West:  { return *(block.getOwnedCells().getYRange().begin()); }
+  }
+}
+
+inline Range getVariableIndexAlongBoundary(const StructuredBlock& block, NeighborDirection dir)
+{
+  if (static_cast<int>(dir) % 2 == 0)
+  {
+    return block.getOwnedCells().getXRange();
+  } else
+  {
+    return block.getOwnedCells().getYRange();
+  }
+}
+
+inline Range2D getBoundaryRange(const StructuredBlock& block, NeighborDirection dir, const Range& boundary_subset)
+{
+  UInt constant_index = getConstantIndexAlongBoundary(block, dir);
+  if (to_int(dir) % 2 == 0)
+  {
+    return Range2D(*boundary_subset.begin(), *boundary_subset.end(), constant_index, constant_index+1);
+  } else
+  {
+    return Range2D(constant_index, constant_index+1, *boundary_subset.begin(), *boundary_subset.end());
+  }
+}
+
+inline std::array<Int, 2> getTransform(Int rotation_left, Int rotation_right)
+{
+  Int delta_r = (rotation_right - rotation_left + 4) % 4;
+  std::array<std::array<Int, 2>, 4> transforms;
+  transforms[0] = {1, 2};
+  transforms[1] = {-2, 1};
+  transforms[2] = {-1, -2};
+  transforms[3] = {2, -1};
+
+  return transforms[delta_r];
+}
+
+inline std::array<Int, 2> getInverseTransform(const std::array<Int, 2>& transform)
+{
+  std::array<Int, 2> inverse_transform;
+  for (int i=0; i < 2; ++i)
+    inverse_transform[std::abs(transform[i])-1] = sgn(transform[i])*(i+1);
+
+  return inverse_transform;
+}
+
+// given an direction and a transfrom from the left block perspective, return
+// the entry of rangeR that corresponds to the first cell on the boundary in blockL
+inline UInt getMinCellOnBoundary(NeighborDirection dirL, const std::array<Int, 2>& transformL, const Range& rangeR)
+{
+  bool is_reversed = (to_int(dirL) % 2 == 0 && sgn(transformL[1]) < 0) ||
+                     (to_int(dirL) % 2 == 1 && sgn(transformL[0]) < 0);
+  return is_reversed ? rangeR(rangeR.size()-1) : rangeR(0);                  
+}
+
 
 class AdjacentBlockIndexer
 {
@@ -139,6 +215,16 @@ class AdjacentBlockIndexer
 
       return {iprime + m_right_block_min_cell[0], jprime + m_right_block_min_cell[1]};
     }
+
+    std::array<UInt, 2> operator()(const std::array<UInt, 2>& ij) const
+    {
+      return this->operator()(ij[0], ij[1]);
+    }
+
+    std::array<UInt, 2> operator()(const std::array<Int, 2>& ij) const
+    {
+      return this->operator()(ij[0], ij[1]);
+    }    
 
   private:
     // TODO: put this on stack?

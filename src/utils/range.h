@@ -123,6 +123,10 @@ class Range
       m_past_the_end(std::max(start, past_the_end))
     {}
 
+    constexpr Range() :
+      Range(0, 0)
+    {}
+
     constexpr UInt operator()(UInt i) const 
     {
       assert (i < size());
@@ -166,14 +170,20 @@ constexpr bool in(const Range& range, UInt val)
 class Range2D
 {
   public:
-    constexpr Range2D(UInt xstart=0, UInt x_past_the_end=0, UInt ystart=0, UInt y_past_the_end=0) :
+    constexpr Range2D(UInt xstart, UInt x_past_the_end, UInt ystart, UInt y_past_the_end) :
       m_xrange(xstart, x_past_the_end),
       m_yrange(ystart, y_past_the_end)
+    {}
+
+    constexpr Range2D() :
+      Range2D(0, 0, 0, 0)
     {}
 
     constexpr const Range& getXRange() const { return m_xrange; }
 
     constexpr const Range& getYRange() const { return m_yrange; }
+
+    constexpr std::array<UInt, 2> getDimensions() const { return {m_xrange.size(), m_yrange.size() }; }
 
     constexpr bool operator==(const Range2D& rhs) const
     {

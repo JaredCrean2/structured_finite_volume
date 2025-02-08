@@ -10,6 +10,11 @@ std::array<UInt, 2> make_array(const std::array<UInt, 2>& arr)
 {
   return arr;
 }
+
+std::array<Int, 2> make_array_signed(const std::array<Int, 2>& arr)
+{
+  return arr;
+}
 }
 
 TEST(AdjacentBlockIndexer, SameCoordSystemEast)
@@ -24,6 +29,12 @@ TEST(AdjacentBlockIndexer, SameCoordSystemEast)
   EXPECT_EQ(indexer(4, 0), make_array({0, 0}));
   EXPECT_EQ(indexer(5, 0), make_array({1, 0}));
   EXPECT_EQ(indexer(4, 1), make_array({0, 1}));
+
+  std::array<Int, 2> idx_signed{4, 0};
+  std::array<UInt, 2> idx_unsigned{4, 0};
+  EXPECT_EQ(indexer(idx_signed), make_array({0, 0}));
+  EXPECT_EQ(indexer(idx_unsigned), make_array({0, 0}));
+
 }
 
 TEST(AdjacentBlockIndexer, SameCoordSystemNorth)
@@ -156,4 +167,21 @@ TEST(AdjacentBlockIndexer, getNeighborImage)
   EXPECT_EQ(getNeighborImage(NeighborDirection::West, {-2,  1}), NeighborDirection::South);
   EXPECT_EQ(getNeighborImage(NeighborDirection::West, {-1, -2}), NeighborDirection::West);
   EXPECT_EQ(getNeighborImage(NeighborDirection::West, { 2, -1}), NeighborDirection::North);  
+}
+
+TEST(AdjacentBlockIndexer, ComputeIndices)
+{
+  EXPECT_EQ(computeIndices(NeighborDirection::North, 2, 2, 3),  make_array_signed({2, 5}));
+  EXPECT_EQ(computeIndices(NeighborDirection::East,  2, 2, 3),  make_array_signed({4, 3}));
+  EXPECT_EQ(computeIndices(NeighborDirection::South, 2, 2, 3),  make_array_signed({2, 1}));
+  EXPECT_EQ(computeIndices(NeighborDirection::West,  2, 2, 3),  make_array_signed({0, 3}));
+}
+
+TEST(AdjacentBlockIndexer, GetInverseTransform)
+{
+  EXPECT_EQ(getInverseTransform({1, 2}), make_array_signed({1, 2}));
+  EXPECT_EQ(getInverseTransform({-1, 2}), make_array_signed({-1, 2}));
+  EXPECT_EQ(getInverseTransform({1, -2}), make_array_signed({1, -2}));
+  EXPECT_EQ(getInverseTransform({2, 1}), make_array_signed({2, 1}));
+  EXPECT_EQ(getInverseTransform({2, -1}), make_array_signed({-2, 1}));
 }
