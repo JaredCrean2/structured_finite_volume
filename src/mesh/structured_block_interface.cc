@@ -17,10 +17,11 @@ StructuredBlockInterface::StructuredBlockInterface(const StructuredBlock& blockL
   m_left_block_id(blockL.getBlockId()),
   m_dirL(dirL),
   m_transformL(transformL),
-  m_right_block_id(blockR.getBlockId())
+  m_right_block_id(blockR.getBlockId()),
+  m_dirR(getNeighborImage(dirL, transformL)),
+  m_transformR(getInverseTransform(transformL))
 {
   m_transformR = getInverseTransform(transformL);
-  m_dirR = getNeighborImage(dirL, transformL);
 
   if (mesh::getNumOwnedCells(blockL, dirL) != mesh::getNumOwnedCells(blockR, m_dirR))
   {

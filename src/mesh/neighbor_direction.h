@@ -123,8 +123,8 @@ inline std::array<Int, 2> getInverseTransform(const std::array<Int, 2>& transfor
 // the entry of rangeR that corresponds to the first cell on the boundary in blockL
 inline UInt getMinCellOnBoundary(NeighborDirection dirL, const std::array<Int, 2>& transformL, const Range& rangeR)
 {
-  bool is_reversed = (to_int(dirL) % 2 == 0 && sgn(transformL[1]) < 0) ||
-                     (to_int(dirL) % 2 == 1 && sgn(transformL[0]) < 0);
+  bool is_reversed = (to_int(dirL) % 2 == 0 && sgn(transformL[0]) < 0) ||
+                     (to_int(dirL) % 2 == 1 && sgn(transformL[1]) < 0);
   return is_reversed ? rangeR(rangeR.size()-1) : rangeR(0);                  
 }
 

@@ -18,7 +18,6 @@ class StructuredBlockInterface
       m_blockR(blockR),
       m_mesh_iface(mesh_iface)
     {
-      std::cout << "\nConstructing disc interface" << std::endl;
 
       auto num_ghost_cells_per_directionL = blockL.getNumGhostCellsPerDirection();
       auto num_ghost_cells_per_directionR = blockR.getNumGhostCellsPerDirection();
@@ -27,7 +26,7 @@ class StructuredBlockInterface
       std::array<UInt, 2> right_block_min_cell = {*mesh_iface.getBoundaryCellsR().getXRange().begin(),
                                                   *mesh_iface.getBoundaryCellsR().getYRange().begin()};                                                 
       std::array<UInt, 2> other_block_min_cellL = mesh_iface.getAdjacentBlockIndexerL().getRightBlockMinCell();
-      std::array<UInt, 2> other_block_min_cellR = mesh_iface.getAdjacentBlockIndexerL().getRightBlockMinCell();
+      std::array<UInt, 2> other_block_min_cellR = mesh_iface.getAdjacentBlockIndexerR().getRightBlockMinCell();
 
       std::array<Int, 2> offset_directions{to_int(mesh::NeighborDirection::West),
                                            to_int(mesh::NeighborDirection::South)};
@@ -58,8 +57,6 @@ class StructuredBlockInterface
       std::array<UInt, 2> ownedCellsYR{*mesh_iface.getBoundaryCellsR().getYRange().begin() + num_ghost_cells_per_directionR[offset_directions[1]],
                                        *mesh_iface.getBoundaryCellsR().getYRange().end()   + num_ghost_cells_per_directionR[offset_directions[1]]};
 
-      std::cout << "mesh::getBoundaryCellsR = " << mesh_iface.getBoundaryCellsR() << std::endl;
-      std::cout << "ownedCellsXR = " << ownedCellsXR[0] << ", " << ownedCellsXR[1] << std::endl;
       m_owned_boundary_cellsL = Range2D(ownedCellsXL[0], ownedCellsXL[1], ownedCellsYL[0], ownedCellsYL[1]);
       m_owned_boundary_cellsR = Range2D(ownedCellsXR[0], ownedCellsXR[1], ownedCellsYR[0], ownedCellsYR[1]);                                                    
     }
