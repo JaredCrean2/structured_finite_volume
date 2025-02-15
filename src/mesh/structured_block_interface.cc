@@ -1,11 +1,10 @@
 #include "structured_block_interface.h"
 #include "mesh/adjacent_block_indexer.h"
 #include "structured_block.h"
+#include <sstream>
 
 namespace structured_fv {
 namespace mesh {
-
-
 
 // rangeL and ranger give corresponding the ranges of indices along the boundary
 // this allows supporting T junctions
@@ -22,6 +21,20 @@ StructuredBlockInterface::StructuredBlockInterface(const StructuredBlock& blockL
 {
   m_transformR = getInverseTransform(transformL);
   m_dirR = getNeighborImage(dirL, transformL);
+
+  if (mesh::getNumOwnedCells(blockL, dirL) != mesh::getNumOwnedCells(blockR, m_dirR))
+  {
+    std::stringstream ss;
+    ss << "cannot create interface between block " << blockL.getBlockId() << ", dir " << dirL
+       << " and block " << blockR.getBlockId() << ", dir " << m_dirL << std::endl
+       << "Left block has " << mesh::getNumOwnedCells(blockL, dirL) << " cells along the interface"
+       << " while the right block has " << mesh::getNumOwnedCells(blockR, m_dirR) << std::endl;
+    throw std::runtime_error(ss.str());
+  }
+
+
+  if (rangeL.size() != rangeR.size())
+    throw std::runtime_error("boundary ranges on block interface do not agree");  
 
   auto [boundary_cellsL, indexerL] = createAdjacentBlockIndexer(blockL, m_dirL, rangeL, m_transformL,
                                                                 blockR, m_dirR, rangeR);
