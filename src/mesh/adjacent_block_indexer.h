@@ -224,7 +224,9 @@ class AdjacentBlockIndexer
     std::array<UInt, 2> operator()(const std::array<Int, 2>& ij) const
     {
       return this->operator()(ij[0], ij[1]);
-    }    
+    }
+
+    const std::array<UInt, 2>& getRightBlockMinCell() const { return m_right_block_min_cell; }
 
   private:
     // TODO: put this on stack?

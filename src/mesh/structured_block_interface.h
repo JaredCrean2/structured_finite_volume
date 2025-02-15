@@ -29,6 +29,10 @@ class StructuredBlockInterface
 
     NeighborDirection getNeighborDirectionR() const { return m_dirR; }
 
+    const std::array<Int, 2> getTransformL() const { return m_transformL; }
+
+    const std::array<Int, 2> getTransformR() const { return m_transformR; }
+
     const Range2D& getBoundaryCellsL() const { return m_boundary_cellsL; }
 
     const Range2D& getBoundaryCellsR() const { return m_boundary_cellsR; };

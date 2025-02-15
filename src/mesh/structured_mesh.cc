@@ -15,8 +15,8 @@ StructuredMesh::StructuredMesh(const MeshSpec& spec)
 {
   assert(spec.blocks.extent(0) > 0 && spec.blocks.extent(1) > 0);
   Range2D block_range(0, spec.blocks.extent(0), 0, spec.blocks.extent(1));
-  Range x_iface_range(1, spec.blocks.extent(0)-1);
-  Range y_iface_range(1, spec.blocks.extent(1)-1);
+  Range x_iface_range(0, spec.blocks.extent(0)-1);
+  Range y_iface_range(0, spec.blocks.extent(1)-1);
 
   UInt block_id = 0;
   for (UInt j : block_range.getYRange())
@@ -29,16 +29,16 @@ StructuredMesh::StructuredMesh(const MeshSpec& spec)
   for (UInt j : block_range.getYRange())
     for (UInt i : x_iface_range)
     {
-      UInt left_block_id = (i-1) + j * spec.blocks.extent(0);
+      UInt left_block_id = i + j * spec.blocks.extent(0);
       UInt right_block_id = left_block_id + 1;
 
       const StructuredBlock& blockL = m_blocks[left_block_id];
       const StructuredBlock& blockR = m_blocks[right_block_id];
 
-      NeighborDirection dirL = rotate(NeighborDirection::East, spec.blocks(i-1, j).rotation);
+      NeighborDirection dirL = rotate(NeighborDirection::East, spec.blocks(i, j).rotation);
       Range rangeL = to_int(dirL) % 2 == 0 ? blockL.getOwnedCells().getXRange() : 
                                              blockL.getOwnedCells().getYRange();
-      std::array<Int, 2> transformL = getTransform(spec.blocks(i-1, j).rotation, spec.blocks(i, j).rotation);
+      std::array<Int, 2> transformL = getTransform(spec.blocks(i, j).rotation, spec.blocks(i+1, j).rotation);
 
       NeighborDirection dirR = getNeighborImage(dirL, transformL);
       Range rangeR = to_int(dirR) % 2 == 0 ?  m_blocks[right_block_id].getOwnedCells().getXRange() : 
@@ -51,16 +51,16 @@ StructuredMesh::StructuredMesh(const MeshSpec& spec)
   for (UInt j : y_iface_range)
     for (UInt i : block_range.getXRange())
     {
-      UInt bottom_block_id = i + (j-1) * spec.blocks.extent(0);
+      UInt bottom_block_id = i + j * spec.blocks.extent(0);
       UInt top_block_id = bottom_block_id + spec.blocks.extent(0);
 
       const StructuredBlock& blockB = m_blocks[bottom_block_id];
       const StructuredBlock& blockT = m_blocks[top_block_id];
 
-      NeighborDirection dirB = rotate(NeighborDirection::North, spec.blocks(i, j-1).rotation);
+      NeighborDirection dirB = rotate(NeighborDirection::North, spec.blocks(i, j).rotation);
       Range rangeB = to_int(dirB) % 2 == 0 ? blockB.getOwnedCells().getXRange() : 
                                              blockB.getOwnedCells().getYRange();      
-      std::array<Int, 2> transformB = getTransform(spec.blocks(i, j-1).rotation, spec.blocks(i, j).rotation);
+      std::array<Int, 2> transformB = getTransform(spec.blocks(i, j).rotation, spec.blocks(i, j+1).rotation);
 
       NeighborDirection dirT = getNeighborImage(dirB, transformB);
       Range rangeT = to_int(dirT) % 2 == 0 ?  m_blocks[top_block_id].getOwnedCells().getXRange() : 

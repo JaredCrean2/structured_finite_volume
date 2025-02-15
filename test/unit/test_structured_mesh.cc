@@ -304,5 +304,30 @@ TEST(StructuredMesh, SingleBlockRotation1)
     EXPECT_EQ(iface.getNeighborDirectionR(), NeighborDirection::East);
     EXPECT_EQ(iface.getBoundaryCellsL(), Range2D(0, 1, 0, 3));    
   }
+}
 
+TEST(StructuredMesh, TwoBlocks)
+{
+  MeshSpec meshspec(2, 1, 2);
+  meshspec.blocks(0, 0) = MeshBlockSpec(2, 3, 0);
+  meshspec.blocks(1, 0) = MeshBlockSpec(2, 3, 0);
+
+  StructuredMesh mesh(meshspec);
+
+  EXPECT_EQ(mesh.getNumBlocks(), 8);
+  EXPECT_EQ(mesh.getNumRegularBlocks(), 2);
+  EXPECT_EQ(mesh.getNumGhostBCBlocks(), 6);
+  EXPECT_EQ(mesh.getNumBlockInterfaces(), 7);
+  EXPECT_EQ(mesh.getNumRegularBlockInterfaces(), 1);
+  EXPECT_EQ(mesh.getNumGhostBCBlockInterfaces(), 6);
+
+  EXPECT_EQ(mesh.getBlockInterfaces(0), make_array({1, 0, 4, 6}));
+  EXPECT_EQ(mesh.getBlockInterfaces(1), make_array({2, 3, 5, 0}));
+
+  EXPECT_EQ(mesh.getBlockInterfaces(2), make_array({-1, -1,  1, -1}));
+  EXPECT_EQ(mesh.getBlockInterfaces(3), make_array({-1, -1,  2, -1}));
+  EXPECT_EQ(mesh.getBlockInterfaces(4), make_array({-1, -1, -1,  3}));
+  EXPECT_EQ(mesh.getBlockInterfaces(5), make_array({ 4, -1, -1, -1}));
+  EXPECT_EQ(mesh.getBlockInterfaces(6), make_array({ 5, -1, -1, -1}));
+  EXPECT_EQ(mesh.getBlockInterfaces(7), make_array({-1,  6, -1, -1}));  
 }
