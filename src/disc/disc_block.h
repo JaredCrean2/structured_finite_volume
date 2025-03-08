@@ -18,11 +18,10 @@ class StructuredBlock
 
     StructuredBlock(const mesh::StructuredMesh& mesh, const mesh::StructuredBlock& block, int nghost) :
       m_mesh_block(block),
-      m_num_ghost_cells_per_direction{0, 0, 0, 0},
-      m_vert_coords("block_vert_coords")
+      m_num_ghost_cells_per_direction{0, 0, 0, 0}
     {
       setNumGhostsPerDirection(mesh, nghost);
-      setVertCoords(mesh, nghost);
+      //setVertCoords(mesh, nghost);
     }
 
     UInt getBlockId() const { return m_mesh_block.getBlockId(); }
@@ -79,22 +78,20 @@ class StructuredBlock
                      0, mesh_range.getYRange().size() + extra_y_cells);
     }
 
-    std::pair<UInt, UInt> meshVertToBlockVert(UInt i, UInt j)
+    std::pair<UInt, UInt> meshVertToBlockVert(UInt i, UInt j) const
     {
       UInt xoffset = m_num_ghost_cells_per_direction[mesh::to_int(mesh::NeighborDirection::West)];
       UInt yoffset = m_num_ghost_cells_per_direction[mesh::to_int(mesh::NeighborDirection::South)];
       return {i + xoffset, j + yoffset};
     }
 
-    std::pair<UInt, UInt> blockVertToMeshVert(UInt i, UInt j)
+    std::pair<UInt, UInt> blockVertToMeshVert(UInt i, UInt j) const
     {
       assert(in(getOwnedVerts(), i, j));
       UInt xoffset = m_num_ghost_cells_per_direction[mesh::to_int(mesh::NeighborDirection::West)];
       UInt yoffset = m_num_ghost_cells_per_direction[mesh::to_int(mesh::NeighborDirection::South)];      
       return {i - xoffset, j - yoffset};
     }
-
-    CoordsHostView getVertCoords() const { return m_vert_coords; }
 
   private:
 
@@ -121,7 +118,7 @@ class StructuredBlock
         }
       }
     }
-
+/*
     void setVertCoords(const mesh::StructuredMesh& mesh, int nghost)
     {
       Kokkos::resize(m_vert_coords, getOwnedAndGhostVerts().getXRange().size(),
@@ -167,11 +164,11 @@ class StructuredBlock
             }
         }        
       }
-    }        
+    }
+*/
 
     const mesh::StructuredBlock& m_mesh_block;
     std::array<UInt, 4> m_num_ghost_cells_per_direction;
-    CoordsHostView m_vert_coords;
 };
 
 inline std::array<Real, 2> computeCellCentroid(StructuredBlock::CoordsHostView vertCoords, int i, int j)

@@ -13,8 +13,8 @@ class DiscTester : public ::testing::Test
     DiscTester()
     {
       mesh::MeshSpec spec(2, 1, m_num_bc_ghost_cells);
-      spec.blocks(0, 0) = mesh::MeshBlockSpec(3, 4);
-      spec.blocks(1, 0) = mesh::MeshBlockSpec(5, 4);
+      spec.blocks(0, 0) = mesh::MeshBlockSpec(3, 4, 0, [](Real x, Real y) { return std::array<Real, 2>{x, y}; });
+      spec.blocks(1, 0) = mesh::MeshBlockSpec(5, 4, 0, [](Real x, Real y) { return std::array<Real, 2>{x+1, y}; });
       m_mesh = std::make_shared<mesh::StructuredMesh>(spec);
       m_disc = std::make_shared<disc::StructuredDisc>(m_mesh, m_num_bc_ghost_cells);
     }
@@ -35,6 +35,72 @@ TEST_F(DiscTester, Counts)
   EXPECT_EQ(m_disc->getNumBlockInterfaces(), 7);
   EXPECT_EQ(m_disc->getNumRegularBlockInterfaces(), 1);
   EXPECT_EQ(m_disc->getNumGhostBCBlockInterfaces(), 6);
+}
+
+TEST_F(DiscTester, CoordField)
+{
+  const disc::VertexField<Real>& coord_field = *m_disc->getCoordField();
+  {
+    UInt block_id = 0;
+    Real dx = 1.0/3;
+    Real dy = 1.0/4;
+    Real x0 = -2*dx;
+    Real y0 = -2*dy;
+    Range2D verts(0, 5, 0, 9);
+    for (UInt i : verts.getXRange())
+      for (UInt j : verts.getYRange())
+      {
+        if ((i < 2 && j < 2) || (i < 2 && j > 6))
+          continue;
+
+        EXPECT_NEAR(coord_field(block_id, i, j, 0), x0 + i*dx, 1e-13);
+        EXPECT_NEAR(coord_field(block_id, i, j, 1), y0 + j*dy, 1e-13);
+      }
+
+    x0 = 1;
+    y0 = 0;
+    dx = 1.0/5;
+    dy = 1.0/4;
+    verts = Range2D(5, 8, 2, 7);
+
+    for (UInt i : verts.getXRange())
+      for (UInt j : verts.getYRange())
+      {
+        EXPECT_NEAR(coord_field(block_id, i, j, 0), x0 + (i - 5)*dx, 1e-13);
+        EXPECT_NEAR(coord_field(block_id, i, j, 1), y0 + (j - 2)*dy, 1e-13);
+      }    
+  }
+
+  {
+    UInt block_id = 1;
+    Real dx = 1.0/3;
+    Real dy = 1.0/4;
+    Real x0 = 1 - 2*dx;
+    Real y0 = 0;
+    Range2D verts(0, 3, 2, 7);
+    for (UInt i : verts.getXRange())
+      for (UInt j : verts.getYRange())
+      {
+        EXPECT_NEAR(coord_field(block_id, i, j, 0), x0 + i*dx, 1e-13);
+        EXPECT_NEAR(coord_field(block_id, i, j, 1), y0 + (j-2)*dy, 1e-13);
+      }
+
+    dx = 1.0/5;
+    dy = 1.0/4;
+    x0 = 1;
+    y0 = -2*dy;
+    verts = Range2D(2, 9, 0, 9);
+    for (UInt i : verts.getXRange())
+      for (UInt j : verts.getYRange())
+      {
+        if (i > 7 && (j < 2 || j > 6))
+          continue;
+        
+        EXPECT_NEAR(coord_field(block_id, i, j, 0), x0 + (i - 2)*dx, 1e-13);
+        EXPECT_NEAR(coord_field(block_id, i, j, 1), y0 + j*dy, 1e-13);
+      }
+
+  }
 }
 
 TEST_F(DiscTester, ElementFieldUpdator)
