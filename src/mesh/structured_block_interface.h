@@ -33,32 +33,44 @@ class StructuredBlockInterface
 
     const std::array<Int, 2> getTransformR() const { return m_transformR; }
 
+    const Range2D& getBoundaryVertsL() const { return m_boundary_vertsL; }
+
+    const Range2D& getBoundaryVertsR() const { return m_boundary_vertsR; };
+
     const Range2D& getBoundaryCellsL() const { return m_boundary_cellsL; }
 
     const Range2D& getBoundaryCellsR() const { return m_boundary_cellsR; };
 
-    const AdjacentBlockIndexer& getAdjacentBlockIndexerL() const { return m_indexerL; }
+    const AdjacentBlockIndexer& getAdjBlockVertIndexerL() const { return m_vert_indexerL; }
 
-    const AdjacentBlockIndexer& getAdjacentBlockIndexerR() const { return m_indexerR; };
+    const AdjacentBlockIndexer& getAdjBlockVertIndexerR() const { return m_vert_indexerR; };
+
+    const AdjacentBlockIndexer& getAdjBlockCellIndexerL() const { return m_cell_indexerL; }
+
+    const AdjacentBlockIndexer& getAdjBlockCellIndexerR() const { return m_cell_indexerR; };
 
   private:
 
-    std::pair<Range2D, AdjacentBlockIndexer> createAdjacentBlockIndexer( const StructuredBlock& blockL, NeighborDirection dirL, 
+    std::pair<Range2D, AdjacentBlockIndexer> createAdjacentBlockIndexer( const Range2D& block_rangeL, NeighborDirection dirL, 
        const Range& rangeL, const std::array<Int, 2>& transformL,
-       const StructuredBlock& blockR, NeighborDirection dirR, const Range& rangeR);
+       const Range2D& block_rangeR, NeighborDirection dirR, const Range& rangeR);
 
     UInt m_left_block_id;
     NeighborDirection m_dirL;  // gives the side of the block the
                                // interface is on, from the left block perspective
     std::array<Int, 2> m_transformL;
+    Range2D m_boundary_vertsL;
     Range2D m_boundary_cellsL;
-    AdjacentBlockIndexer m_indexerL;
+    AdjacentBlockIndexer m_vert_indexerL;
+    AdjacentBlockIndexer m_cell_indexerL;
 
     UInt m_right_block_id;
     NeighborDirection m_dirR;
     std::array<Int, 2> m_transformR;
+    Range2D m_boundary_vertsR;
     Range2D m_boundary_cellsR;
-    AdjacentBlockIndexer m_indexerR;
+    AdjacentBlockIndexer m_vert_indexerR;
+    AdjacentBlockIndexer m_cell_indexerR;
 };
 
 

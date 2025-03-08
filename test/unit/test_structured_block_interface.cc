@@ -66,18 +66,30 @@ TEST_F(StructuredBlockInterfaceTester, East)
   EXPECT_EQ(m_east_iface.getBlockIdR(), 1);
   EXPECT_EQ(m_east_iface.getNeighborDirectionL(), NeighborDirection::East);
   EXPECT_EQ(m_east_iface.getNeighborDirectionR(), NeighborDirection::West);
+  EXPECT_EQ(m_east_iface.getBoundaryVertsL(), Range2D(3, 4, 0, 5));
+  EXPECT_EQ(m_east_iface.getBoundaryVertsR(), Range2D(0, 1, 0, 5));   
   EXPECT_EQ(m_east_iface.getBoundaryCellsL(), Range2D(2, 3, 0, 4));
-  EXPECT_EQ(m_east_iface.getBoundaryCellsR(), Range2D(0, 1, 0, 4));
+  EXPECT_EQ(m_east_iface.getBoundaryCellsR(), Range2D(0, 1, 0, 4)); 
 
-  const auto& indexerL = m_east_iface.getAdjacentBlockIndexerL();
-  EXPECT_EQ(indexerL(3, 0), make_array({0, 0}));
-  EXPECT_EQ(indexerL(4, 0), make_array({1, 0}));
-  EXPECT_EQ(indexerL(3, 1), make_array({0, 1}));
+  const auto& vert_indexerL = m_east_iface.getAdjBlockVertIndexerL();
+  EXPECT_EQ(vert_indexerL(4, 0), make_array({0, 0}));
+  EXPECT_EQ(vert_indexerL(5, 0), make_array({1, 0}));
+  EXPECT_EQ(vert_indexerL(4, 1), make_array({0, 1}));
 
-  const auto& indexerR = m_east_iface.getAdjacentBlockIndexerR();
-  EXPECT_EQ(indexerR(-1, 0), make_array({2, 0}));
-  EXPECT_EQ(indexerR(-2, 0), make_array({1, 0}));
-  EXPECT_EQ(indexerR(-1, 1), make_array({2, 1}));  
+  const auto& cell_indexerL = m_east_iface.getAdjBlockCellIndexerL();
+  EXPECT_EQ(cell_indexerL(3, 0), make_array({0, 0}));
+  EXPECT_EQ(cell_indexerL(4, 0), make_array({1, 0}));
+  EXPECT_EQ(cell_indexerL(3, 1), make_array({0, 1}));
+
+  const auto& cell_indexerR = m_east_iface.getAdjBlockCellIndexerR();
+  EXPECT_EQ(cell_indexerR(-1, 0), make_array({2, 0}));
+  EXPECT_EQ(cell_indexerR(-2, 0), make_array({1, 0}));
+  EXPECT_EQ(cell_indexerR(-1, 1), make_array({2, 1}));
+
+  const auto& vert_indexerR = m_east_iface.getAdjBlockVertIndexerR();
+  EXPECT_EQ(vert_indexerR(-1, 0), make_array({3, 0}));
+  EXPECT_EQ(vert_indexerR(-2, 0), make_array({2, 0}));
+  EXPECT_EQ(vert_indexerR(-1, 1), make_array({3, 1}));   
 }
 
 TEST_F(StructuredBlockInterfaceTester, North)
@@ -86,18 +98,30 @@ TEST_F(StructuredBlockInterfaceTester, North)
   EXPECT_EQ(m_north_iface.getBlockIdR(), 2);
   EXPECT_EQ(m_north_iface.getNeighborDirectionL(), NeighborDirection::North);
   EXPECT_EQ(m_north_iface.getNeighborDirectionR(), NeighborDirection::South);
+  EXPECT_EQ(m_north_iface.getBoundaryVertsL(), Range2D(0, 4, 4, 5));
+  EXPECT_EQ(m_north_iface.getBoundaryVertsR(), Range2D(0, 4, 0, 1));  
   EXPECT_EQ(m_north_iface.getBoundaryCellsL(), Range2D(0, 3, 3, 4));
   EXPECT_EQ(m_north_iface.getBoundaryCellsR(), Range2D(0, 3, 0, 1));
 
-  const auto& indexerL = m_north_iface.getAdjacentBlockIndexerL();
-  EXPECT_EQ(indexerL(0, 4), make_array({0, 0}));
-  EXPECT_EQ(indexerL(0, 5), make_array({0, 1}));
-  EXPECT_EQ(indexerL(1, 4), make_array({1, 0}));
+  const auto& vert_indexerL = m_north_iface.getAdjBlockVertIndexerL();
+  EXPECT_EQ(vert_indexerL(0, 5), make_array({0, 0}));
+  EXPECT_EQ(vert_indexerL(0, 6), make_array({0, 1}));
+  EXPECT_EQ(vert_indexerL(1, 5), make_array({1, 0}));
 
-  const auto& indexerR = m_north_iface.getAdjacentBlockIndexerR();
-  EXPECT_EQ(indexerR(0, -1), make_array({0, 3}));
-  EXPECT_EQ(indexerR(0, -2), make_array({0, 2}));
-  EXPECT_EQ(indexerR(1, -1), make_array({1, 3}));  
+  const auto& cell_indexerL = m_north_iface.getAdjBlockCellIndexerL();
+  EXPECT_EQ(cell_indexerL(0, 4), make_array({0, 0}));
+  EXPECT_EQ(cell_indexerL(0, 5), make_array({0, 1}));
+  EXPECT_EQ(cell_indexerL(1, 4), make_array({1, 0}));
+
+  const auto& cell_indexerR = m_north_iface.getAdjBlockCellIndexerR();
+  EXPECT_EQ(cell_indexerR(0, -1), make_array({0, 3}));
+  EXPECT_EQ(cell_indexerR(0, -2), make_array({0, 2}));
+  EXPECT_EQ(cell_indexerR(1, -1), make_array({1, 3})); 
+
+  const auto& vert_indexerR = m_north_iface.getAdjBlockVertIndexerR();
+  EXPECT_EQ(vert_indexerR(0, -1), make_array({0, 4}));
+  EXPECT_EQ(vert_indexerR(0, -2), make_array({0, 3}));
+  EXPECT_EQ(vert_indexerR(1, -1), make_array({1, 4}));    
 }
 
 
@@ -107,18 +131,30 @@ TEST_F(StructuredBlockInterfaceRotationTester, East)
   EXPECT_EQ(m_east_iface.getBlockIdR(), 1);
   EXPECT_EQ(m_east_iface.getNeighborDirectionL(), NeighborDirection::East);
   EXPECT_EQ(m_east_iface.getNeighborDirectionR(), NeighborDirection::North);
+  EXPECT_EQ(m_east_iface.getBoundaryVertsL(), Range2D(3, 4, 0, 5));
+  EXPECT_EQ(m_east_iface.getBoundaryVertsR(), Range2D(0, 5, 6, 7));  
   EXPECT_EQ(m_east_iface.getBoundaryCellsL(), Range2D(2, 3, 0, 4));
   EXPECT_EQ(m_east_iface.getBoundaryCellsR(), Range2D(0, 4, 5, 6));
 
-  const auto& indexerL = m_east_iface.getAdjacentBlockIndexerL();
-  EXPECT_EQ(indexerL(3, 0), make_array({0, 5}));
-  EXPECT_EQ(indexerL(4, 0), make_array({0, 4}));
-  EXPECT_EQ(indexerL(3, 1), make_array({1, 5}));
+  const auto& vert_indexerL = m_east_iface.getAdjBlockVertIndexerL();
+  EXPECT_EQ(vert_indexerL(4, 0), make_array({0, 6}));
+  EXPECT_EQ(vert_indexerL(5, 0), make_array({0, 5}));
+  EXPECT_EQ(vert_indexerL(4, 1), make_array({1, 6}));
 
-  const auto& indexerR = m_east_iface.getAdjacentBlockIndexerR();
-  EXPECT_EQ(indexerR(0, 6), make_array({2, 0}));
-  EXPECT_EQ(indexerR(0, 7), make_array({1, 0}));
-  EXPECT_EQ(indexerR(1, 6), make_array({2, 1}));  
+  const auto& cell_indexerL = m_east_iface.getAdjBlockCellIndexerL();
+  EXPECT_EQ(cell_indexerL(3, 0), make_array({0, 5}));
+  EXPECT_EQ(cell_indexerL(4, 0), make_array({0, 4}));
+  EXPECT_EQ(cell_indexerL(3, 1), make_array({1, 5}));
+
+  const auto& cell_indexerR = m_east_iface.getAdjBlockCellIndexerR();
+  EXPECT_EQ(cell_indexerR(0, 6), make_array({2, 0}));
+  EXPECT_EQ(cell_indexerR(0, 7), make_array({1, 0}));
+  EXPECT_EQ(cell_indexerR(1, 6), make_array({2, 1}));
+
+  const auto& vert_indexerR = m_east_iface.getAdjBlockVertIndexerR();
+  EXPECT_EQ(vert_indexerR(0, 7), make_array({3, 0}));
+  EXPECT_EQ(vert_indexerR(0, 8), make_array({2, 0}));
+  EXPECT_EQ(vert_indexerR(1, 7), make_array({3, 1}));    
 }
 
 TEST_F(StructuredBlockInterfaceRotationTester, North)
@@ -127,16 +163,28 @@ TEST_F(StructuredBlockInterfaceRotationTester, North)
   EXPECT_EQ(m_north_iface.getBlockIdR(), 2);
   EXPECT_EQ(m_north_iface.getNeighborDirectionL(), NeighborDirection::North);
   EXPECT_EQ(m_north_iface.getNeighborDirectionR(), NeighborDirection::North);
+  EXPECT_EQ(m_north_iface.getBoundaryVertsL(), Range2D(0, 4, 4, 5));
+  EXPECT_EQ(m_north_iface.getBoundaryVertsR(), Range2D(0, 4, 6, 7));  
   EXPECT_EQ(m_north_iface.getBoundaryCellsL(), Range2D(0, 3, 3, 4));
   EXPECT_EQ(m_north_iface.getBoundaryCellsR(), Range2D(0, 3, 5, 6));
 
-  const auto& indexerL = m_north_iface.getAdjacentBlockIndexerL();
-  EXPECT_EQ(indexerL(0, 4), make_array({2, 5}));
-  EXPECT_EQ(indexerL(0, 5), make_array({2, 4}));
-  EXPECT_EQ(indexerL(1, 4), make_array({1, 5}));
+  const auto& vert_indexerL = m_north_iface.getAdjBlockVertIndexerL();
+  EXPECT_EQ(vert_indexerL(0, 5), make_array({3, 6}));
+  EXPECT_EQ(vert_indexerL(0, 6), make_array({3, 5}));
+  EXPECT_EQ(vert_indexerL(1, 5), make_array({2, 6}));
 
-  const auto& indexerR = m_north_iface.getAdjacentBlockIndexerR();
-  EXPECT_EQ(indexerR(0, 6), make_array({2, 3}));
-  EXPECT_EQ(indexerR(0, 7), make_array({2, 2}));
-  EXPECT_EQ(indexerR(1, 6), make_array({1, 3}));  
+  const auto& cell_indexerL = m_north_iface.getAdjBlockCellIndexerL();
+  EXPECT_EQ(cell_indexerL(0, 4), make_array({2, 5}));
+  EXPECT_EQ(cell_indexerL(0, 5), make_array({2, 4}));
+  EXPECT_EQ(cell_indexerL(1, 4), make_array({1, 5}));
+
+  const auto& cell_indexerR = m_north_iface.getAdjBlockCellIndexerR();
+  EXPECT_EQ(cell_indexerR(0, 6), make_array({2, 3}));
+  EXPECT_EQ(cell_indexerR(0, 7), make_array({2, 2}));
+  EXPECT_EQ(cell_indexerR(1, 6), make_array({1, 3})); 
+
+  const auto& vert_indexerR = m_north_iface.getAdjBlockVertIndexerR();
+  EXPECT_EQ(vert_indexerR(0, 7), make_array({3, 4}));
+  EXPECT_EQ(vert_indexerR(0, 8), make_array({3, 3}));
+  EXPECT_EQ(vert_indexerR(1, 7), make_array({2, 4}));    
 }

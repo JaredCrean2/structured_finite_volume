@@ -31,6 +31,8 @@ class StructuredBlock
 
     std::array<UInt, 2> getCellDimensions() const { return getOwnedAndGhostCells().getDimensions(); }
 
+    std::array<UInt, 2> getVertDimensions() const { return getOwnedAndGhostVerts().getDimensions(); }
+
     const std::array<UInt, 4> getNumGhostCellsPerDirection() const { return m_num_ghost_cells_per_direction; }
 
     Range2D getOwnedVerts() const
@@ -77,8 +79,6 @@ class StructuredBlock
                      0, mesh_range.getYRange().size() + extra_y_cells);
     }
 
-  private:
-
     std::pair<UInt, UInt> meshVertToBlockVert(UInt i, UInt j)
     {
       UInt xoffset = m_num_ghost_cells_per_direction[mesh::to_int(mesh::NeighborDirection::West)];
@@ -93,6 +93,10 @@ class StructuredBlock
       UInt yoffset = m_num_ghost_cells_per_direction[mesh::to_int(mesh::NeighborDirection::South)];      
       return {i - xoffset, j - yoffset};
     }
+
+    CoordsHostView getVertCoords() const { return m_vert_coords; }
+
+  private:
 
     void setNumGhostsPerDirection(const mesh::StructuredMesh& mesh, int nghost)
     {
@@ -141,8 +145,8 @@ class StructuredBlock
           bool amLeftBlock = iface.getBlockIdL() == m_mesh_block.getBlockId();
           const mesh::StructuredBlock& blockR       = amLeftBlock ? mesh.getBlock(iface.getBlockIdR()) : 
                                                                     mesh.getBlock(iface.getBlockIdL());
-          const mesh::AdjacentBlockIndexer& indexer = amLeftBlock ? iface.getAdjacentBlockIndexerL() : 
-                                                                    iface.getAdjacentBlockIndexerR();
+          const mesh::AdjacentBlockIndexer& indexer = amLeftBlock ? iface.getAdjBlockCellIndexerL() : 
+                                                                    iface.getAdjBlockCellIndexerR();
           const Range2D& boundary_cells             = amLeftBlock ? iface.getBoundaryCellsL() :
                                                                     iface.getBoundaryCellsR();
           mesh::NeighborDirection dir               = amLeftBlock ? iface.getNeighborDirectionL() : 
@@ -169,6 +173,15 @@ class StructuredBlock
     std::array<UInt, 4> m_num_ghost_cells_per_direction;
     CoordsHostView m_vert_coords;
 };
+
+inline std::array<Real, 2> computeCellCentroid(StructuredBlock::CoordsHostView vertCoords, int i, int j)
+{
+  return {(vertCoords(i, j, 0) + vertCoords(i+1, j, 0) + 
+           vertCoords(i+1, j+1, 0) + vertCoords(i+1, j, 0))/4,
+          (vertCoords(i, j, 1) + vertCoords(i+1, j, 1) + 
+           vertCoords(i+1, j+1, 1) + vertCoords(i+1, j, 1))/4};
+}
+
 
 }
 }

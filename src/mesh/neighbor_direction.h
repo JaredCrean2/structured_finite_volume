@@ -81,7 +81,7 @@ constexpr NeighborDirection getNeighborImage(NeighborDirection dir, const std::a
   return toNeighborDirection(other_block_axis);
 }
 
-constexpr std::array<Int, 2> computeIndices(NeighborDirection dir, UInt offset, Int i, Int j)
+constexpr std::array<Int, 2> computeIndices(NeighborDirection dir, Int offset, Int i, Int j)
 {
   std::array<Int, 2> idxs = {i, j};
   //Int sign = to_int(dir) < 2 ? 1 : -1;
@@ -92,11 +92,11 @@ constexpr std::array<Int, 2> computeIndices(NeighborDirection dir, UInt offset, 
   return idxs;
 }
 
-UInt getConstantIndexAlongBoundary(const StructuredBlock& block, NeighborDirection dir);
+UInt getConstantIndexAlongBoundary(const Range2D& block_range, NeighborDirection dir);
 
-Range getVariableIndexAlongBoundary(const StructuredBlock& block, NeighborDirection dir);
+Range getVariableIndexAlongBoundary(const Range2D& block_range, NeighborDirection dir);
 
-Range2D getBoundaryRange(const StructuredBlock& block, NeighborDirection dir, const Range& boundary_subset);
+Range2D getBoundaryRange(const Range2D& block_range, NeighborDirection dir, const Range& boundary_subset);
 
 inline std::array<Int, 2> getTransform(Int rotation_left, Int rotation_right)
 {
@@ -121,7 +121,7 @@ inline std::array<Int, 2> getInverseTransform(const std::array<Int, 2>& transfor
 
 // given an direction and a transfrom from the left block perspective, return
 // the entry of rangeR that corresponds to the first cell on the boundary in blockL
-inline UInt getMinCellOnBoundary(NeighborDirection dirL, const std::array<Int, 2>& transformL, const Range& rangeR)
+inline UInt getMinEntityOnBoundary(NeighborDirection dirL, const std::array<Int, 2>& transformL, const Range& rangeR)
 {
   bool is_reversed = (to_int(dirL) % 2 == 0 && sgn(transformL[0]) < 0) ||
                      (to_int(dirL) % 2 == 1 && sgn(transformL[1]) < 0);

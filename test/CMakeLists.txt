@@ -12,6 +12,7 @@ target_include_directories(test_utils PUBLIC
 
 target_link_libraries(test_utils
                      mesh
+                     disc
                      ${GTEST_BOTH_LIBRARIES}
                    )
  
@@ -30,6 +31,7 @@ target_link_libraries(unit_tests
                      pthread 
                      mesh
                      utils
+                     disc
                      test_utils)
 
 
@@ -48,4 +50,5 @@ target_link_libraries(integration_tests
                      pthread 
                      mesh
                      utils
+                     disc
                      test_utils)                  

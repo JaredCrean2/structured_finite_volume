@@ -77,7 +77,7 @@ class AdjacentBlockIndexer
       return this->operator()(ij[0], ij[1]);
     }
 
-    const std::array<UInt, 2>& getRightBlockMinCell() const { return m_right_block_min_cell; }
+    const std::array<UInt, 2>& getRightBlockMinEntity() const { return m_right_block_min_cell; }
 
   private:
     // TODO: put this on stack?

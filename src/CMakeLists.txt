@@ -1,6 +1,6 @@
 message("Processing source directory")
 
-
+### Utils
 file(GLOB utils_files utils/*.cc)
 add_library(utils "${utils_files}")
 target_include_directories(utils PUBLIC
@@ -9,6 +9,7 @@ target_include_directories(utils PUBLIC
 )
 target_link_libraries(utils Kokkos::kokkos MPI::MPI_CXX)
 
+### Mesh
 file(GLOB mesh_files mesh/*.cc)
 add_library(mesh "${mesh_files}")
 target_include_directories(mesh PUBLIC
@@ -16,6 +17,18 @@ target_include_directories(mesh PUBLIC
                           "${PROJECT_BINARY_DIR}/include"  # needed for configured header
 )
 target_link_libraries(mesh Kokkos::kokkos MPI::MPI_CXX)
+
+
+### Mesh
+file(GLOB disc_files disc/*.cc)
+add_library(disc "${disc_files}")
+target_include_directories(disc PUBLIC
+                          "${CMAKE_CURRENT_SOURCE_DIR}"
+                          "${PROJECT_BINARY_DIR}/include"  # needed for configured header
+)
+target_link_libraries(disc PUBLIC mesh Kokkos::kokkos MPI::MPI_CXX)
+
+
 
 
 
