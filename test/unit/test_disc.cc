@@ -2,6 +2,8 @@
 #include "disc/disc_block.h"
 #include "disc/disc_interface.h"
 #include "disc/discretization.h"
+#include "disc/elem_field.h"
+#include "disc/vert_field.h"
 #include "mesh/adjacent_block_indexer.h"
 
 using namespace structured_fv;

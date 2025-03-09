@@ -1,5 +1,6 @@
 #include "discretization.h"
 #include "disc/disc_block.h"
+#include "disc/vert_field.h"
 
 namespace structured_fv {
 namespace disc {
