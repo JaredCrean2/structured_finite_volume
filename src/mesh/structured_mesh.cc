@@ -82,6 +82,61 @@ StructuredMesh::StructuredMesh(const MeshSpec& spec)
   }
 }
 
+
+UInt StructuredMesh::getNumBlocks() const { return m_block_counts[0] + m_block_counts[1]; }
+
+UInt StructuredMesh::getNumRegularBlocks() const { return m_block_counts[0]; }
+
+UInt StructuredMesh::getNumGhostBCBlocks() const { return m_block_counts[1]; }
+
+const StructuredBlock& StructuredMesh::getBlock(UInt block) const
+{
+  return m_blocks.at(block);
+}
+
+const StructuredBlock& StructuredMesh::getRegularBlock(UInt block) const
+{
+  return m_blocks.at(block);
+}
+
+const StructuredBlock& StructuredMesh::getGhostBCBlock(UInt bc_block) const
+{
+  return m_blocks.at(getNumRegularBlocks() + bc_block);
+}    
+
+UInt StructuredMesh::getNumBlockInterfaces() const { return m_block_iface_counts[0] + m_block_iface_counts[1]; }
+
+UInt StructuredMesh::getNumRegularBlockInterfaces() const { return m_block_iface_counts[0]; }
+
+UInt StructuredMesh::getNumGhostBCBlockInterfaces() const { return m_block_iface_counts[1]; }
+
+const StructuredBlockInterface& StructuredMesh::getBlockInterface(UInt iface) const
+{
+  return m_block_interfaces.at(iface);
+}
+
+const StructuredBlockInterface& StructuredMesh::getRegularBlockInterface(UInt iface) const
+{
+  return m_block_interfaces.at(iface);
+}
+
+const StructuredBlockInterface& StructuredMesh::getGhostBCBlockInterface(UInt iface) const
+{
+  return m_block_interfaces.at(getNumRegularBlockInterfaces() + iface);
+}
+
+UInt StructuredMesh::getNumBCs() const { return m_bc_block_ranges.size(); }
+
+// gives the range of ghost blocks that are part of the given BC
+Range StructuredMesh::getBCBlockRange(UInt bc) const { return m_bc_block_ranges.at(bc); }
+
+// gives the range of ghost block interfaces that are part of the BC
+// (ie. one of the blocks in a ghost BC block)
+Range StructuredMesh::getBCInterfaceRange(UInt bc) const { return m_bc_iface_ranges.at(bc); }
+
+std::array<Int, 4> StructuredMesh::getBlockInterfaces(UInt block) const { return m_block_interface_connectivity.at(block); }
+
+
 // dir is the direction of the interface from the ghost block perspective
 Kokkos::View<double**[2], HostMemorySpace> computeGhostBCCoords(const StructuredBlock& block, NeighborDirection dir, UInt num_ghost_cells)
 {

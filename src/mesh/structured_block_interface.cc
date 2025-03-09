@@ -59,6 +59,34 @@ StructuredBlockInterface::StructuredBlockInterface(const StructuredBlock& blockL
   m_cell_indexerR   = cell_indexerR;
 }
 
+UInt StructuredBlockInterface::getBlockIdL() const { return m_left_block_id; }
+
+UInt StructuredBlockInterface::getBlockIdR() const { return m_right_block_id; }
+
+NeighborDirection StructuredBlockInterface::getNeighborDirectionL() const { return m_dirL; }
+
+NeighborDirection StructuredBlockInterface::getNeighborDirectionR() const { return m_dirR; }
+
+const std::array<Int, 2> StructuredBlockInterface::getTransformL() const { return m_transformL; }
+
+const std::array<Int, 2> StructuredBlockInterface::getTransformR() const { return m_transformR; }
+
+const Range2D& StructuredBlockInterface::getBoundaryVertsL() const { return m_boundary_vertsL; }
+
+const Range2D& StructuredBlockInterface::getBoundaryVertsR() const { return m_boundary_vertsR; };
+
+const Range2D& StructuredBlockInterface::getBoundaryCellsL() const { return m_boundary_cellsL; }
+
+const Range2D& StructuredBlockInterface::getBoundaryCellsR() const { return m_boundary_cellsR; };
+
+const AdjacentBlockIndexer& StructuredBlockInterface::getAdjBlockVertIndexerL() const { return m_vert_indexerL; }
+
+const AdjacentBlockIndexer& StructuredBlockInterface::getAdjBlockVertIndexerR() const { return m_vert_indexerR; };
+
+const AdjacentBlockIndexer& StructuredBlockInterface::getAdjBlockCellIndexerL() const { return m_cell_indexerL; }
+
+const AdjacentBlockIndexer& StructuredBlockInterface::getAdjBlockCellIndexerR() const { return m_cell_indexerR; };
+
 std::pair<Range2D, AdjacentBlockIndexer> StructuredBlockInterface::createAdjacentBlockIndexer(
    const Range2D& block_rangeL, NeighborDirection dirL, 
    const Range& rangeL, const std::array<Int, 2>& transformL,

@@ -51,5 +51,28 @@ StructuredBlock::StructuredBlock(Kokkos::View<Real**[2], HostMemorySpace> ghost_
   m_offset_into_block{0, 0},
   m_all_block_size{static_cast<UInt>(ghost_coords.extent(0)-1), static_cast<UInt>(ghost_coords.extent(1)-1)}
 {}
+
+UInt StructuredBlock::getBlockId() const { return m_block_id;};  // block IDs are global
+
+BlockType StructuredBlock::getBlockType() const { return m_block_type; };
+
+// these are the verts of owned cells
+// slightly misleading, because we dont define ownership of verts
+Range2D StructuredBlock::getOwnedVerts() const { return m_owned_vert_range; }
+
+Range2D StructuredBlock::getOwnedCells() const { return m_owned_cell_range; };
+
+const StructuredBlock::CoordsHostView& StructuredBlock::getOwnedVertCoords() const { return m_owned_vert_coords; };
+
+std::array<UInt, 2> StructuredBlock::getOffsetIntoBlock() const { return m_offset_into_block; };  // owned idx + offset = block idx
+
+// returns size of the entire block (including non-owned cells)
+std::array<UInt, 2> StructuredBlock::getAllBlockSize() const { return m_all_block_size; };
+
+UInt getNumOwnedCells(const StructuredBlock& block, NeighborDirection dir)
+{
+  return block.getOwnedCells().getDimensions()[to_int(dir) % 2];
+}
+
 }
 }

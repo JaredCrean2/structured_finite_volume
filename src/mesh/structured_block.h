@@ -36,22 +36,22 @@ class StructuredBlock
 
     StructuredBlock& operator=(StructuredBlock&& rhs) = default;
 
-    UInt getBlockId() const { return m_block_id;};  // block IDs are global
+    UInt getBlockId() const;// block IDs are global
 
-    BlockType getBlockType() const { return m_block_type; };
+    BlockType getBlockType() const;
 
     // these are the verts of owned cells
     // slightly misleading, because we dont define ownership of verts
-    Range2D getOwnedVerts() const { return m_owned_vert_range; }
+    Range2D getOwnedVerts() const;
 
-    Range2D getOwnedCells() const { return m_owned_cell_range; };
+    Range2D getOwnedCells() const;
 
-    const CoordsHostView& getOwnedVertCoords() const { return m_owned_vert_coords; };
+    const CoordsHostView& getOwnedVertCoords() const;
 
-    std::array<UInt, 2> getOffsetIntoBlock() const { return m_offset_into_block; };  // owned idx + offset = block idx
+    std::array<UInt, 2> getOffsetIntoBlock() const; // owned idx + offset = block idx
 
     // returns size of the entire block (including non-owned cells)
-    std::array<UInt, 2> getAllBlockSize() const { return m_all_block_size; };
+    std::array<UInt, 2> getAllBlockSize() const;
 
   private:
     UInt m_block_id;
@@ -63,10 +63,7 @@ class StructuredBlock
     std::array<UInt, 2> m_all_block_size;
 };
 
-inline UInt getNumOwnedCells(const StructuredBlock& block, NeighborDirection dir)
-{
-  return block.getOwnedCells().getDimensions()[to_int(dir) % 2];
-}
+UInt getNumOwnedCells(const StructuredBlock& block, NeighborDirection dir);
 
 
 }

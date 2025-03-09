@@ -14,58 +14,40 @@ class StructuredMesh
     // creates a mesh with 4 BCs, in the North, East, South, and West direction
     StructuredMesh(const MeshSpec& spec);
 
-    UInt getNumBlocks() const { return m_block_counts[0] + m_block_counts[1]; }
+    UInt getNumBlocks() const;
 
-    UInt getNumRegularBlocks() const { return m_block_counts[0]; }
+    UInt getNumRegularBlocks() const;
 
-    UInt getNumGhostBCBlocks() const { return m_block_counts[1]; }
+    UInt getNumGhostBCBlocks() const;
 
-    const StructuredBlock& getBlock(UInt block) const
-    {
-      return m_blocks.at(block);
-    }
+    const StructuredBlock& getBlock(UInt block) const;
 
-    const StructuredBlock& getRegularBlock(UInt block) const
-    {
-      return m_blocks.at(block);
-    }
+    const StructuredBlock& getRegularBlock(UInt block) const;
 
-    const StructuredBlock& getGhostBCBlock(UInt bc_block) const
-    {
-      return m_blocks.at(getNumRegularBlocks() + bc_block);
-    }    
+    const StructuredBlock& getGhostBCBlock(UInt bc_block) const;  
 
-    UInt getNumBlockInterfaces() const { return m_block_iface_counts[0] + m_block_iface_counts[1]; }
+    UInt getNumBlockInterfaces() const;
 
-    UInt getNumRegularBlockInterfaces() const { return m_block_iface_counts[0]; }
+    UInt getNumRegularBlockInterfaces() const;
 
-    UInt getNumGhostBCBlockInterfaces() const { return m_block_iface_counts[1]; }
+    UInt getNumGhostBCBlockInterfaces() const;
 
-    const StructuredBlockInterface& getBlockInterface(UInt iface) const
-    {
-      return m_block_interfaces.at(iface);
-    }
+    const StructuredBlockInterface& getBlockInterface(UInt iface) const;
 
-    const StructuredBlockInterface& getRegularBlockInterface(UInt iface) const
-    {
-      return m_block_interfaces.at(iface);
-    }
+    const StructuredBlockInterface& getRegularBlockInterface(UInt iface) const;
 
-    const StructuredBlockInterface& getGhostBCBlockInterface(UInt iface) const
-    {
-      return m_block_interfaces.at(getNumRegularBlockInterfaces() + iface);
-    }
+    const StructuredBlockInterface& getGhostBCBlockInterface(UInt iface) const;
 
-    UInt getNumBCs() const { return m_bc_block_ranges.size(); }
+    UInt getNumBCs() const;
 
     // gives the range of ghost blocks that are part of the given BC
-    Range getBCBlockRange(UInt bc) const { return m_bc_block_ranges.at(bc); }
+    Range getBCBlockRange(UInt bc) const;
 
     // gives the range of ghost block interfaces that are part of the BC
     // (ie. one of the blocks in a ghost BC block)
-    Range getBCInterfaceRange(UInt bc) const { return m_bc_iface_ranges.at(bc); }
+    Range getBCInterfaceRange(UInt bc) const;
 
-    std::array<Int, 4> getBlockInterfaces(UInt block) const { return m_block_interface_connectivity.at(block); }
+    std::array<Int, 4> getBlockInterfaces(UInt block) const;
 
   private:
     void createBCGhosts(const MeshSpec& spec);

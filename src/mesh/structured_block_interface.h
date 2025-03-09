@@ -21,33 +21,33 @@ class StructuredBlockInterface
                           const StructuredBlock& blockR,
                           const Range& rangeR);
 
-    UInt getBlockIdL() const { return m_left_block_id; }
+    UInt getBlockIdL() const;
 
-    UInt getBlockIdR() const { return m_right_block_id; }
+    UInt getBlockIdR() const;
 
-    NeighborDirection getNeighborDirectionL() const { return m_dirL; }
+    NeighborDirection getNeighborDirectionL() const;
 
-    NeighborDirection getNeighborDirectionR() const { return m_dirR; }
+    NeighborDirection getNeighborDirectionR() const;
 
-    const std::array<Int, 2> getTransformL() const { return m_transformL; }
+    const std::array<Int, 2> getTransformL() const;
 
-    const std::array<Int, 2> getTransformR() const { return m_transformR; }
+    const std::array<Int, 2> getTransformR() const;
 
-    const Range2D& getBoundaryVertsL() const { return m_boundary_vertsL; }
+    const Range2D& getBoundaryVertsL() const;
 
-    const Range2D& getBoundaryVertsR() const { return m_boundary_vertsR; };
+    const Range2D& getBoundaryVertsR() const;
 
-    const Range2D& getBoundaryCellsL() const { return m_boundary_cellsL; }
+    const Range2D& getBoundaryCellsL() const;
 
-    const Range2D& getBoundaryCellsR() const { return m_boundary_cellsR; };
+    const Range2D& getBoundaryCellsR() const;
 
-    const AdjacentBlockIndexer& getAdjBlockVertIndexerL() const { return m_vert_indexerL; }
+    const AdjacentBlockIndexer& getAdjBlockVertIndexerL() const;
 
-    const AdjacentBlockIndexer& getAdjBlockVertIndexerR() const { return m_vert_indexerR; };
+    const AdjacentBlockIndexer& getAdjBlockVertIndexerR() const;
 
-    const AdjacentBlockIndexer& getAdjBlockCellIndexerL() const { return m_cell_indexerL; }
+    const AdjacentBlockIndexer& getAdjBlockCellIndexerL() const;
 
-    const AdjacentBlockIndexer& getAdjBlockCellIndexerR() const { return m_cell_indexerR; };
+    const AdjacentBlockIndexer& getAdjBlockCellIndexerR() const;
 
   private:
 
