@@ -4,7 +4,7 @@
 #include "project_defs.h"
 #include <iterator>
 #include <limits>
-#include <iostream>
+#include <iosfwd>
 
 namespace structured_fv {
 
@@ -154,11 +154,7 @@ class Range
     UInt m_past_the_end;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const Range& range)
-{
-  os << "[" << *(range.begin()) << ", " << *(range.end()) << ")";
-  return os;
-}
+std::ostream& operator<<(std::ostream& os, const Range& range);
 
 constexpr bool in(const Range& range, UInt val)
 {
@@ -201,11 +197,7 @@ class Range2D
     Range m_yrange;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const Range2D& range)
-{
-  os << range.getXRange() << " x " << range.getYRange();
-  return os;
-}
+std::ostream& operator<<(std::ostream& os, const Range2D& range);
 
 constexpr bool in(const Range2D range, UInt x, UInt y)
 {
