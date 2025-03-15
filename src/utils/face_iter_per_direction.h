@@ -12,12 +12,31 @@ struct YDirTag {};
 class FaceRangePerDirection
 {
   public:
-    FaceRangePerDirection(const Range2D& cell_range) :
-      m_face_range_x(*cell_range.getXRange().begin(), *cell_range.getXRange().end()-1,
-                     *cell_range.getYRange().begin(), *cell_range.getYRange().end()),
-      m_face_range_y(*cell_range.getXRange().begin(), *cell_range.getXRange().end(),
-                     *cell_range.getYRange().begin(), *cell_range.getYRange().end()-1)                     
-    {}
+    // iterates over the faces of the given cell range.
+    // if include_boundary is false, only includes interior faces
+    // if include_boundary is true, include all faces
+    // This requires there to be cells to the left and below the
+    // bottom left cell of the cell_range
+    FaceRangePerDirection(const Range2D& cell_range, bool include_boundary=false)
+    {
+      if (include_boundary)
+      {
+        if (*cell_range.getXRange().begin() == 0 || *cell_range.getYRange().begin() == 0)
+          throw std::runtime_error("cannot iterate over cell faces with boundaries if the first cell has index 0");
+        
+        assert(*cell_range.getYRange().begin() > 0);
+        m_face_range_x = Range2D(*cell_range.getXRange().begin()-1, *cell_range.getXRange().end(),
+                                 *cell_range.getYRange().begin(),   *cell_range.getYRange().end()),
+        m_face_range_y = Range2D(*cell_range.getXRange().begin(),   *cell_range.getXRange().end(),
+                                 *cell_range.getYRange().begin()-1, *cell_range.getYRange().end());
+      } else
+      {
+        m_face_range_x = Range2D(*cell_range.getXRange().begin(), *cell_range.getXRange().end()-1,
+                                 *cell_range.getYRange().begin(), *cell_range.getYRange().end()),
+        m_face_range_y = Range2D(*cell_range.getXRange().begin(), *cell_range.getXRange().end(),
+                                 *cell_range.getYRange().begin(), *cell_range.getYRange().end()-1);
+      }
+    }
 
     Range getXRange(XDirTag) const { return m_face_range_x.getXRange(); }
 

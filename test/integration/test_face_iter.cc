@@ -113,7 +113,6 @@ __attribute((noinline)) void kernel4(const Range2D& cell_range)
         work(face, field1, field2);
       }
   }
-
 }
 
 TEST(FaceIter, Performance)
