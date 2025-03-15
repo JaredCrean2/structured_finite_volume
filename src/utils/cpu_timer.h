@@ -41,7 +41,7 @@ class ScopedCPUTimer
 
   private:
     CPUTimer m_timer;
-    const std::string& m_desc;
+    const std::string m_desc;
     std::ostream& m_os;
 };
 

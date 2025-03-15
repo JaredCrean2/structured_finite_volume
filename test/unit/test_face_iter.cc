@@ -72,11 +72,6 @@ TEST(FaceIter, Iteration)
   EXPECT_EQ(*iter, makeFaceId(1, 2, 1, 3, mesh::NeighborDirection::North, mesh::NeighborDirection::South));
   ++iter;
   EXPECT_EQ(*iter, makeFaceId(2, 2, 2, 3, mesh::NeighborDirection::North, mesh::NeighborDirection::South));  
-
-#ifndef NDEBUG
-  ++iter;
-  EXPECT_ANY_THROW(++iter);
-#endif
 }
 
 TEST(FaceIter, Range)

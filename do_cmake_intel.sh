@@ -14,26 +14,24 @@
 #BUILDTYPE="Release"
 
 # Optimized build
-CXXFLAGS="-Ofast -march=native -mtune=native -ffast-math -Wall -DNDEBUG"
-BUILDTYPE="Release"
+#CXXFLAGS="-Ofast -march=native -mtune=native -ffast-math -Wall -DNDEBUG -diag-disable=10441"
+#BUILDTYPE="Release"
 
 # VTune build
-#CXXFLAGS="-Ofast -march=native -mtune=native -g -Rpass-analysis=loop-vectorize -Rpass=loop-vectorize -Rpass-missed=loop-vectorize -ffast-math -DNDEBUG"
-#BUILDTYPE="ReleaseWithDebInfo"
+CXXFLAGS="-Ofast -march=native -mtune=native -g -Rpass-analysis=loop-vectorize -Rpass=loop-vectorize -Rpass-missed=loop-vectorize -ffast-math -DNDEBUG"
+BUILDTYPE="ReleaseWithDebInfo"
 
 # set PETSC_DIR and PETSC_ARCH to guide which Petsc installation CMake finds
 
 cmake \
 -D CMAKE_INSTALL_PREFIX="$HOME/install/heat_calc" \
--D CMAKE_C_COMPILER=`which clang` \
--D CMAKE_CXX_COMPILER=`which clang++` \
+-D CMAKE_C_COMPILER=`which icx` \
+-D CMAKE_CXX_COMPILER=`which icpx` \
 -D MPI_C_COMPILER=`which mpicc` \
 -D MPI_CXX_COMPILER=`which mpicxx` \
 -D CMAKE_EXPORT_COMPILE_COMMANDS=1 \
 -D CMAKE_BUILD_TYPE=$BUILDTYPE \
 -D CMAKE_CXX_FLAGS="$CXXFLAGS $ASAN_FLAGS" \
--D CMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld" \
--D CMAKE_SHARED_LINKER_FLAGS="-fuse-ld=lld" \
 -D BLAS_ROOT="$HOME/build/OpenBLAS_install/" \
 ..
 
