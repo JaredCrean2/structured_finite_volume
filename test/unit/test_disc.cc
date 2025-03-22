@@ -7,6 +7,7 @@
 #include "disc/vert_field.h"
 #include "mesh/adjacent_block_indexer.h"
 #include "utils/face_iter_per_direction.h"
+#include "utils/neighbor_direction.h"
 
 using namespace structured_fv;
 
@@ -500,4 +501,35 @@ TEST_F(DiscTester, FaceFieldSetField)
         EXPECT_NEAR(north_data(i, j, 1), y0[block_id] + (j-2)*dy[block_id], 1e-13);
       }      
   }
+}
+
+TEST_F(DiscTester, InvVolumeField)
+{
+  std::array<double, 2> dx = {1.0/spec.blocks(0, 0).num_cells_x, 1.0/spec.blocks(1, 0).num_cells_x};
+  std::array<double, 2> dy = {1.0/spec.blocks(0, 0).num_cells_y, 1.0/spec.blocks(1, 0).num_cells_y};  
+  for (UInt block_id=0; block_id < m_disc->getNumRegularBlocks(); ++block_id)
+  {
+    const auto& inv_volumes = m_disc->getInvCellVolumeField()->getData(block_id);
+    const disc::StructuredBlock& block = m_disc->getBlock(block_id);
+    for (UInt i : block.getOwnedCells().getXRange())
+      for (UInt j : block.getOwnedCells().getYRange())
+        EXPECT_NEAR(inv_volumes(i, j, 0), 1.0/(dx[block_id]*dy[block_id]), 1e-13);
+  }
+
+  const disc::StructuredBlockInterface& iface = m_disc->getBlockInterface(0);
+  const auto& block_0_data = m_disc->getInvCellVolumeField()->getData(0);
+  const auto& block_1_data = m_disc->getInvCellVolumeField()->getData(1);
+  for (UInt i : iface.getOwnedBoundaryCellsL().getXRange())
+    for (UInt j : iface.getOwnedBoundaryCellsL().getYRange())
+    {
+      auto [iprime, jprime] = computeIndices(iface.getNeighborDirectionL(), 1, i, j);
+      EXPECT_NEAR(block_0_data(iprime, jprime, 0), 1.0/(dx[1]*dy[1]), 1e-13);
+    }
+
+  for (UInt i : iface.getOwnedBoundaryCellsR().getXRange())
+    for (UInt j : iface.getOwnedBoundaryCellsR().getYRange())
+    {
+      auto [iprime, jprime] = computeIndices(iface.getNeighborDirectionR(), 1, i, j);
+      EXPECT_NEAR(block_1_data(iprime, jprime, 0), 1.0/(dx[0]*dy[0]), 1e-13);
+    }
 }

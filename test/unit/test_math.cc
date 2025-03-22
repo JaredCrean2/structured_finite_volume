@@ -105,3 +105,24 @@ TEST(Math, SmoothAbsDeriv)
   EXPECT_NEAR(smoothAbsDeriv(0.05, delta), 2*0.05/delta, 1e-13);
   EXPECT_NEAR(smoothAbsDeriv(-0.05, delta), -2*0.05/delta, 1e-13);
 }
+
+TEST(Math, QuadArea)
+{
+  std::array<std::array<Real, 2>, 4> coords;
+  coords[0] = {0, 0};
+  coords[1] = {1, 0};
+  coords[2] = {1, 1};
+  coords[3] = {0, 1};
+  EXPECT_EQ(computeQuadArea(coords), 1);
+}
+
+TEST(Math, QuadAreaNegative)
+{
+  std::array<std::array<Real, 2>, 4> coords;
+  coords[0] = {0, 0};
+  coords[1] = {0, 1};
+  coords[2] = {1, 1};
+  coords[3] = {1, 0};
+
+  EXPECT_EQ(computeQuadArea(coords), -1);
+}

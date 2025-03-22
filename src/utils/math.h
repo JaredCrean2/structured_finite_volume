@@ -178,14 +178,14 @@ constexpr Real radiansToDegrees(Real radians)
   return radians * 180/ PI;
 }
 
-constexpr  Real smoothAbs(Real x, Real delta)
+constexpr Real smoothAbs(Real x, Real delta)
 {
   Real val1 = std::abs(x);
   Real val2 = x*x/delta;
   return val1 > delta ? val1 : val2;
 }
 
-constexpr  Real smoothAbsDeriv(Real x, Real delta)
+constexpr Real smoothAbsDeriv(Real x, Real delta)
 {
   double val1 = std::abs(x);
   Real val1_deriv = x > 0 ? 1 : -1;
@@ -194,6 +194,22 @@ constexpr  Real smoothAbsDeriv(Real x, Real delta)
   Real val2_deriv = 2*x/delta;
 
   return val1 > delta ? val1_deriv : val2_deriv;
+}
+
+// coords should be in couter-clockwise order
+constexpr Real computeQuadArea(const std::array<std::array<Real, 2>, 4>& coords)
+{
+  Vec3<Real> a1{0, 0, 0}, a2{0, 0, 0}, b1{0, 0, 0}, b2{0, 0, 0};
+
+  for (int d=0; d < 2; ++d)
+  {
+    a1[d] = coords[1][d] - coords[0][d];
+    a2[d] = coords[3][d] - coords[0][d];
+    b1[d] = coords[3][d] - coords[2][d];
+    b2[d] = coords[1][d] - coords[2][d];
+  }
+
+  return 0.5*(cross(a1, a2)[2] + cross(b1, b2)[2]);
 }
 
 

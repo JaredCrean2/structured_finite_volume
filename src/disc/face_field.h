@@ -4,6 +4,7 @@
 #include "utils/neighbor_direction.h"
 #include "utils/face_iter_per_direction.h"
 #include "utils/project_defs.h"
+#include "utils/traits.h"
 #include "disc/discretization.h"
 #include "disc/vert_field.h"
 
@@ -68,7 +69,7 @@ class FaceField
     // Func is a callable object (Real x, Real y) -> std::array<T, num_vals_per_element>
     // return type can be anything of the correct length that supports operator[]
     // x and y are the centroid of each face
-    template <typename Func>
+    template <typename Func, IsFuncXY_t<Func> = true>
     void set(Func func, bool include_corners=false);
 
   private:
@@ -92,7 +93,7 @@ void FaceField<T>::set(const T& val)
 
 
 template <typename T>
-template <typename Func>
+template <typename Func, IsFuncXY_t<Func>>
 void FaceField<T>::set(Func func, bool include_corners)
 {
   for (UInt block_id=0; block_id < getNumBlocks(); ++block_id)

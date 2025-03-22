@@ -50,9 +50,13 @@ class StructuredDisc
 
     VertexFieldPtr<Real> getCoordField() const { return m_coordField; }
 
+    ElementFieldPtr<Real> getInvCellVolumeField() const { return m_invCellVolumeField; }
+
   private:
 
     VertexFieldPtr<Real> createCoordField();
+
+    ElementFieldPtr<Real> createInvCellVolumeField();
 
     //std::shared_ptr<ElementField<Real>> createNormalField();
 
@@ -62,6 +66,7 @@ class StructuredDisc
     //UInt m_num_ghost_cells;
     VertexFieldPtr<Real> m_coordField;
     ElementFieldPtr<Real> m_normalField;
+    ElementFieldPtr<Real> m_invCellVolumeField;
 
 };
 

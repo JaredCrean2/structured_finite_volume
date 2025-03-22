@@ -3,6 +3,7 @@
 
 #include "discretization.h"
 #include "vert_field.h"
+#include "utils/traits.h"
 
 namespace structured_fv {
 namespace disc {
@@ -45,8 +46,9 @@ class ElementField
 
     // Func is a callable object (Real x, Real y) -> std::array<T, num_vals_per_element>
     // return type can be anything of the correct length that supports operator[]
-    template <typename Func>
+    template <typename Func, IsFuncXY_t<Func> = true>
     void set(Func func);
+
 
     // overwrite ghost values with the owner values
     void updateGhostValues();
@@ -75,7 +77,7 @@ void ElementField<T>::set(const T& val)
 // Func is a callable object (Real x, Real y) -> std::array<T, num_vals_per_element>
 // return type can be anything of the correct length that supports operator[]
 template <typename T>
-template <typename Func>
+template <typename Func, IsFuncXY_t<Func>>
 void ElementField<T>::set(Func func)
 {
   for (UInt b=0; b < m_disc.getNumBlocks(); ++b)
