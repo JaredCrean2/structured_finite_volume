@@ -25,6 +25,12 @@ class VertexField;
 template <typename T>
 using VertexFieldPtr = std::shared_ptr<VertexField<T>>;
 
+template <typename T>
+class FaceField;
+
+template <typename T>
+using FaceFieldPtr = std::shared_ptr<FaceField<T>>;
+
 class StructuredDisc
 {
   public:
@@ -50,7 +56,10 @@ class StructuredDisc
 
     VertexFieldPtr<Real> getCoordField() const { return m_coordField; }
 
+    FaceFieldPtr<Real> getNormalField() const { return m_normalField; }
+
     ElementFieldPtr<Real> getInvCellVolumeField() const { return m_invCellVolumeField; }
+
 
   private:
 
@@ -58,14 +67,14 @@ class StructuredDisc
 
     ElementFieldPtr<Real> createInvCellVolumeField();
 
-    //std::shared_ptr<ElementField<Real>> createNormalField();
+    FaceFieldPtr<Real> createFaceNormalField();
 
     std::shared_ptr<mesh::StructuredMesh> m_mesh;
     std::vector<StructuredBlock> m_blocks;
     std::vector<StructuredBlockInterface> m_ifaces;
     //UInt m_num_ghost_cells;
     VertexFieldPtr<Real> m_coordField;
-    ElementFieldPtr<Real> m_normalField;
+    FaceFieldPtr<Real> m_normalField;
     ElementFieldPtr<Real> m_invCellVolumeField;
 
 };

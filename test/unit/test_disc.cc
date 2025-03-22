@@ -506,7 +506,7 @@ TEST_F(DiscTester, FaceFieldSetField)
 TEST_F(DiscTester, InvVolumeField)
 {
   std::array<double, 2> dx = {1.0/spec.blocks(0, 0).num_cells_x, 1.0/spec.blocks(1, 0).num_cells_x};
-  std::array<double, 2> dy = {1.0/spec.blocks(0, 0).num_cells_y, 1.0/spec.blocks(1, 0).num_cells_y};  
+  std::array<double, 2> dy = {1.0/spec.blocks(0, 0).num_cells_y, 1.0/spec.blocks(1, 0).num_cells_y};
   for (UInt block_id=0; block_id < m_disc->getNumRegularBlocks(); ++block_id)
   {
     const auto& inv_volumes = m_disc->getInvCellVolumeField()->getData(block_id);
@@ -532,4 +532,30 @@ TEST_F(DiscTester, InvVolumeField)
       auto [iprime, jprime] = computeIndices(iface.getNeighborDirectionR(), 1, i, j);
       EXPECT_NEAR(block_1_data(iprime, jprime, 0), 1.0/(dx[0]*dy[0]), 1e-13);
     }
+}
+
+TEST_F(DiscTester, NormalField)
+{
+
+std::array<double, 2> dx = {1.0/spec.blocks(0, 0).num_cells_x, 1.0/spec.blocks(1, 0).num_cells_x};
+  std::array<double, 2> dy = {1.0/spec.blocks(0, 0).num_cells_y, 1.0/spec.blocks(1, 0).num_cells_y};
+  for (UInt block_id=0; block_id < m_disc->getNumRegularBlocks(); ++block_id)
+  {
+    const disc::StructuredBlock& block = m_disc->getBlock(block_id);
+    const auto& east_normals = m_disc->getNormalField()->getData(block_id, NeighborDirection::East);
+    const auto& north_normals = m_disc->getNormalField()->getData(block_id, NeighborDirection::North);
+    for (UInt i : block.getOwnedFaces().getXRange(XDirTag()))
+      for (UInt j : block.getOwnedFaces().getYRange(XDirTag()))
+      {
+        EXPECT_NEAR(east_normals(i, j, 0), 1*dy[block_id], 1e-13);
+        EXPECT_NEAR(east_normals(i, j, 1), 0, 1e-13);
+      }
+
+    for (UInt i : block.getOwnedFaces().getXRange(YDirTag()))
+      for (UInt j : block.getOwnedFaces().getYRange(YDirTag()))
+      {
+        EXPECT_NEAR(north_normals(i, j, 0), 0, 1e-13);
+        EXPECT_NEAR(north_normals(i, j, 1), 1*dx[block_id], 1e-13);
+      }      
+  }
 }

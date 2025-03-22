@@ -1,8 +1,12 @@
 #include "discretization.h"
 #include "disc/disc_block.h"
+#include "disc/face_field.h"
 #include "disc/vert_field.h"
 #include "disc/elem_field.h"
+#include "utils/face_iter_per_direction.h"
 #include "utils/math.h"
+
+#include <iostream>  //TODO: DEBUGGING
 
 namespace structured_fv {
 namespace disc {
@@ -23,8 +27,8 @@ StructuredDisc::StructuredDisc(std::shared_ptr<mesh::StructuredMesh> mesh, UInt 
   }
 
   m_coordField = createCoordField();
+  m_normalField = createFaceNormalField();
   m_invCellVolumeField = createInvCellVolumeField();
-  //m_normalField = createNormalField();
 }
 
 
@@ -90,6 +94,64 @@ ElementFieldPtr<Real> StructuredDisc::createInvCellVolumeField()
   inv_cell_volume_field->updateGhostValues();
 
   return inv_cell_volume_field;
+}
+
+FaceFieldPtr<Real> StructuredDisc::createFaceNormalField()
+{
+  auto normal_field = std::make_shared<FaceField<Real>>(*this, 2);
+  normal_field->set(0);
+
+  constexpr  Vec3<Real> unit_z{0, 0, 1};
+  for (UInt block_id=0; block_id < getNumBlocks(); ++block_id)
+  {
+    const StructuredBlock& block = getBlock(block_id);
+    const auto& coords = getCoordField()->getData(block_id);
+    const auto& east_normals = normal_field->getData(block_id, NeighborDirection::East);
+    const auto& north_normals = normal_field->getData(block_id, NeighborDirection::North);
+
+    auto compute_normals = [&](UInt i, UInt j)
+    {
+      Vec3<Real> bottom_edge{coords(i+1, j, 0) - coords(i, j, 0),
+                              coords(i+1, j, 1) - coords(i, j, 1),
+                              0};
+
+      Vec3<Real> right_edge{coords(i+1, j+1, 0) - coords(i+1, j, 0),
+                            coords(i+1, j+1, 1) - coords(i+1, j, 1),
+                            0};
+
+      Vec3<Real> top_edge{coords(i, j+1, 0) - coords(i+1, j+1, 0),
+                          coords(i, j+1, 1) - coords(i+1, j+1, 1),
+                          0};
+
+      Vec3<Real> left_edge{coords(i, j, 0) - coords(i, j+1, 0),
+                           coords(i, j, 1) - coords(i, j+1, 1),
+                           0};
+      
+      // normal is outward from the left/bottom cell
+      Vec3<Real> bottom_normal = cross(unit_z, bottom_edge);
+      Vec3<Real> right_normal  = cross(right_edge, unit_z);
+      Vec3<Real> top_normal    = cross(top_edge, unit_z);
+      Vec3<Real> left_normal   = cross(unit_z, left_edge);
+
+      for (UInt d=0; d < 2; ++d)
+      {
+        north_normals(i,   j,   d) = bottom_normal[d];
+        east_normals( i+1, j,   d) = right_normal[d];
+        north_normals(i,   j+1, d) = top_normal[d];
+        east_normals( i,   j,   d) = left_normal[d];
+      }
+    };
+
+    for (UInt i : block.getOwnedAndGhostCells().getXRange())
+      for (UInt j : block.getOwnedCells().getYRange())
+        compute_normals(i, j);
+
+    for (UInt i : block.getOwnedCells().getXRange())
+      for (UInt j : block.getOwnedAndGhostCells().getYRange())
+        compute_normals(i, j);     
+  }
+
+  return normal_field;
 }
 
 
