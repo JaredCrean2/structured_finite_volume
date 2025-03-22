@@ -1,6 +1,15 @@
 #include "neighbor_direction.h"
+#include <iostream>
 
 namespace structured_fv {
+
+
+std::ostream& operator<<(std::ostream& os, NeighborDirection dir)
+{
+  std::array<std::string, 4> names{"North", "East", "South", "West"};
+  os << names[to_int(dir)];
+  return os;
+}
 
 UInt getConstantIndexAlongBoundary(const Range2D& block_range, NeighborDirection dir)
 {

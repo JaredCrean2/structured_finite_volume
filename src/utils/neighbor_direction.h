@@ -3,6 +3,7 @@
 
 #include "utils/project_defs.h"
 #include "utils/range.h"
+#include <iosfwd>
 
 namespace structured_fv {
 
@@ -32,12 +33,7 @@ constexpr int to_int(NeighborDirection dir)
   return static_cast<int>(dir);
 }
 
-inline std::ostream& operator<<(std::ostream& os, NeighborDirection dir)
-{
-  std::array<std::string, 4> names{"North", "East", "South", "West"};
-  os << names[to_int(dir)];
-  return os;
-}
+std::ostream& operator<<(std::ostream& os, NeighborDirection dir);
 
 // given a direction for a block with rotation=0, computes the direction
 // of the same side (in the global coordinate system) of the block

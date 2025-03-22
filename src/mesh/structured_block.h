@@ -4,10 +4,7 @@
 #include "utils/neighbor_direction.h"
 #include "utils/project_defs.h"
 #include "utils/range.h"
-//#include <iostream>
 #include "block_spec.h"
-#include <stdexcept>
-#include <utility>
 
 namespace structured_fv {
 namespace mesh {
@@ -24,6 +21,7 @@ class StructuredBlock
   public:
     //TODO: the datatype should be const
     using CoordsHostView = Kokkos::View<Real**[2], HostMemorySpace>;
+    
     StructuredBlock(const MeshBlockSpec& spec, UInt block_id, BlockType block_type);
 
     StructuredBlock(Kokkos::View<Real**[2], HostMemorySpace> ghost_coords, UInt block_id);

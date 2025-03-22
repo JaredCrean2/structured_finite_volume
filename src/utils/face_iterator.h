@@ -6,13 +6,8 @@
 #include "bitwise.h"
 #include <iosfwd>
 
-#include <iostream>
-#include <bitset>
 
 namespace structured_fv {
-
-using BitsetU = std::bitset<8*sizeof(UInt)>;  //TODO: DEBUGGING
-
 
 struct FaceId
 {
