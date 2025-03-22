@@ -1,7 +1,6 @@
 #include "neighbor_direction.h"
 
 namespace structured_fv {
-namespace mesh {
 
 UInt getConstantIndexAlongBoundary(const Range2D& block_range, NeighborDirection dir)
 {
@@ -36,5 +35,5 @@ Range2D getBoundaryRange(const Range2D& block_range, NeighborDirection dir, cons
     return Range2D(constant_index, constant_index+1, *boundary_subset.begin(), *boundary_subset.end());
   }
 }
-}
+
 }

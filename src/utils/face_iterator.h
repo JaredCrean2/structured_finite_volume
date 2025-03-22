@@ -1,7 +1,7 @@
 #ifndef STRUCTURED_FINITE_VOLUME_UTILS_FACE_ITER_H
 #define STRUCTURED_FINITE_VOLUME_UTILS_FACE_ITER_H
 
-#include "mesh/neighbor_direction.h"
+#include "neighbor_direction.h"
 #include "range.h"
 #include "bitwise.h"
 #include <iosfwd>
@@ -19,7 +19,7 @@ struct FaceId
   constexpr FaceId() = default;
 
   constexpr FaceId(UInt cell_i_left_, UInt cell_j_left_, UInt cell_i_right_, UInt cell_j_right_,
-                   mesh::NeighborDirection dirL_, mesh::NeighborDirection dirR_):
+                   NeighborDirection dirL_, NeighborDirection dirR_):
     cell_i_left(cell_i_left_),
     cell_j_left(cell_j_left_),
     cell_i_right(cell_i_right_),
@@ -32,8 +32,8 @@ struct FaceId
   UInt cell_j_left = 0;
   UInt cell_i_right = 0;
   UInt cell_j_right = 0;
-  mesh::NeighborDirection dirL = mesh::NeighborDirection::North;
-  mesh::NeighborDirection dirR = mesh::NeighborDirection::North;
+  NeighborDirection dirL = NeighborDirection::North;
+  NeighborDirection dirR = NeighborDirection::North;
 };
 
 constexpr bool operator==(const FaceId& lhs, const FaceId& rhs)
@@ -116,11 +116,11 @@ class FaceIter
       if (m_is_x_direction)
       {
         return {m_cell_i, m_cell_j, m_cell_i+1, m_cell_j,
-                mesh::NeighborDirection::East, mesh::NeighborDirection::West};
+                NeighborDirection::East, NeighborDirection::West};
       } else
       {
         return {m_cell_i, m_cell_j, m_cell_i, m_cell_j+1,
-                mesh::NeighborDirection::North, mesh::NeighborDirection::South};
+                NeighborDirection::North, NeighborDirection::South};
       }    
     }  
 

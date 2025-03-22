@@ -2,6 +2,7 @@
 #define STRUCTURED_FINITE_VOLUME_DISC_INTERFACE_H
 
 #include "utils/project_defs.h"
+#include "utils/neighbor_direction.h"
 #include "mesh/structured_block_interface.h"
 #include "disc_block.h"
 
@@ -27,9 +28,9 @@ class StructuredBlockInterface
 
     const Range2D& getOwnedBoundaryCellsR() const;
 
-    mesh::NeighborDirection getNeighborDirectionL() const;
+    NeighborDirection getNeighborDirectionL() const;
 
-    mesh::NeighborDirection getNeighborDirectionR() const;
+    NeighborDirection getNeighborDirectionR() const;
 
     const mesh::AdjacentBlockIndexer& getAdjBlockVertIndexerL() const;
 

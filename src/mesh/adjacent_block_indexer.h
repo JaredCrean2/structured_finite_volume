@@ -2,7 +2,7 @@
 #define STRUCTURED_FINITE_VOLUME_MESH_ADJACENT_BLOCK_INDEXER_H
 
 #include "utils/project_defs.h"
-#include "neighbor_direction.h"
+#include "utils/neighbor_direction.h"
 
 namespace structured_fv {
 namespace mesh {

@@ -455,8 +455,8 @@ TEST_F(DiscTester, FaceFieldSetConstant)
   {
     const disc::StructuredBlock& block = m_disc->getBlock(block_id);
     FaceRangePerDirection faces = block.getOwnedAndGhostFacesWithCorners();
-    auto east_data = field.getData(block_id, mesh::NeighborDirection::East);
-    auto north_data = field.getData(block_id, mesh::NeighborDirection::North);
+    auto east_data = field.getData(block_id, NeighborDirection::East);
+    auto north_data = field.getData(block_id, NeighborDirection::North);
 
     for (UInt i : faces.getXRange(XDirTag()))
       for (UInt j : faces.getYRange(XDirTag()))
@@ -483,8 +483,8 @@ TEST_F(DiscTester, FaceFieldSetField)
   {
     const disc::StructuredBlock& block = m_disc->getBlock(block_id);
     FaceRangePerDirection faces = block.getOwnedFaces();
-    auto east_data = field.getData(block_id, mesh::NeighborDirection::East);
-    auto north_data = field.getData(block_id, mesh::NeighborDirection::North);
+    auto east_data = field.getData(block_id, NeighborDirection::East);
+    auto north_data = field.getData(block_id, NeighborDirection::North);
 
     for (UInt i : faces.getXRange(XDirTag()))
       for (UInt j : faces.getYRange(XDirTag()))

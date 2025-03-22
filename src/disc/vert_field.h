@@ -100,7 +100,7 @@ void VertexField<T>::updateGhostValues()
   {
     const StructuredBlockInterface& iface = m_disc.getBlockInterface(i);
     const StructuredBlock& blockL = m_disc.getBlock(iface.getBlockIdL());
-    int num_ghost_cells = blockL.getNumGhostCellsPerDirection()[mesh::to_int(iface.getNeighborDirectionL())];
+    int num_ghost_cells = blockL.getNumGhostCellsPerDirection()[to_int(iface.getNeighborDirectionL())];
     const auto& indexerL = iface.getAdjBlockVertIndexerL();
     const auto& indexerR = iface.getAdjBlockVertIndexerR();
     auto fieldL = getData(iface.getBlockIdL());
@@ -110,9 +110,9 @@ void VertexField<T>::updateGhostValues()
       for (UInt j : iface.getOwnedBoundaryVertsL().getYRange())
         for (int v=1; v <= num_ghost_cells; ++v)
         {
-          auto [iprime, jprime] = mesh::computeIndices(iface.getNeighborDirectionL(), v, i, j);
+          auto [iprime, jprime] = computeIndices(iface.getNeighborDirectionL(), v, i, j);
           auto [ineighbor, jneighbor] = indexerL(iprime, jprime);
-          auto [ineighbor2, jneighbor2] = mesh::computeIndices(iface.getNeighborDirectionR(), -1, ineighbor, jneighbor);
+          auto [ineighbor2, jneighbor2] = computeIndices(iface.getNeighborDirectionR(), -1, ineighbor, jneighbor);
 
           for (UInt d=0; d < fieldL.extent(2); ++d)
           {
@@ -126,9 +126,9 @@ void VertexField<T>::updateGhostValues()
       for (UInt j : iface.getOwnedBoundaryVertsR().getYRange())
         for (int v=1; v <= num_ghost_cells; ++v)
         {
-          auto [iprime, jprime] = mesh::computeIndices(iface.getNeighborDirectionR(), v, i, j);
+          auto [iprime, jprime] = computeIndices(iface.getNeighborDirectionR(), v, i, j);
           auto [ineighbor, jneighbor] = indexerR(iprime, jprime);
-          auto [ineighbor2, jneighbor2] = mesh::computeIndices(iface.getNeighborDirectionL(), -1, ineighbor, jneighbor);
+          auto [ineighbor2, jneighbor2] = computeIndices(iface.getNeighborDirectionL(), -1, ineighbor, jneighbor);
 
           for (UInt d=0; d < fieldL.extent(2); ++d)
           {

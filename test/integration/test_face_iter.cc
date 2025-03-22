@@ -1,7 +1,6 @@
 #include "gtest/gtest.h"
-#include <bitset>
 
-#include "mesh/neighbor_direction.h"
+#include "utils/neighbor_direction.h"
 #include "utils/face_iter_per_direction.h"
 #include "utils/project_defs.h"
 #include "utils/face_iterator.h"
@@ -56,14 +55,14 @@ __attribute((noinline)) void kernel(const Range2D& cell_range)
     for (UInt i : Range(*cell_range.getXRange().begin(), *cell_range.getXRange().end()-1))
       for (UInt j : cell_range.getYRange())
       {
-        FaceId face{i, j, i+1, j, mesh::NeighborDirection::East, mesh::NeighborDirection::West};
+        FaceId face{i, j, i+1, j, NeighborDirection::East, NeighborDirection::West};
         work(face, field1, field2);
       }
 
     for (UInt i : cell_range.getXRange())
       for (UInt j : Range(*cell_range.getYRange().begin(), *cell_range.getYRange().end()-1))
       {
-        FaceId face{i, j, i, j+1, mesh::NeighborDirection::North, mesh::NeighborDirection::South};
+        FaceId face{i, j, i, j+1, NeighborDirection::North, NeighborDirection::South};
         work(face, field1, field2);
       }
   }

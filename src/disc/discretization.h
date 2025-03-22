@@ -4,7 +4,7 @@
 //#include "mesh/structured_block.h"
 //#include "mesh/structured_block_interface.h"
 //#include "mesh/structured_mesh.h"
-#include "mesh/neighbor_direction.h"
+#include "utils/neighbor_direction.h"
 #include "utils/project_defs.h"
 #include "disc_block.h"
 #include "disc_interface.h"

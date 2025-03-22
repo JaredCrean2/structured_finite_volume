@@ -3,6 +3,7 @@
 
 #include "range.h"
 #include "face_iterator.h"
+#include "neighbor_direction.h"
 
 namespace structured_fv {
 
@@ -48,7 +49,7 @@ class FaceRangePerDirection
     {
       assert(cell_i > 0);
       return {cell_i-1, cell_j, cell_i, cell_j,
-              mesh::NeighborDirection::East, mesh::NeighborDirection::West};
+              NeighborDirection::East, NeighborDirection::West};
     }
 
     Range2D getRange(YDirTag) const { return m_face_range_y; }
@@ -61,7 +62,7 @@ class FaceRangePerDirection
     {
       assert(cell_j > 0);
       return {cell_i, cell_j-1, cell_i, cell_j,
-              mesh::NeighborDirection::North, mesh::NeighborDirection::South};
+              NeighborDirection::North, NeighborDirection::South};
     }    
 
   private:

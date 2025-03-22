@@ -40,8 +40,8 @@ TEST_F(DiscIfaceTester, RegularInterface)
   EXPECT_EQ(iface.getOwnedBoundaryVertsR(), Range2D(2, 7, 7, 8));
   EXPECT_EQ(iface.getOwnedBoundaryCellsL(), Range2D(4, 5, 2, 6));
   EXPECT_EQ(iface.getOwnedBoundaryCellsR(), Range2D(2, 6, 6, 7));
-  EXPECT_EQ(iface.getNeighborDirectionL(), mesh::NeighborDirection::East);
-  EXPECT_EQ(iface.getNeighborDirectionR(), mesh::NeighborDirection::North);
+  EXPECT_EQ(iface.getNeighborDirectionL(), NeighborDirection::East);
+  EXPECT_EQ(iface.getNeighborDirectionR(), NeighborDirection::North);
 
   {
     UInt i_corner = *iface.getOwnedBoundaryVertsL().getXRange().begin();
@@ -89,8 +89,8 @@ TEST_F(DiscIfaceTester, GhostInterface)
   EXPECT_EQ(iface.getOwnedBoundaryVertsR(), Range2D(0, 4, 2, 3));  
   EXPECT_EQ(iface.getOwnedBoundaryCellsL(), Range2D(2, 5, 2, 3));
   EXPECT_EQ(iface.getOwnedBoundaryCellsR(), Range2D(0, 3, 1, 2));
-  EXPECT_EQ(iface.getNeighborDirectionL(), mesh::NeighborDirection::South);
-  EXPECT_EQ(iface.getNeighborDirectionR(), mesh::NeighborDirection::North);
+  EXPECT_EQ(iface.getNeighborDirectionL(), NeighborDirection::South);
+  EXPECT_EQ(iface.getNeighborDirectionR(), NeighborDirection::North);
 
   {
     UInt i_corner = *iface.getOwnedBoundaryVertsL().getXRange().begin();

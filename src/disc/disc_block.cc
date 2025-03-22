@@ -22,8 +22,8 @@ const std::array<UInt, 4> StructuredBlock::getNumGhostCellsPerDirection() const 
 
 Range2D StructuredBlock::getOwnedVerts() const
 {
-  UInt xoffset = m_num_ghost_cells_per_direction[mesh::to_int(mesh::NeighborDirection::West)];
-  UInt yoffset = m_num_ghost_cells_per_direction[mesh::to_int(mesh::NeighborDirection::South)];
+  UInt xoffset = m_num_ghost_cells_per_direction[to_int(NeighborDirection::West)];
+  UInt yoffset = m_num_ghost_cells_per_direction[to_int(NeighborDirection::South)];
   Range2D mesh_range = m_mesh_block.getOwnedVerts();
   return Range2D(*mesh_range.getXRange().begin() + xoffset,
                   *mesh_range.getXRange().end()   + xoffset,
@@ -33,8 +33,8 @@ Range2D StructuredBlock::getOwnedVerts() const
 
 Range2D StructuredBlock::getOwnedCells() const
 {
-  UInt xoffset = m_num_ghost_cells_per_direction[mesh::to_int(mesh::NeighborDirection::West)];
-  UInt yoffset = m_num_ghost_cells_per_direction[mesh::to_int(mesh::NeighborDirection::South)];
+  UInt xoffset = m_num_ghost_cells_per_direction[to_int(NeighborDirection::West)];
+  UInt yoffset = m_num_ghost_cells_per_direction[to_int(NeighborDirection::South)];
   Range2D mesh_range = m_mesh_block.getOwnedCells();
   return Range2D(*mesh_range.getXRange().begin() + xoffset,
                   *mesh_range.getXRange().end()   + xoffset,
@@ -44,10 +44,10 @@ Range2D StructuredBlock::getOwnedCells() const
 
 Range2D StructuredBlock::getOwnedAndGhostVerts() const
 {
-  UInt extra_x_verts = m_num_ghost_cells_per_direction[mesh::to_int(mesh::NeighborDirection::West)] +
-                        m_num_ghost_cells_per_direction[mesh::to_int(mesh::NeighborDirection::East)];
-  UInt extra_y_verts = m_num_ghost_cells_per_direction[mesh::to_int(mesh::NeighborDirection::South)] +
-                        m_num_ghost_cells_per_direction[mesh::to_int(mesh::NeighborDirection::North)];
+  UInt extra_x_verts = m_num_ghost_cells_per_direction[to_int(NeighborDirection::West)] +
+                        m_num_ghost_cells_per_direction[to_int(NeighborDirection::East)];
+  UInt extra_y_verts = m_num_ghost_cells_per_direction[to_int(NeighborDirection::South)] +
+                        m_num_ghost_cells_per_direction[to_int(NeighborDirection::North)];
   Range2D mesh_range = m_mesh_block.getOwnedVerts();
   return Range2D(0, mesh_range.getXRange().size() + extra_x_verts,
                   0, mesh_range.getYRange().size() + extra_y_verts);
@@ -55,10 +55,10 @@ Range2D StructuredBlock::getOwnedAndGhostVerts() const
 
 Range2D StructuredBlock::getOwnedAndGhostCells() const
 {
-  UInt extra_x_cells = m_num_ghost_cells_per_direction[mesh::to_int(mesh::NeighborDirection::West)] +
-                        m_num_ghost_cells_per_direction[mesh::to_int(mesh::NeighborDirection::East)];
-  UInt extra_y_cells = m_num_ghost_cells_per_direction[mesh::to_int(mesh::NeighborDirection::South)] +
-                        m_num_ghost_cells_per_direction[mesh::to_int(mesh::NeighborDirection::North)];
+  UInt extra_x_cells = m_num_ghost_cells_per_direction[to_int(NeighborDirection::West)] +
+                        m_num_ghost_cells_per_direction[to_int(NeighborDirection::East)];
+  UInt extra_y_cells = m_num_ghost_cells_per_direction[to_int(NeighborDirection::South)] +
+                        m_num_ghost_cells_per_direction[to_int(NeighborDirection::North)];
   Range2D mesh_range = m_mesh_block.getOwnedCells();
   return Range2D(0, mesh_range.getXRange().size() + extra_x_cells,
                   0, mesh_range.getYRange().size() + extra_y_cells);
@@ -93,16 +93,16 @@ FaceRangePerDirection StructuredBlock::getOwnedAndGhostFacesWithCorners(bool inc
 
 std::pair<UInt, UInt> StructuredBlock::meshVertToBlockVert(UInt i, UInt j) const
 {
-  UInt xoffset = m_num_ghost_cells_per_direction[mesh::to_int(mesh::NeighborDirection::West)];
-  UInt yoffset = m_num_ghost_cells_per_direction[mesh::to_int(mesh::NeighborDirection::South)];
+  UInt xoffset = m_num_ghost_cells_per_direction[to_int(NeighborDirection::West)];
+  UInt yoffset = m_num_ghost_cells_per_direction[to_int(NeighborDirection::South)];
   return {i + xoffset, j + yoffset};
 }
 
 std::pair<UInt, UInt> StructuredBlock::blockVertToMeshVert(UInt i, UInt j) const
 {
   assert(in(getOwnedVerts(), i, j));
-  UInt xoffset = m_num_ghost_cells_per_direction[mesh::to_int(mesh::NeighborDirection::West)];
-  UInt yoffset = m_num_ghost_cells_per_direction[mesh::to_int(mesh::NeighborDirection::South)];      
+  UInt xoffset = m_num_ghost_cells_per_direction[to_int(NeighborDirection::West)];
+  UInt yoffset = m_num_ghost_cells_per_direction[to_int(NeighborDirection::South)];      
   return {i - xoffset, j - yoffset};
 }
 
@@ -119,10 +119,10 @@ std::array<UInt, 4> StructuredBlock::computeNumGhostsPerDirection(const mesh::St
       const mesh::StructuredBlock& blockL = mesh.getBlock(iface.getBlockIdL());
       const mesh::StructuredBlock& blockR = mesh.getBlock(iface.getBlockIdR());
 
-      if (blockL.getOwnedCells().getDimensions()[mesh::to_int(iface.getNeighborDirectionL()) % 2] < nghost)
+      if (blockL.getOwnedCells().getDimensions()[to_int(iface.getNeighborDirectionL()) % 2] < nghost)
         throw std::runtime_error("block is too small for given number of ghosts");
 
-      if (blockR.getOwnedCells().getDimensions()[mesh::to_int(iface.getNeighborDirectionR()) % 2] < nghost)
+      if (blockR.getOwnedCells().getDimensions()[to_int(iface.getNeighborDirectionR()) % 2] < nghost)
         throw std::runtime_error("block is too small for given number of ghosts");
     } else
     {

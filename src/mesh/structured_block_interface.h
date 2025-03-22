@@ -7,6 +7,7 @@
 namespace structured_fv {
 namespace mesh {
 
+class StructuredBlock;
 
 class StructuredBlockInterface
 {

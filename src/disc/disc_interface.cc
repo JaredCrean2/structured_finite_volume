@@ -29,8 +29,8 @@ StructuredBlockInterface::StructuredBlockInterface(const StructuredBlock& blockL
   std::array<UInt, 2> other_block_min_cellL = mesh_iface.getAdjBlockCellIndexerL().getRightBlockMinEntity();
   std::array<UInt, 2> other_block_min_cellR = mesh_iface.getAdjBlockCellIndexerR().getRightBlockMinEntity();
 
-  std::array<Int, 2> offset_directions{to_int(mesh::NeighborDirection::West),
-                                        to_int(mesh::NeighborDirection::South)};
+  std::array<Int, 2> offset_directions{to_int(NeighborDirection::West),
+                                        to_int(NeighborDirection::South)};
   for (int i=0; i < 2; ++i)
   {
     Int dir = offset_directions[i];
@@ -100,9 +100,9 @@ const Range2D& StructuredBlockInterface::getOwnedBoundaryCellsL() const { return
 
 const Range2D& StructuredBlockInterface::getOwnedBoundaryCellsR() const { return m_owned_boundary_cellsR; }
 
-mesh::NeighborDirection StructuredBlockInterface::getNeighborDirectionL() const { return m_mesh_iface.getNeighborDirectionL(); }
+NeighborDirection StructuredBlockInterface::getNeighborDirectionL() const { return m_mesh_iface.getNeighborDirectionL(); }
 
-mesh::NeighborDirection StructuredBlockInterface::getNeighborDirectionR() const { return m_mesh_iface.getNeighborDirectionR(); }
+NeighborDirection StructuredBlockInterface::getNeighborDirectionR() const { return m_mesh_iface.getNeighborDirectionR(); }
 
 const mesh::AdjacentBlockIndexer& StructuredBlockInterface::getAdjBlockVertIndexerL() const { return m_vert_indexerL; }
 

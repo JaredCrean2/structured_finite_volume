@@ -1,13 +1,11 @@
-#ifndef STRUCTURED_FINITE_VOLUME_MESH_NEIGHBOR_DIRECTION_H
-#define STRUCTURED_FINITE_VOLUME_MESH_NEIGHBOR_DIRECTION_H
+#ifndef STRUCTURED_FINITE_VOLUME_NEIGHBOR_DIRECTION_H
+#define STRUCTURED_FINITE_VOLUME_NEIGHBOR_DIRECTION_H
 
 #include "utils/project_defs.h"
 #include "utils/range.h"
 
 namespace structured_fv {
-namespace mesh {
 
-class StructuredBlock;
 
 template <typename T>
 constexpr Int sgn(T val)
@@ -128,7 +126,6 @@ inline UInt getMinEntityOnBoundary(NeighborDirection dirL, const std::array<Int,
   return is_reversed ? rangeR(rangeR.size()-1) : rangeR(0);                  
 }
 
-}
 }
 
 #endif

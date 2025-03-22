@@ -1,7 +1,7 @@
 #ifndef STRUCTURED_FINITE_VOLUME_DISC_FACE_FIELD_H
 #define STRUCTURED_FINITE_VOLUME_DISC_FACE_FIELD_H
 
-#include "mesh/neighbor_direction.h"
+#include "utils/neighbor_direction.h"
 #include "utils/face_iter_per_direction.h"
 #include "utils/project_defs.h"
 #include "disc/discretization.h"
@@ -26,10 +26,10 @@ class FaceField
         const StructuredBlock& block = disc.getBlock(i);
         FaceRangePerDirection faces = block.getOwnedAndGhostFacesWithCorners();
 
-        m_data[getDirection(mesh::NeighborDirection::East)].emplace_back("field_data",
+        m_data[getDirection(NeighborDirection::East)].emplace_back("field_data",
           faces.getXRange(XDirTag()).size(), faces.getYRange(XDirTag()).size(), nvals_per_element);
 
-        m_data[getDirection(mesh::NeighborDirection::North)].emplace_back("field_data",
+        m_data[getDirection(NeighborDirection::North)].emplace_back("field_data",
           faces.getXRange(YDirTag()).size(), faces.getYRange(YDirTag()).size(), nvals_per_element);
       }
     }
@@ -42,23 +42,23 @@ class FaceField
 
     // if dir == North or South, returns the Y direction faces (parallel to x axis)
     // if dir == East or West, returns the X direction faces (parallel to y axis)
-    FieldData& getData(UInt block, mesh::NeighborDirection dir)
+    FieldData& getData(UInt block, NeighborDirection dir)
     {
       return m_data[getDirection(dir)][block];
     }
 
-    const ConstFieldData& getData(UInt block, mesh::NeighborDirection dir) const
+    const ConstFieldData& getData(UInt block, NeighborDirection dir) const
     {
       return m_data[getDirection(dir)][block];
     }
 
-    T& operator()(UInt block, mesh::NeighborDirection dir, UInt i, UInt j, UInt v)
+    T& operator()(UInt block, NeighborDirection dir, UInt i, UInt j, UInt v)
     {
 
       return m_data[getDirection(dir)][block](i, j, v);
     }      
 
-    const T& operator()(UInt block, mesh::NeighborDirection dir, UInt i, UInt j, UInt v) const
+    const T& operator()(UInt block, NeighborDirection dir, UInt i, UInt j, UInt v) const
     { 
       return m_data[getDirection(dir)][block](i, j, v);
     }
@@ -72,9 +72,9 @@ class FaceField
     void set(Func func, bool include_corners=false);
 
   private:
-    static constexpr UInt getDirection(mesh::NeighborDirection dir)
+    static constexpr UInt getDirection(NeighborDirection dir)
     {
-      return mesh::to_int(dir) % 2;
+      return to_int(dir) % 2;
     }
 
     const StructuredDisc& m_disc;
@@ -99,8 +99,8 @@ void FaceField<T>::set(Func func, bool include_corners)
   {
     const StructuredBlock& block = m_disc.getBlock(block_id);
     auto coords = m_disc.getCoordField()->getData(block_id);
-    auto east_data = getData(block_id, mesh::NeighborDirection::East);
-    auto north_data = getData(block_id, mesh::NeighborDirection::North);
+    auto east_data = getData(block_id, NeighborDirection::East);
+    auto north_data = getData(block_id, NeighborDirection::North);
 
     auto set_values = [&](const FaceRangePerDirection& x_faces, const FaceRangePerDirection& y_faces)
     {

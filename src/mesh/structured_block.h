@@ -1,7 +1,7 @@
 #ifndef STRUCTURED_FINITE_VOLUME_MESH_STRUCTURED_BLOCK_H
 #define STRUCTURED_FINITE_VOLUME_MESH_STRUCTURED_BLOCK_H
 
-#include "neighbor_direction.h"
+#include "utils/neighbor_direction.h"
 #include "utils/project_defs.h"
 #include "utils/range.h"
 //#include <iostream>
