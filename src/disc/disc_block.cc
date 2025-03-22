@@ -1,4 +1,5 @@
 #include "disc_block.h"
+#include "utils/face_iter_per_direction.h"
 
 namespace structured_fv {
 namespace disc {
@@ -61,6 +62,33 @@ Range2D StructuredBlock::getOwnedAndGhostCells() const
   Range2D mesh_range = m_mesh_block.getOwnedCells();
   return Range2D(0, mesh_range.getXRange().size() + extra_x_cells,
                   0, mesh_range.getYRange().size() + extra_y_cells);
+}
+
+FaceRangePerDirection StructuredBlock::getOwnedFaces(bool include_boundary) const
+{
+  return FaceRangePerDirection(getOwnedCells(), include_boundary);
+}
+
+// gets all x direction faces for cells in the rectangle [ownedOrGhost x owned]
+FaceRangePerDirection StructuredBlock::getOwnedAndGhostXFaces(bool include_boundary) const
+{
+  Range cell_x_range = getOwnedAndGhostCells().getXRange();
+  Range cell_y_range = getOwnedCells().getYRange();
+  return FaceRangePerDirection(Range2D(cell_x_range, cell_y_range), include_boundary);
+}
+
+// gets all y direction faces for cells in the rectangle [owned x ownedOrGhost]
+FaceRangePerDirection StructuredBlock::getOwnedAndGhostYFaces(bool include_boundary) const
+{
+  Range cell_x_range = getOwnedCells().getXRange();
+  Range cell_y_range = getOwnedAndGhostCells().getYRange();
+  return FaceRangePerDirection(Range2D(cell_x_range, cell_y_range), include_boundary);
+}
+
+// gets all x direction faces for cells in the rectangle [ownedOrGhost x owned]
+FaceRangePerDirection StructuredBlock::getOwnedAndGhostFacesWithCorners(bool include_boundary) const
+{
+  return FaceRangePerDirection(getOwnedAndGhostCells(), include_boundary);
 }
 
 std::pair<UInt, UInt> StructuredBlock::meshVertToBlockVert(UInt i, UInt j) const

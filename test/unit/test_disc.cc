@@ -3,8 +3,10 @@
 #include "disc/disc_interface.h"
 #include "disc/discretization.h"
 #include "disc/elem_field.h"
+#include "disc/face_field.h"
 #include "disc/vert_field.h"
 #include "mesh/adjacent_block_indexer.h"
+#include "utils/face_iter_per_direction.h"
 
 using namespace structured_fv;
 
@@ -12,9 +14,10 @@ namespace {
 class DiscTester : public ::testing::Test
 {
   public:
-    DiscTester()
+    DiscTester() :
+      spec(2, 1, m_num_bc_ghost_cells)
     {
-      mesh::MeshSpec spec(2, 1, m_num_bc_ghost_cells);
+      //spec = mesh::MeshSpec(2, 1, m_num_bc_ghost_cells);
       spec.blocks(0, 0) = mesh::MeshBlockSpec(3, 4, 0, [](Real x, Real y) { return std::array<Real, 2>{x, y}; });
       spec.blocks(1, 0) = mesh::MeshBlockSpec(5, 4, 0, [](Real x, Real y) { return std::array<Real, 2>{x+1, y}; });
       m_mesh = std::make_shared<mesh::StructuredMesh>(spec);
@@ -22,6 +25,7 @@ class DiscTester : public ::testing::Test
     }
 
     int m_num_bc_ghost_cells = 2;
+    mesh::MeshSpec spec;
     std::shared_ptr<mesh::StructuredMesh> m_mesh;
     std::shared_ptr<disc::StructuredDisc> m_disc;
 };
@@ -438,5 +442,62 @@ TEST_F(DiscTester, VertFieldUpdator)
         EXPECT_EQ(field(block_id, i, j2, k), vals(south_iface.getBlockIdL(), i+2, 5, k));
       }
     }
+  }
+}
+
+TEST_F(DiscTester, FaceFieldSetConstant)
+{
+  int val = 42;
+  disc::FaceField<int> field(*m_disc, 1);
+  field.set(val);
+
+  for (UInt block_id=0; block_id < m_disc->getNumBlocks(); ++block_id)
+  {
+    const disc::StructuredBlock& block = m_disc->getBlock(block_id);
+    FaceRangePerDirection faces = block.getOwnedAndGhostFacesWithCorners();
+    auto east_data = field.getData(block_id, mesh::NeighborDirection::East);
+    auto north_data = field.getData(block_id, mesh::NeighborDirection::North);
+
+    for (UInt i : faces.getXRange(XDirTag()))
+      for (UInt j : faces.getYRange(XDirTag()))
+        EXPECT_EQ(east_data(i, j, 0), val);
+
+    for (UInt i : faces.getXRange(YDirTag()))
+      for (UInt j : faces.getYRange(YDirTag()))
+        EXPECT_EQ(north_data(i, j, 0), val);      
+  }
+}
+
+TEST_F(DiscTester, FaceFieldSetField)
+{
+  disc::FaceField<double> field(*m_disc, 2);
+  auto f = [](Real x, Real y) { return std::array<double, 2>{x, y}; };
+  field.set(f);
+
+  std::array<double, 2> dx = {1.0/spec.blocks(0, 0).num_cells_x, 1.0/spec.blocks(1, 0).num_cells_x};
+  std::array<double, 2> dy = {1.0/spec.blocks(0, 0).num_cells_y, 1.0/spec.blocks(1, 0).num_cells_y};
+  std::array<double, 2> x0 = {0, 1};
+  std::array<double, 2> y0 = {0, 0};
+
+  for (UInt block_id=0; block_id < m_disc->getNumRegularBlocks(); ++block_id)
+  {
+    const disc::StructuredBlock& block = m_disc->getBlock(block_id);
+    FaceRangePerDirection faces = block.getOwnedFaces();
+    auto east_data = field.getData(block_id, mesh::NeighborDirection::East);
+    auto north_data = field.getData(block_id, mesh::NeighborDirection::North);
+
+    for (UInt i : faces.getXRange(XDirTag()))
+      for (UInt j : faces.getYRange(XDirTag()))
+      {
+        EXPECT_NEAR(east_data(i, j, 0), x0[block_id] + (i-2)*dx[block_id], 1e-13);
+        EXPECT_NEAR(east_data(i, j, 1), y0[block_id] + (j-2 + 0.5)*dy[block_id], 1e-13);
+      }
+
+    for (UInt i : faces.getXRange(YDirTag()))
+      for (UInt j : faces.getYRange(YDirTag()))
+      {
+        EXPECT_NEAR(north_data(i, j, 0), x0[block_id] + (i-2 + 0.5)*dx[block_id], 1e-13);
+        EXPECT_NEAR(north_data(i, j, 1), y0[block_id] + (j-2)*dy[block_id], 1e-13);
+      }      
   }
 }

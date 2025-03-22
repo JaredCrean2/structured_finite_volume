@@ -55,7 +55,6 @@ class ElementField
     const StructuredDisc& m_disc;
     const UInt m_nvals_per_element;
     std::vector<FieldData> m_data;
-
 };
 
 

@@ -175,6 +175,11 @@ class Range2D
       Range2D(0, 0, 0, 0)
     {}
 
+    constexpr Range2D(const Range& xrange, const Range& yrange) :
+      m_xrange(xrange),
+      m_yrange(yrange)
+    {}
+
     constexpr const Range& getXRange() const { return m_xrange; }
 
     constexpr const Range& getYRange() const { return m_yrange; }

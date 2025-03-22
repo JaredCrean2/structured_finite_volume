@@ -2,6 +2,7 @@
 #include "disc/disc_block.h"
 #include "disc/discretization.h"
 #include "mesh/structured_mesh.h"
+#include "utils/face_iter_per_direction.h"
 
 using namespace structured_fv;
 
@@ -47,6 +48,10 @@ TEST_F(DiscBlockTester, Counts)
     EXPECT_EQ(block.getOwnedCells(), Range2D(2, 5, 2, 6));
     EXPECT_EQ(block.getOwnedAndGhostVerts(), Range2D(0, 8, 0, 9));
     EXPECT_EQ(block.getOwnedAndGhostCells(), Range2D(0, 7, 0, 8));
+    EXPECT_EQ(block.getOwnedFaces().getRange(XDirTag()), Range2D(2, 6, 2, 6));
+    EXPECT_EQ(block.getOwnedFaces().getRange(YDirTag()), Range2D(2, 5, 2, 7));
+    EXPECT_EQ(block.getOwnedAndGhostXFaces().getRange(XDirTag()), Range2D(0, 8, 2, 6));
+    EXPECT_EQ(block.getOwnedAndGhostYFaces().getRange(YDirTag()), Range2D(2, 5, 0, 9));
   }
 
   {
@@ -59,5 +64,9 @@ TEST_F(DiscBlockTester, Counts)
     EXPECT_EQ(block.getOwnedCells(), Range2D(0, 3, 2, 4));
     EXPECT_EQ(block.getOwnedAndGhostVerts(), Range2D(0, 4, 0, 5));
     EXPECT_EQ(block.getOwnedAndGhostCells(), Range2D(0, 3, 0, 4));
+    EXPECT_EQ(block.getOwnedFaces().getRange(XDirTag()), Range2D(0, 4, 2, 4));
+    EXPECT_EQ(block.getOwnedFaces().getRange(YDirTag()), Range2D(0, 3, 2, 5));
+    EXPECT_EQ(block.getOwnedAndGhostXFaces().getRange(XDirTag()), Range2D(0, 4, 2, 4));
+    EXPECT_EQ(block.getOwnedAndGhostYFaces().getRange(YDirTag()), Range2D(0, 3, 0, 5));   
   }  
 }

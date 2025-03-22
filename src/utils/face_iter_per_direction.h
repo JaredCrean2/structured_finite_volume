@@ -21,22 +21,24 @@ class FaceRangePerDirection
     {
       if (include_boundary)
       {
-        if (*cell_range.getXRange().begin() == 0 || *cell_range.getYRange().begin() == 0)
-          throw std::runtime_error("cannot iterate over cell faces with boundaries if the first cell has index 0");
-        
-        assert(*cell_range.getYRange().begin() > 0);
-        m_face_range_x = Range2D(*cell_range.getXRange().begin()-1, *cell_range.getXRange().end(),
+        //if (*cell_range.getXRange().begin() == 0 || *cell_range.getYRange().begin() == 0)
+        //  throw std::runtime_error("cannot iterate over cell faces with boundaries if the first cell has index 0");
+        //
+        //assert(*cell_range.getYRange().begin() > 0);
+        m_face_range_x = Range2D(*cell_range.getXRange().begin(),   *cell_range.getXRange().end()+1,
                                  *cell_range.getYRange().begin(),   *cell_range.getYRange().end()),
         m_face_range_y = Range2D(*cell_range.getXRange().begin(),   *cell_range.getXRange().end(),
-                                 *cell_range.getYRange().begin()-1, *cell_range.getYRange().end());
+                                 *cell_range.getYRange().begin(),   *cell_range.getYRange().end()+1);
       } else
       {
-        m_face_range_x = Range2D(*cell_range.getXRange().begin(), *cell_range.getXRange().end()-1,
-                                 *cell_range.getYRange().begin(), *cell_range.getYRange().end()),
-        m_face_range_y = Range2D(*cell_range.getXRange().begin(), *cell_range.getXRange().end(),
-                                 *cell_range.getYRange().begin(), *cell_range.getYRange().end()-1);
+        m_face_range_x = Range2D(*cell_range.getXRange().begin()+1, *cell_range.getXRange().end(),
+                                 *cell_range.getYRange().begin(),   *cell_range.getYRange().end()),
+        m_face_range_y = Range2D(*cell_range.getXRange().begin(),   *cell_range.getXRange().end(),
+                                 *cell_range.getYRange().begin()+1, *cell_range.getYRange().end());
       }
     }
+
+    Range2D getRange(XDirTag) const { return m_face_range_x; }
 
     Range getXRange(XDirTag) const { return m_face_range_x.getXRange(); }
 
@@ -44,9 +46,12 @@ class FaceRangePerDirection
 
     FaceId getFaceId(XDirTag, UInt cell_i, UInt cell_j) const
     {
-      return {cell_i, cell_j, cell_i+1, cell_j,
+      assert(cell_i > 0);
+      return {cell_i-1, cell_j, cell_i, cell_j,
               mesh::NeighborDirection::East, mesh::NeighborDirection::West};
     }
+
+    Range2D getRange(YDirTag) const { return m_face_range_y; }
 
     Range getXRange(YDirTag) const { return m_face_range_y.getXRange(); }
 
@@ -54,7 +59,8 @@ class FaceRangePerDirection
 
     FaceId getFaceId(YDirTag, UInt cell_i, UInt cell_j) const
     {
-      return {cell_i, cell_j, cell_i, cell_j+1,
+      assert(cell_j > 0);
+      return {cell_i, cell_j-1, cell_i, cell_j,
               mesh::NeighborDirection::North, mesh::NeighborDirection::South};
     }    
 

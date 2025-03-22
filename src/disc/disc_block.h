@@ -3,6 +3,7 @@
 
 #include "utils/project_defs.h"
 #include "mesh/structured_mesh.h"
+#include "utils/face_iter_per_direction.h"
 
 namespace structured_fv {
 namespace disc {
@@ -35,6 +36,20 @@ class StructuredBlock
     Range2D getOwnedAndGhostVerts() const;
 
     Range2D getOwnedAndGhostCells() const;
+
+    // owned faces is a bit misleading: it means faces of owned cells.
+    // if include_boundary is true, the faces on the boundary (ie. faces shared
+    // between an owned cell and a non-owned cell) are included
+    FaceRangePerDirection getOwnedFaces(bool include_boundary=true) const;
+
+    // gets all x direction faces for cells in the rectangle [ownedOrGhost x owned]
+    FaceRangePerDirection getOwnedAndGhostXFaces(bool include_boundary=true) const;
+    
+    // gets all y direction faces for cells in the rectangel [owned x ownedOrGhost]
+    FaceRangePerDirection getOwnedAndGhostYFaces(bool include_boundary=true) const;
+
+    // gets all x direction faces for cells in the rectangle [ownedOrGhost x ownedAndGhost]
+    FaceRangePerDirection getOwnedAndGhostFacesWithCorners(bool include_boundary=true) const;
 
     std::pair<UInt, UInt> meshVertToBlockVert(UInt i, UInt j) const;
 
