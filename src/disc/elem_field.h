@@ -16,7 +16,7 @@ class ElementField
     using FieldData = Kokkos::View<T***, HostMemorySpace>;
     using ConstFieldData = Kokkos::View<const T***, HostMemorySpace>;
 
-    ElementField(const StructuredDisc& disc, Int nvals_per_element) :
+    ElementField(const StructuredDisc& disc, UInt nvals_per_element) :
       m_disc(disc),
       m_nvals_per_element(nvals_per_element)
     {
@@ -33,6 +33,8 @@ class ElementField
     ElementField& operator=(const ElementField& other) = delete;
 
     UInt getNumBlocks() const { return m_data.size(); }
+
+    UInt getNumValsPerElement() const { return m_nvals_per_element; }
 
     FieldData& getData(UInt block) { return m_data[block]; }
 

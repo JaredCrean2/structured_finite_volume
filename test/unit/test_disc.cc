@@ -39,10 +39,16 @@ TEST_F(DiscTester, Counts)
   EXPECT_EQ(m_disc->getNumBlocks(), 8);
   EXPECT_EQ(m_disc->getNumRegularBlocks(), 2);
   EXPECT_EQ(m_disc->getNumGhostBCBlocks(), 6);
+  EXPECT_EQ(m_disc->getRegularBlocksIds(), Range(0, 2));
+  EXPECT_EQ(m_disc->getGhostBCBlocksIds(), Range(2, 8));
+  EXPECT_EQ(m_disc->getAllBlocksIds(), Range(0, 8));
 
   EXPECT_EQ(m_disc->getNumBlockInterfaces(), 7);
   EXPECT_EQ(m_disc->getNumRegularBlockInterfaces(), 1);
   EXPECT_EQ(m_disc->getNumGhostBCBlockInterfaces(), 6);
+  EXPECT_EQ(m_disc->getRegularBlockInterfacesIds(), Range(0, 1));
+  EXPECT_EQ(m_disc->getBCBlockInterfacesIds(), Range(1, 7));
+  EXPECT_EQ(m_disc->getAllBlockInterfacesIds(), Range(0, 7));
 }
 
 TEST_F(DiscTester, CoordField)

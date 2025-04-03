@@ -32,6 +32,11 @@ class StructuredBlockInterface
 
     NeighborDirection getNeighborDirectionR() const;
 
+    // these indexers allow getting *owned* values from adjacent blocks as a
+    // continuation of the *owned* region of the current block.
+    // ie. indexer(max_owned_i_index + 1, j) gives the index of the
+    //     owned cell of the adjacent block next to (max_owned_i_index, j)
+    //     of the current block
     const mesh::AdjacentBlockIndexer& getAdjBlockVertIndexerL() const;
 
     const mesh::AdjacentBlockIndexer& getAdjBlockVertIndexerR() const;

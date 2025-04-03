@@ -30,6 +30,9 @@ class DiscVector
     Kokkos::View<T*, HostMemorySpace> m_data;
 };
 
+template <typename T>
+using DiscVectorPtr = std::shared_ptr<DiscVector<T>>;
+
 }
 }
 

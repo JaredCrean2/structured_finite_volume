@@ -10,6 +10,16 @@ namespace structured_fv {
 struct XDirTag {};
 struct YDirTag {};
 
+constexpr NeighborDirection toNeighborDirection(XDirTag)
+{
+  return NeighborDirection::East;
+}
+
+constexpr NeighborDirection toNeighborDirection(YDirTag)
+{
+  return NeighborDirection::North;
+}
+
 class FaceRangePerDirection
 {
   public:

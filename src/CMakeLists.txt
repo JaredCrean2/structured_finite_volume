@@ -19,7 +19,7 @@ target_include_directories(mesh PUBLIC
 target_link_libraries(mesh Kokkos::kokkos MPI::MPI_CXX)
 
 
-### Mesh
+### Disc
 file(GLOB disc_files disc/*.cc)
 add_library(disc "${disc_files}")
 target_include_directories(disc PUBLIC
@@ -27,6 +27,15 @@ target_include_directories(disc PUBLIC
                           "${PROJECT_BINARY_DIR}/include"  # needed for configured header
 )
 target_link_libraries(disc PUBLIC mesh Kokkos::kokkos MPI::MPI_CXX)
+
+### Advection
+file(GLOB advection_files physics/advection/*.cc)
+add_library(advection "${advection_files}")
+target_include_directories(advection PUBLIC
+                          "${CMAKE_CURRENT_SOURCE_DIR}"
+                          "${PROJECT_BINARY_DIR}/include"  # needed for configured header
+)
+target_link_libraries(advection PUBLIC disc utils)
 
 
 

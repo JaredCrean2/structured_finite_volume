@@ -32,6 +32,7 @@ target_link_libraries(unit_tests
                      mesh
                      utils
                      disc
+                     advection
                      test_utils)
 
 
@@ -51,4 +52,5 @@ target_link_libraries(integration_tests
                      mesh
                      utils
                      disc
-                     test_utils)                  
+                     advection
+                     test_utils)  

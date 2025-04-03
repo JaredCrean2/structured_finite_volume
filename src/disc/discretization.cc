@@ -3,17 +3,16 @@
 #include "disc/face_field.h"
 #include "disc/vert_field.h"
 #include "disc/elem_field.h"
-#include "utils/face_iter_per_direction.h"
 #include "utils/math.h"
 
-#include <iostream>  //TODO: DEBUGGING
 
 namespace structured_fv {
 namespace disc {
 
 StructuredDisc::StructuredDisc(std::shared_ptr<mesh::StructuredMesh> mesh, UInt num_ghost_cells, int dofs_per_cell) :
+  m_dofs_per_cell(dofs_per_cell),
+  m_num_ghost_cells(num_ghost_cells),
   m_mesh(mesh)
-  //m_num_ghost_cells(num_ghost_cells)
 {
   for (UInt i=0; i < mesh->getNumBlocks(); ++i)
   {
@@ -29,7 +28,7 @@ StructuredDisc::StructuredDisc(std::shared_ptr<mesh::StructuredMesh> mesh, UInt 
   m_coordField = createCoordField();
   m_normalField = createFaceNormalField();
   m_invCellVolumeField = createInvCellVolumeField();
-  m_dofNumbering = createDofNumbering(dofs_per_cell);
+  m_dofNumbering = createDofNumbering(dofs_per_cell, m_num_dofs);
 }
 
 
@@ -79,16 +78,16 @@ ElementFieldPtr<Real> StructuredDisc::createInvCellVolumeField()
           cell_coords[1][d] = coords(i+1, j, d);
           cell_coords[2][d] = coords(i+1, j+1, d);
           cell_coords[3][d] = coords(i, j+1, d);
-
-          Real volume = computeQuadArea(cell_coords);
-          if (volume < 0)
-          {
-            throw std::runtime_error(std::string("found negative volume for block ") + std::to_string(block_id) +
-                                     ", cell " + std::to_string(i) + ", " + std::to_string(j));
-          }
-
-          inv_volumes(i, j, 0) = 1.0/volume;
         }
+
+        Real volume = computeQuadArea(cell_coords);
+        if (volume < 0)
+        {
+          throw std::runtime_error(std::string("found negative volume for block ") + std::to_string(block_id) +
+                                    ", cell " + std::to_string(i) + ", " + std::to_string(j));
+        }
+
+        inv_volumes(i, j, 0) = 1.0/volume;
       }
   }
 
@@ -155,7 +154,7 @@ FaceFieldPtr<Real> StructuredDisc::createFaceNormalField()
   return normal_field;
 }
 
-ElementFieldPtr<GlobalDof> StructuredDisc::createDofNumbering(UInt dofs_per_cell)
+ElementFieldPtr<GlobalDof> StructuredDisc::createDofNumbering(UInt dofs_per_cell, GlobalDof& num_dofs)
 {
   //TODO: there are better ways of numbering the DOFs to minimize matrix bandwidth
   auto dof_numbering = std::make_shared<ElementField<GlobalDof>>(*this, dofs_per_cell);
@@ -173,6 +172,7 @@ ElementFieldPtr<GlobalDof> StructuredDisc::createDofNumbering(UInt dofs_per_cell
           dof_numbering_block(i, j, k) = dof++;
   }
 
+  num_dofs = dof;
   dof_numbering->updateGhostValues();
 
   return dof_numbering;

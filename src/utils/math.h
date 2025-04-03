@@ -9,6 +9,9 @@ namespace {
   template <typename T>
   using Vec3 = std::array<T, 3>;
 
+  template <typename T>
+  using Vec2 = std::array<T, 2>;
+
   static constexpr double PI = 3.141592653589793238462643383279502884;
   using structured_fv::Real;
 }
