@@ -22,9 +22,10 @@ class DiscTester : public ::testing::Test
       spec.blocks(0, 0) = mesh::MeshBlockSpec(3, 4, 0, [](Real x, Real y) { return std::array<Real, 2>{x, y}; });
       spec.blocks(1, 0) = mesh::MeshBlockSpec(5, 4, 0, [](Real x, Real y) { return std::array<Real, 2>{x+1, y}; });
       m_mesh = std::make_shared<mesh::StructuredMesh>(spec);
-      m_disc = std::make_shared<disc::StructuredDisc>(m_mesh, m_num_bc_ghost_cells);
+      m_disc = std::make_shared<disc::StructuredDisc>(m_mesh, m_num_bc_ghost_cells, m_dofs_per_cell);
     }
 
+    UInt m_dofs_per_cell = 4;
     int m_num_bc_ghost_cells = 2;
     mesh::MeshSpec spec;
     std::shared_ptr<mesh::StructuredMesh> m_mesh;
@@ -558,4 +559,27 @@ std::array<double, 2> dx = {1.0/spec.blocks(0, 0).num_cells_x, 1.0/spec.blocks(1
         EXPECT_NEAR(north_normals(i, j, 1), 1*dx[block_id], 1e-13);
       }      
   }
+}
+
+TEST_F(DiscTester, DofNumbering)
+{
+  GlobalDof num_expected_dofs = m_dofs_per_cell* (spec.blocks(0, 0).num_cells_x*spec.blocks(0, 0).num_cells_y +
+                                                  spec.blocks(1, 0).num_cells_x*spec.blocks(1, 0).num_cells_y);
+  std::vector<GlobalDof> used_dofs(num_expected_dofs, 0);
+
+  disc::ElementFieldPtr<GlobalDof> dof_numbering = m_disc->getDofNumbering();
+
+  for (UInt block_id=0; block_id < m_disc->getNumRegularBlocks(); ++block_id)
+  {
+    const disc::StructuredBlock& block = m_disc->getBlock(block_id);
+    const auto& dof_numbering_block = dof_numbering->getData(block_id);
+
+    for (UInt i : block.getOwnedCells().getXRange())
+      for (UInt j : block.getOwnedCells().getYRange())
+        for (UInt k=0; k < m_dofs_per_cell; ++k)
+          used_dofs[dof_numbering_block(i, j, k)] = 1;
+  }
+
+  for (GlobalDof dof : used_dofs)
+    EXPECT_EQ(used_dofs[dof], 1);
 }

@@ -16,7 +16,7 @@ class DiscBlockTester : public ::testing::Test
       spec.blocks(0, 0) = mesh::MeshBlockSpec(3, 4);
       spec.blocks(1, 0) = mesh::MeshBlockSpec(5, 4);
       m_mesh = std::make_shared<mesh::StructuredMesh>(spec);
-      m_disc = std::make_shared<disc::StructuredDisc>(m_mesh, m_num_bc_ghost_cells);
+      m_disc = std::make_shared<disc::StructuredDisc>(m_mesh, m_num_bc_ghost_cells, 1);
     }
 
     int m_num_bc_ghost_cells = 2;

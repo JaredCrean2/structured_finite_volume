@@ -34,7 +34,7 @@ using FaceFieldPtr = std::shared_ptr<FaceField<T>>;
 class StructuredDisc
 {
   public:
-    StructuredDisc(std::shared_ptr<mesh::StructuredMesh> mesh, UInt num_ghost_cells);
+    StructuredDisc(std::shared_ptr<mesh::StructuredMesh> mesh, UInt num_ghost_cells, int dofs_per_cell);
             
     UInt getNumBlocks() const { return m_mesh->getNumBlocks(); }
 
@@ -60,6 +60,7 @@ class StructuredDisc
 
     ElementFieldPtr<Real> getInvCellVolumeField() const { return m_invCellVolumeField; }
 
+    ElementFieldPtr<GlobalDof> getDofNumbering() const { return m_dofNumbering; }
 
   private:
 
@@ -69,6 +70,8 @@ class StructuredDisc
 
     FaceFieldPtr<Real> createFaceNormalField();
 
+    ElementFieldPtr<GlobalDof> createDofNumbering(UInt dofs_per_cell);
+
     std::shared_ptr<mesh::StructuredMesh> m_mesh;
     std::vector<StructuredBlock> m_blocks;
     std::vector<StructuredBlockInterface> m_ifaces;
@@ -76,6 +79,7 @@ class StructuredDisc
     VertexFieldPtr<Real> m_coordField;
     FaceFieldPtr<Real> m_normalField;
     ElementFieldPtr<Real> m_invCellVolumeField;
+    ElementFieldPtr<GlobalDof> m_dofNumbering;
 
 };
 

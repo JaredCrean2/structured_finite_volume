@@ -11,7 +11,7 @@
 namespace structured_fv {
 namespace disc {
 
-StructuredDisc::StructuredDisc(std::shared_ptr<mesh::StructuredMesh> mesh, UInt num_ghost_cells) :
+StructuredDisc::StructuredDisc(std::shared_ptr<mesh::StructuredMesh> mesh, UInt num_ghost_cells, int dofs_per_cell) :
   m_mesh(mesh)
   //m_num_ghost_cells(num_ghost_cells)
 {
@@ -29,6 +29,7 @@ StructuredDisc::StructuredDisc(std::shared_ptr<mesh::StructuredMesh> mesh, UInt 
   m_coordField = createCoordField();
   m_normalField = createFaceNormalField();
   m_invCellVolumeField = createInvCellVolumeField();
+  m_dofNumbering = createDofNumbering(dofs_per_cell);
 }
 
 
@@ -153,6 +154,30 @@ FaceFieldPtr<Real> StructuredDisc::createFaceNormalField()
 
   return normal_field;
 }
+
+ElementFieldPtr<GlobalDof> StructuredDisc::createDofNumbering(UInt dofs_per_cell)
+{
+  //TODO: there are better ways of numbering the DOFs to minimize matrix bandwidth
+  auto dof_numbering = std::make_shared<ElementField<GlobalDof>>(*this, dofs_per_cell);
+  dof_numbering->set(std::numeric_limits<GlobalDof>::min());
+
+  GlobalDof dof = 0;
+  for (UInt blockid=0; blockid < getNumRegularBlocks(); ++blockid)
+  {
+    const StructuredBlock& block = getBlock(blockid);
+    auto& dof_numbering_block = dof_numbering->getData(blockid);
+
+    for (UInt i : block.getOwnedCells().getXRange())
+      for (UInt j : block.getOwnedCells().getYRange())
+        for (UInt k=0; k < dofs_per_cell; ++k)
+          dof_numbering_block(i, j, k) = dof++;
+  }
+
+  dof_numbering->updateGhostValues();
+
+  return dof_numbering;
+}
+
 
 
 
