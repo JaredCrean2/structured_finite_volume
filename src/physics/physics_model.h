@@ -22,7 +22,13 @@ class PhysicsModel
     // where S(x, t) is the source term
     virtual void evaluateRhs(disc::DiscVectorPtr<Real> q, Real t, disc::DiscVectorPtr<Real> residual) = 0;
 
+    virtual Real computeRhsNorm(disc::DiscVectorPtr<Real> residual) = 0;
+
+    virtual const disc::StructuredDiscPtr& getDisc() const = 0;
+
 };
+
+using PhysicsModelPtr = std::shared_ptr<PhysicsModel>;
 
 
 template <typename T>

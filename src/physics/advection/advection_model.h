@@ -4,14 +4,7 @@
 #include "disc/disc_interface.h"
 #include "physics/physics_model.h"
 #include "disc/discretization.h"
-
-
 #include "utils/math.h"
-#include "disc/elem_field.h"
-#include "utils/face_iter_per_direction.h"
-#include "disc/face_field.h"
-#include "utils/neighbor_direction.h"
-#include <cassert>
 
 namespace structured_fv {
 namespace advection {
@@ -41,6 +34,11 @@ class AdvectionModel : public PhysicsModel
     // evaluate the right hand side of the equation:
     // dq/dt = R(q, t)
     void evaluateRhs(DiscVectorPtr<Real> q, Real t, DiscVectorPtr<Real> residual) override;
+
+    Real computeRhsNorm(disc::DiscVectorPtr<Real> residual) override;
+
+
+    const disc::StructuredDiscPtr& getDisc() const override { return m_disc; }
 
   private:
 

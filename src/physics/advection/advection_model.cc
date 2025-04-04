@@ -2,6 +2,13 @@
 #include "disc/discretization.h"
 #include "utils/face_iter_per_direction.h"
 
+#include "utils/math.h"
+#include "disc/elem_field.h"
+#include "utils/face_iter_per_direction.h"
+#include "disc/face_field.h"
+#include "utils/neighbor_direction.h"
+#include <cassert>
+
 #include <iostream>
 
 namespace structured_fv {
@@ -65,6 +72,29 @@ Fxyt& AdvectionModel::getBCFunction(UInt block_id)
 {
   assert(in(m_disc->getGhostBCBlocksIds(), block_id));
   return m_bc_functions[block_id - m_disc->getNumRegularBlocks()];
+}
+
+Real AdvectionModel::computeRhsNorm(disc::DiscVectorPtr<Real> residual) 
+{
+  // compute integral of the residual over the domain
+  Real residual_norm = 0.0;
+
+  for (UInt block_id : m_disc->getRegularBlocksIds())
+  {
+    const disc::StructuredBlock& block = m_disc->getBlock(block_id);
+    const auto& inv_cell_volumes = m_disc->getInvCellVolumeField()->getData(block_id);
+    const auto& dof_nums = m_disc->getDofNumbering()->getData(block_id);
+
+    for (UInt i : block.getOwnedCells().getXRange())
+      for (UInt j : block.getOwnedCells().getYRange())
+      {
+        Real volume = inv_cell_volumes(i, j, 0);
+        Real integral_residual = volume * (*residual)(dof_nums(i, j, 0));
+        residual_norm += integral_residual * integral_residual;
+      }
+  }
+
+  return std::sqrt(residual_norm);
 }
 
 

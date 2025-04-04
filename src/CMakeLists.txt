@@ -37,6 +37,15 @@ target_include_directories(advection PUBLIC
 )
 target_link_libraries(advection PUBLIC disc utils)
 
+### Nonlinear solvers
+file(GLOB nlsolver_files nonlinear_solvers/*.cc)
+add_library(nlsolvers "${nlsolver_files}")
+target_include_directories(nlsolvers PUBLIC
+                          "${CMAKE_CURRENT_SOURCE_DIR}"
+                          "${PROJECT_BINARY_DIR}/include"  # needed for configured header
+)
+target_link_libraries(nlsolvers PUBLIC disc utils)
+
 
 
 

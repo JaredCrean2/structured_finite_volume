@@ -33,6 +33,7 @@ target_link_libraries(unit_tests
                      utils
                      disc
                      advection
+                     nlsolvers
                      test_utils)
 
 
@@ -53,4 +54,5 @@ target_link_libraries(integration_tests
                      utils
                      disc
                      advection
+                     nlsolvers
                      test_utils)  

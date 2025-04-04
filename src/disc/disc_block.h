@@ -5,6 +5,8 @@
 #include "mesh/structured_mesh.h"
 #include "utils/face_iter_per_direction.h"
 
+#include <iostream> //TODO: DEBUGGING
+
 namespace structured_fv {
 namespace disc {
 
@@ -63,12 +65,20 @@ class StructuredBlock
     std::array<UInt, 4> m_num_ghost_cells_per_direction;
 };
 
-inline std::array<Real, 2> computeCellCentroid(StructuredBlock::CoordsHostView vertCoords, int i, int j)
+inline std::array<Real, 2> computeCellCentroid(StructuredBlock::CoordsHostView vert_coords, int i, int j)
 {
-  return {(vertCoords(i, j, 0) + vertCoords(i+1, j, 0) + 
-           vertCoords(i+1, j+1, 0) + vertCoords(i+1, j, 0))/4,
-          (vertCoords(i, j, 1) + vertCoords(i+1, j, 1) + 
-           vertCoords(i+1, j+1, 1) + vertCoords(i+1, j, 1))/4};
+  if (false /*i == 1 && j == 1*/)
+  {
+    std::cout << "vert coords"  << std::endl;
+    std::cout << vert_coords(i, j, 0) << ", " << vert_coords(i, j, 1) << std::endl;
+    std::cout << vert_coords(i+1, j, 0) << ", " << vert_coords(i+1, j, 1) << std::endl;
+    std::cout << vert_coords(i+1, j+1, 0) << ", " << vert_coords(i+1, j+1, 1) << std::endl;
+    std::cout << vert_coords(i, j+1, 0) << ", " << vert_coords(i, j+1, 1) << std::endl;
+  }
+  return {(vert_coords(i, j, 0) + vert_coords(i+1, j, 0) + 
+           vert_coords(i+1, j+1, 0) + vert_coords(i, j+1, 0))/4,
+          (vert_coords(i, j, 1) + vert_coords(i+1, j, 1) + 
+           vert_coords(i+1, j+1, 1) + vert_coords(i+1, j+1, 1))/4};
 }
 
 
