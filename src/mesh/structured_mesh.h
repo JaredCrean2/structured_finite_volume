@@ -52,7 +52,7 @@ class StructuredMesh
   private:
     void createBCGhosts(const MeshSpec& spec);
 
-    void createBCGhost(const MeshBlockSpec& spec, UInt regular_block_id, NeighborDirection domain_boundary);
+    void createBCGhost(const MeshBlockSpec& spec, UInt regular_block_id, NeighborDirection domain_boundary, int num_bc_ghost_cells);
 
 
     std::array<UInt, 2> m_block_counts{0, 0};

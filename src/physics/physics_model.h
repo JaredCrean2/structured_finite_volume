@@ -5,7 +5,9 @@
 #include "disc/disc_vector.h"
 #include "disc/discretization.h"
 #include "disc/elem_field.h"
-#include <unistd.h>
+
+
+#include <iostream>
 
 namespace structured_fv {
 
@@ -22,7 +24,7 @@ class PhysicsModel
     // where S(x, t) is the source term
     virtual void evaluateRhs(disc::DiscVectorPtr<Real> q, Real t, disc::DiscVectorPtr<Real> residual) = 0;
 
-    virtual Real computeRhsNorm(disc::DiscVectorPtr<Real> residual) = 0;
+    virtual Real computeRhsNorm(disc::DiscVectorPtr<Real> residual);
 
     virtual const disc::StructuredDiscPtr& getDisc() const = 0;
 

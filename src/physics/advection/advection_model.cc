@@ -74,29 +74,6 @@ Fxyt& AdvectionModel::getBCFunction(UInt block_id)
   return m_bc_functions[block_id - m_disc->getNumRegularBlocks()];
 }
 
-Real AdvectionModel::computeRhsNorm(disc::DiscVectorPtr<Real> residual) 
-{
-  // compute integral of the residual over the domain
-  Real residual_norm = 0.0;
-
-  for (UInt block_id : m_disc->getRegularBlocksIds())
-  {
-    const disc::StructuredBlock& block = m_disc->getBlock(block_id);
-    const auto& inv_cell_volumes = m_disc->getInvCellVolumeField()->getData(block_id);
-    const auto& dof_nums = m_disc->getDofNumbering()->getData(block_id);
-
-    for (UInt i : block.getOwnedCells().getXRange())
-      for (UInt j : block.getOwnedCells().getYRange())
-      {
-        Real volume = inv_cell_volumes(i, j, 0);
-        Real integral_residual = volume * (*residual)(dof_nums(i, j, 0));
-        residual_norm += integral_residual * integral_residual;
-      }
-  }
-
-  return std::sqrt(residual_norm);
-}
-
 
 void AdvectionModel::setBCValues(ElementFieldPtr<Real> solution, Real t)
 {
@@ -115,7 +92,7 @@ void AdvectionModel::setBCValues(ElementFieldPtr<Real> solution, Real t)
     for (UInt i : block.getOwnedCells().getXRange())
       for (UInt j : block.getOwnedCells().getYRange())
       {
-        std::array<Real, 2> x = disc::computeCellCentroid(vert_coords, i, j);
+        std::array<Real, 2> x = disc::computeCellCentroid(vert_coords, i, j);        
         sol(i, j, 0) = func(x[0], x[1], t);
       }
   }

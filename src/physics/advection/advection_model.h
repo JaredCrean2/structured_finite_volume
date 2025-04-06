@@ -35,9 +35,6 @@ class AdvectionModel : public PhysicsModel
     // dq/dt = R(q, t)
     void evaluateRhs(DiscVectorPtr<Real> q, Real t, DiscVectorPtr<Real> residual) override;
 
-    Real computeRhsNorm(disc::DiscVectorPtr<Real> residual) override;
-
-
     const disc::StructuredDiscPtr& getDisc() const override { return m_disc; }
 
   private:

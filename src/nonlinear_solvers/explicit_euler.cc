@@ -24,7 +24,7 @@ void explicitEuler(const ExplicitEulerOpts& opts, PhysicsModelPtr model, disc::D
   UInt iter = 0;
   while (t < opts.t_end && !converged && iter != opts.itermax)
   {
-    //std::cout << "\niter " << iter << std::endl;
+    std::cout << "\niter " << iter << std::endl;
     model->evaluateRhs(sol, t, dudt);
 
     
@@ -32,7 +32,7 @@ void explicitEuler(const ExplicitEulerOpts& opts, PhysicsModelPtr model, disc::D
     {
       Real norm = model->computeRhsNorm(dudt);
       converged = norm < opts.residual_tol;
-      //std::cout << "norm = " << norm << std::endl;
+      std::cout << "norm = " << norm << std::endl;
     }
 
     if (!converged)

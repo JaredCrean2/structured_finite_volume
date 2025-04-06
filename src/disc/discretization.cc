@@ -5,6 +5,7 @@
 #include "disc/elem_field.h"
 #include "utils/math.h"
 
+#include <iostream>
 
 namespace structured_fv {
 namespace disc {

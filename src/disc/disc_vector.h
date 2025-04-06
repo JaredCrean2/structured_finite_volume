@@ -31,6 +31,18 @@ class DiscVector
         m_data(i) = val;
     }
 
+    void set(const std::vector<T>& vals)
+    {
+      UInt dofs_per_node = m_disc.getNumDofsPerNode();
+      assert(vals.size() == dofs_per_node);
+      UInt nnodes = size()/dofs_per_node;
+
+      UInt idx=0;
+      for (UInt node=0; node < nnodes; ++node)
+        for (UInt j=0; j < dofs_per_node; ++j)
+          m_data(idx++) = vals[j];
+    }
+
     template <typename Fxy, IsFuncXY_t<Fxy> = true>
     void set(Fxy func)
     {
@@ -45,7 +57,6 @@ class DiscVector
           {
              Vec2<Real> x = computeCellCentroid(coords, i, j);
              auto vals = func(x[0], x[1]);
-
              for (int k=0; k < m_disc.getNumDofsPerNode(); ++k)
                m_data(dof_nums(i, j, k)) = vals[k];
           }

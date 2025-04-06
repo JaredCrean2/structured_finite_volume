@@ -229,7 +229,7 @@ void StructuredMesh::createBCGhosts(const MeshSpec& spec)
       {
         UInt regular_block_id = i + j * spec.blocks.extent(0);
         const MeshBlockSpec& block_spec = spec.blocks(i, j);
-        createBCGhost(block_spec, regular_block_id, directions[dir]);
+        createBCGhost(block_spec, regular_block_id, directions[dir], spec.num_bc_ghost_cells);
       }
 
     UInt ghost_block_id_end = m_blocks.size();
@@ -239,7 +239,7 @@ void StructuredMesh::createBCGhosts(const MeshSpec& spec)
   }
 }
 
-void StructuredMesh::createBCGhost(const MeshBlockSpec& spec, UInt regular_block_id, NeighborDirection domain_boundary)
+void StructuredMesh::createBCGhost(const MeshBlockSpec& spec, UInt regular_block_id, NeighborDirection domain_boundary, int num_bc_ghost_cells)
 {
   UInt ghost_block_id = m_blocks.size();
   UInt regular_block_rotation = spec.rotation;
@@ -249,7 +249,7 @@ void StructuredMesh::createBCGhost(const MeshBlockSpec& spec, UInt regular_block
   NeighborDirection regular_block_dir = rotate(domain_boundary, regular_block_rotation);
   NeighborDirection ghost_block_dir = getNeighborImage(regular_block_dir, transform);
 
-  auto ghost_coords = computeGhostBCCoords(m_blocks[regular_block_id], ghost_block_dir, 2);
+  auto ghost_coords = computeGhostBCCoords(m_blocks[regular_block_id], ghost_block_dir, num_bc_ghost_cells);
 
   m_blocks.emplace_back(ghost_coords, ghost_block_id);
   m_block_counts[1]++;

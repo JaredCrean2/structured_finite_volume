@@ -7,7 +7,7 @@ target_include_directories(utils PUBLIC
                           "${CMAKE_CURRENT_SOURCE_DIR}"
                           "${PROJECT_BINARY_DIR}/include"  # needed for configured header
 )
-target_link_libraries(utils Kokkos::kokkos MPI::MPI_CXX)
+target_link_libraries(utils PUBLIC Kokkos::kokkos MPI::MPI_CXX)
 
 ### Mesh
 file(GLOB mesh_files mesh/*.cc)
@@ -28,6 +28,15 @@ target_include_directories(disc PUBLIC
 )
 target_link_libraries(disc PUBLIC mesh Kokkos::kokkos MPI::MPI_CXX)
 
+### Physics model
+file(GLOB physics_files physics/*.cc)
+add_library(physics "${physics_files}")
+target_include_directories(physics PUBLIC
+                          "${CMAKE_CURRENT_SOURCE_DIR}"
+                          "${PROJECT_BINARY_DIR}/include"  # needed for configured header
+)
+target_link_libraries(physics PUBLIC disc utils)
+
 ### Advection
 file(GLOB advection_files physics/advection/*.cc)
 add_library(advection "${advection_files}")
@@ -35,7 +44,19 @@ target_include_directories(advection PUBLIC
                           "${CMAKE_CURRENT_SOURCE_DIR}"
                           "${PROJECT_BINARY_DIR}/include"  # needed for configured header
 )
-target_link_libraries(advection PUBLIC disc utils)
+target_link_libraries(advection PUBLIC physics disc utils)
+
+
+### Euler
+file(GLOB euler_files physics/euler/*.cc)
+add_library(euler "${euler_files}")
+target_include_directories(euler PUBLIC
+                          "${CMAKE_CURRENT_SOURCE_DIR}"
+                          "${PROJECT_BINARY_DIR}/include"  # needed for configured header
+)
+target_link_libraries(euler PUBLIC physics disc utils)
+
+
 
 ### Nonlinear solvers
 file(GLOB nlsolver_files nonlinear_solvers/*.cc)
@@ -44,7 +65,7 @@ target_include_directories(nlsolvers PUBLIC
                           "${CMAKE_CURRENT_SOURCE_DIR}"
                           "${PROJECT_BINARY_DIR}/include"  # needed for configured header
 )
-target_link_libraries(nlsolvers PUBLIC disc utils)
+target_link_libraries(nlsolvers PUBLIC physics disc utils)
 
 
 
