@@ -20,7 +20,7 @@ Real PhysicsModel::computeRhsNorm(disc::DiscVectorPtr<Real> residual)
       {
         for (UInt k=0; k < ncomp; ++k)
         {
-          Real volume = inv_cell_volumes(i, j, 0);
+          Real volume = 1.0/inv_cell_volumes(i, j, 0);
           Real integral_residual = volume * (*residual)(dof_nums(i, j, k));
           residual_norm += integral_residual * integral_residual;
         }

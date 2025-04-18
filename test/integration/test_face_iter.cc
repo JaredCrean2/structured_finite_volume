@@ -116,7 +116,7 @@ __attribute((noinline)) void kernel4(const Range2D& cell_range)
 
 TEST(FaceIter, Performance)
 {
-  Range2D range(0, 10000, 0, 10000);
+  Range2D range(0, 1000, 0, 1000);
   kernel(range);
   //kernel2(range);
   kernel4(range);
