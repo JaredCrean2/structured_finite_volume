@@ -44,6 +44,24 @@ constexpr std::array<T, N> operator+(const T2& a, const std::array<T, N>& b)
   return b + a;
 }
 
+template <typename T,  size_t N, typename T2>
+constexpr std::array<T, N>& operator+=(std::array<T, N>& a, const std::array<T2, N>& b)
+{
+  for (int i=0; i < N; ++i)
+    a[i] += b[i];
+
+  return a;
+}
+
+template <typename T,  size_t N, typename T2>
+constexpr std::array<T, N>& operator+=(std::array<T, N>& a, const T2& b)
+{
+  for (int i=0; i < N; ++i)
+    a[i] += b;
+
+  return a;
+}
+
 template <typename T,  size_t N>
 constexpr std::array<T, N> operator-(const std::array<T, N>& a, const std::array<T, N>& b)
 {
@@ -72,6 +90,24 @@ constexpr std::array<T, N> operator-(const T2& a, const std::array<T, N>& b)
     c[i] = a - b[i];
 
   return c;
+}
+
+template <typename T,  size_t N, typename T2>
+constexpr std::array<T, N>& operator-=(std::array<T, N>& a, const std::array<T2, N>& b)
+{
+  for (int i=0; i < N; ++i)
+    a[i] -= b[i];
+
+  return a;
+}
+
+template <typename T,  size_t N, typename T2>
+constexpr std::array<T, N>& operator-=(std::array<T, N>& a, const T2& b)
+{
+  for (int i=0; i < N; ++i)
+    a[i] -= b;
+
+  return a;
 }
 
 template <typename T,  size_t N>
@@ -104,6 +140,24 @@ constexpr std::array<T, N> operator*(const T2& b, const std::array<T, N>& a)
   return c;
 }
 
+template <typename T,  size_t N, typename T2>
+constexpr std::array<T, N>& operator*=(std::array<T, N>& a, const std::array<T2, N>& b)
+{
+  for (int i=0; i < N; ++i)
+    a[i] *= b[i];
+
+  return a;
+}
+
+template <typename T,  size_t N, typename T2>
+constexpr std::array<T, N>& operator*=(std::array<T, N>& a, const T2& b)
+{
+  for (int i=0; i < N; ++i)
+    a[i] *= b;
+
+  return a;
+}
+
 template <typename T,  size_t N>
 constexpr std::array<T, N> operator/(const std::array<T, N>& a, const std::array<T, N>& b)
 {
@@ -133,6 +187,24 @@ constexpr std::array<T, N> operator/(const T2& a, const std::array<T, N>& b)
     c[i] = a / b[i];
 
   return c;
+}
+
+template <typename T,  size_t N, typename T2>
+constexpr std::array<T, N>& operator/=(std::array<T, N>& a, const std::array<T2, N>& b)
+{
+  for (int i=0; i < N; ++i)
+    a[i] /= b[i];
+
+  return a;
+}
+
+template <typename T,  size_t N, typename T2>
+constexpr std::array<T, N>& operator/=(std::array<T, N>& a, const T2& b)
+{
+  for (int i=0; i < N; ++i)
+    a[i] /= b;
+
+  return a;
 }
 
 template <typename T,  size_t N>
@@ -169,6 +241,16 @@ constexpr Vec3<T> cross(const Vec3<T>& a, const Vec3<T>& b)
   return {c1, c2, c3};
 }
 
+}
+
+template <typename T, typename T2, size_t N>
+constexpr std::array<T, N> convert(const std::array<T2, N>& arr)
+{
+  std::array<T, N> arr2{};
+  for (size_t i=0; i < N; ++i)
+    arr2[i] = arr[i];
+
+  return arr2;
 }
 
 constexpr Real degreesToRadians(Real degrees)

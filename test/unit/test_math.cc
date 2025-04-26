@@ -17,12 +17,26 @@ TEST(Math, ArrayPlusArray)
   expect_near(a+b, {5, 7, 9});
 }
 
+TEST(Math, ArrayPlusEqualArray)
+{
+  Vec3<double> a = {1, 2, 3};
+  Vec3<int> b = {4, 5, 6};
+  a += b;
+  expect_near(a, {5, 7, 9});
+}
+
 TEST(Math, ArrayPlusScalar)
 {
   Vec3<double> a = {1, 2, 3};
   expect_near(a + 2, {3, 4, 5});
   expect_near(2 + a, {3, 4, 5});
+}
 
+TEST(Math, ArrayPlusEqualScalar)
+{
+  Vec3<double> a = {1, 2, 3};
+  a += 2;
+  expect_near(a, {3, 4, 5});
 }
 
 TEST(Math, ArrayMinusArray)
@@ -32,12 +46,26 @@ TEST(Math, ArrayMinusArray)
   expect_near(a-b, {-1, -3, -4});
 }
 
+TEST(Math, ArrayMinusEqualArray)
+{
+  Vec3<double> a = {1, 2, 3};
+  Vec3<double> b = {2, 5, 7};
+  a -= b;
+  expect_near(a, {-1, -3, -4});
+}
+
 TEST(Math, ArrayMinusScalar)
 {
   Vec3<double> a = {1, 2, 3};
   expect_near(a - 2, {-1, 0, 1});
   expect_near(2 - a, {1, 0, -1});
+}
 
+TEST(Math, ArrayMinusEqualScalar)
+{
+  Vec3<double> a = {1, 2, 3};
+  a -= 2;
+  expect_near(a, {-1, 0, 1});
 }
 
 TEST(Math, ArrayMultiplyArray)
@@ -47,11 +75,26 @@ TEST(Math, ArrayMultiplyArray)
   expect_near(a*b, {4, 10, 18});
 }
 
+TEST(Math, ArrayMultiplyEqualArray)
+{
+  Vec3<double> a = {1, 2, 3};
+  Vec3<double> b = {4, 5, 6};
+  a *= b;
+  expect_near(a, {4, 10, 18});
+}
+
 TEST(Math, ArrayMultiplyScalar)
 {
   Vec3<double> a = {1, 2, 3};
   expect_near(a * 2, {2, 4, 6});
   expect_near(2 * a, {2, 4, 6});
+}
+
+TEST(Math, ArrayMultiplyEqualScalar)
+{
+  Vec3<double> a = {1, 2, 3};
+  a *= 2;
+  expect_near(a, {2, 4, 6});
 }
 
 TEST(Math, ArrayDivideArray)
@@ -61,11 +104,26 @@ TEST(Math, ArrayDivideArray)
   expect_near(a/b, {1.0/4, 2.0/5, 3.0/6});
 }
 
+TEST(Math, ArrayDivideEqualArray)
+{
+  Vec3<double> a = {1, 2, 3};
+  Vec3<double> b = {4, 5, 6};
+  a /= b;
+  expect_near(a, {1.0/4, 2.0/5, 3.0/6});
+}
+
 TEST(Math, ArrayDivideScalar)
 {
   Vec3<double> a = {1, 2, 3};
   expect_near(a / 2, {1.0/2, 1, 3.0/2});
   expect_near(2 / a, {2, 1, 2.0/3});
+}
+
+TEST(Math, ArrayDivideEqualScalar)
+{
+  Vec3<double> a = {1, 2, 3};
+  a /= 2;
+  expect_near(a, {1.0/2, 1, 3.0/2});
 }
 
 TEST(Math, DotProduct)
