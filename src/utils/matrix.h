@@ -3,10 +3,10 @@
 
 #include "project_defs.h"
 #include <array>
+#include <iostream>
 
 namespace structured_fv {
 
-//TODO: default N
 template <typename T, UInt M, UInt N=M>
 class Matrix
 {
@@ -45,6 +45,20 @@ class Matrix
     std::array<T, M*N> m_data;
 };
 
-};
+template <typename T, UInt M, UInt N>
+std::ostream& operator<<(std::ostream& os, const Matrix<T, M, N>& mat)
+{
+  for (size_t i=0; i < M; ++i)
+  {
+    for (size_t j=0; j < N; ++j)
+      os << mat(i, j) << (j < N-1 ? "," : "");
+
+    os << (i < M-1 ? "\n" : "");
+  }
+
+  return os;
+}
+
+}
 
 #endif

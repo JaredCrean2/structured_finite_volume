@@ -92,6 +92,16 @@ constexpr std::array<T, N> operator-(const T2& a, const std::array<T, N>& b)
   return c;
 }
 
+template <typename T,  size_t N>
+constexpr std::array<T, N> operator-(const std::array<T, N>& a)
+{
+  std::array<T, N> b;
+  for (int i=0; i < N; ++i)
+    b[i] = -a[i];
+
+  return b;
+}
+
 template <typename T,  size_t N, typename T2>
 constexpr std::array<T, N>& operator-=(std::array<T, N>& a, const std::array<T2, N>& b)
 {

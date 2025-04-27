@@ -61,6 +61,13 @@ TEST(Math, ArrayMinusScalar)
   expect_near(2 - a, {1, 0, -1});
 }
 
+TEST(Math, ArrayUnaryMinus)
+{
+  Vec3<double> a = {1, 2, 3};
+  Vec3<double> b = -a;
+  expect_near(b, {-1, -2, -3});
+}
+
 TEST(Math, ArrayMinusEqualScalar)
 {
   Vec3<double> a = {1, 2, 3};
