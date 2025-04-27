@@ -10,6 +10,7 @@ void EulerModel::evaluateRhs(DiscVectorPtr<Real> q, Real t,
   setBCValues(m_solution, t);
   m_solution->updateGhostValues();
   checkPositivity(m_solution);
+  std::cout << "max wave speed = " << computeMaxWaveSpeed(m_solution) << std::endl;
   m_residual->set(0);
 
   //HLLEFlux flux;
@@ -148,6 +149,38 @@ void EulerModel::checkPositivity(const ElementFieldPtr<Real>& solution)
   }
 
 }
+
+
+Real EulerModel::computeMaxWaveSpeed(ElementFieldPtr<Real> solution)
+{
+  Real max_wave_speed = 0.0;
+  for (UInt block_id : m_disc->getRegularBlocksIds())
+  {
+    const StructuredBlock& block = m_disc->getBlock(block_id);
+    const auto& sol = solution->getData(block_id);
+
+    for (UInt i : block.getOwnedCells().getXRange())
+      for (UInt j : block.getOwnedCells().getYRange())
+      {
+        Vec4<Real> q = getValues(sol, i, j);
+        Real Umag = std::sqrt(q[1]*q[1] + q[2]*q[2])/q[0];
+        Real a = compute_sos(q);
+        /*
+        if (Umag + a > max_wave_speed)
+        {
+          std::cout << "found new max wave speed" << std::endl;
+          std::cout << "q = " << q << std::endl;
+          std::cout << "U = " << Umag << ", a = " << a << std::endl;
+          std::cout << "p = " << compute_pressure(q) << std::endl;
+        }
+        */
+        max_wave_speed = std::max(max_wave_speed, Umag + a);
+      }
+  }
+
+  return max_wave_speed;  
+}
+
 
 }
 }

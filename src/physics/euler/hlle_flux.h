@@ -4,6 +4,8 @@
 #include "euler_flux.h"
 #include "roe_state.h"
 
+#include <iostream>
+
 namespace structured_fv {
 namespace euler {
 
@@ -24,6 +26,8 @@ class HLLEFlux
       Real unR = compute_un(qR, normal);
       Real unAvg = compute_un(avg_state, normal);
 
+      //TODO: optimize this: we only need the most negative and most positive
+      //      wave speeds
       Real lambda1L = std::min(unL - aL*n_mag, unAvg - aAvg*n_mag);
       Real lambda2L = std::min(unL, unAvg);
       Real lambda3L = std::min(unL + aL*n_mag, unAvg + aAvg*n_mag);
@@ -35,12 +39,30 @@ class HLLEFlux
       Real s1 = std::min(lambda1L, std::min(lambda2L, lambda3L));
       Real s2 = std::max(lambda1R, std::max(lambda2R, lambda3R));
 
+      //std::cout << "s1 = " << s1 << ", s2 = " << s2 << std::endl;
+
       Vec4<Real> fL = compute_euler_flux(qL, normal);
       Vec4<Real> fR = compute_euler_flux(qR, normal);
 
+      //TODO: optimize this
       Vec4<Real> q_star = (fR - fL - s2*qR + s1*qL)/(s1 - s2);
+      //std::cout << "qL = " << qL << std::endl;
+      //std::cout << "qR = " << qR << std::endl;
+      //std::cout << "q_star = " << q_star << std::endl;
 
-      return compute_euler_flux(q_star, normal);
+      if (s1 > 0)
+      {
+        //std::cout << "in region 1" << std::endl;
+        return compute_euler_flux(qL, normal);
+      } else if (s2 < 0)
+      {
+        //std::cout << "in region 3" << std::endl;
+        return compute_euler_flux(qR, normal);
+      } else
+      {
+        //std::cout << "in region 2" << std::endl;
+        return compute_euler_flux(q_star, normal);
+      }
     }
 };
 

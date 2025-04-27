@@ -25,6 +25,8 @@ using Fxyt = std::function<Vec4<Real>(Real, Real, Real)>;
 constexpr Real Gamma = 1.4;
 constexpr Real Gamma_m1 = Gamma - 1;
 constexpr Real Cv = 718.0;  // J/kg*K
+constexpr Real Cp = Gamma * Cv;
+constexpr Real R = Cp - Cv;
 
 }
 }

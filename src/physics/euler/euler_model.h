@@ -57,6 +57,8 @@ class EulerModel : public PhysicsModel
 
     void checkPositivity(const ElementFieldPtr<Real>& solution);
 
+    Real computeMaxWaveSpeed(ElementFieldPtr<Real> solution);
+
 
     //EulerOpts m_opts;
     StructuredDiscPtr m_disc;
