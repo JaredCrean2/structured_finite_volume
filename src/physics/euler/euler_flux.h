@@ -133,7 +133,7 @@ compute_euler_flux_jac(const Vec4<T>& sol, const Vec2<Real>& normal)
 // Eigenvalue decomposition of df/dq = R Lambda R^-1 in a given normal direction
 
 template <typename T>
-constexpr void computeEigenDecomp(const Vec4<T>& sol, const Vec2<Real>& normal,
+constexpr void compute_eigen_decomp(const Vec4<T>& sol, const Vec2<Real>& normal,
                                   Matrix<T, 4>& R, Vec4<T>& lambda, Matrix<T, 4>& Rinv)
 {  
   Real n_mag = std::sqrt(dot(normal, normal));

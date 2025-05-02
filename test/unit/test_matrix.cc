@@ -50,3 +50,35 @@ TEST(Matrix, DefaultTemplateArgument)
   EXPECT_EQ(mat.size().first, 3);
   EXPECT_EQ(mat.size().second, 3);
 }
+
+TEST(Matrix, MatVec)
+{
+  Matrix<Int, 3, 2> mat({1, 2, 3, 4, 5, 6});
+  std::array<Int, 2> x{2, 3};
+  std::array<Int, 3> b = mat * x;
+
+  EXPECT_EQ(b[0], 1*2 + 2*3);
+  EXPECT_EQ(b[1], 3*2 + 4*3);
+  EXPECT_EQ(b[2], 5*2 + 6*3);
+}
+
+TEST(Matrix, RowIndex)
+{
+  Matrix<Int, 3, 2> mat({1, 2, 3, 4, 5, 6});
+
+  auto x = mat(Row{1});
+  EXPECT_EQ(x.size(), 2);
+  EXPECT_EQ(x[0], 3);
+  EXPECT_EQ(x[1], 4);
+}
+
+TEST(Matrix, ColIndex)
+{
+  Matrix<Int, 3, 2> mat({1, 2, 3, 4, 5, 6});
+
+  auto x = mat(Column{1});
+  EXPECT_EQ(x.size(), 3);
+  EXPECT_EQ(x[0], 2);
+  EXPECT_EQ(x[1], 4);
+  EXPECT_EQ(x[2], 6);
+}

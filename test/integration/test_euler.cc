@@ -101,7 +101,7 @@ TEST(Euler, XSolutionConvergenceSupersonic)
 }
 
 // Not sure why this doesnt converge
-TEST(Euler, DISABLED_XSolutionConvergenceSubsonic)
+TEST(Euler, XSolutionConvergenceSubsonic)
 {
   std::vector<UInt> ncells = {3, 6, 12, 24}; // {3, 6, 12};
   Real u = 40;
@@ -127,7 +127,7 @@ TEST(Euler, XSolutionConvergenceSupersonicNegative)
   runConvergenceStudy(opts, ncells, 2, u_ex, src_term);
 }
 
-TEST(Euler, DISABLED_XSolutionConvergenceSubsonicNegative)
+TEST(Euler, XSolutionConvergenceSubsonicNegative)
 {
   std::vector<UInt> ncells = {3, 6, 12, 24}; // {3, 6, 12};
   Real u = -40;

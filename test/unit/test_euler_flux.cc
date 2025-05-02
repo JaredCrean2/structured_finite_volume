@@ -100,7 +100,7 @@ TEST(EulerFlux, EigenDecompRightEigenVectors)
   Matrix<Real, 4, 4> R, Rinv;
   Vec4<Real> lambda;
   auto [flux, flux_jac] = compute_euler_flux_jac(q, normal);
-  computeEigenDecomp(q, normal, R, lambda, Rinv);
+  compute_eigen_decomp(q, normal, R, lambda, Rinv);
 
   // The columns of R should be the right eigenvectors of the flux Jacobian,
   // which are defined as A*v = lambda*v
@@ -121,14 +121,14 @@ TEST(EulerFlux, EigenDecompRightEigenVectors)
 
 TEST(EulerFlux, EigenDecompLeftEigenVectors)
 {
-  Vec4<Real> prim_vars = {2, 0, 0, 300};
+  Vec4<Real> prim_vars = {2, 20, 30, 300};
   std::array<Real, 2> normal = {1, 0};  //TODO: was 2, 3
   auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
   
   Matrix<Real, 4, 4> R, Rinv;
   Vec4<Real> lambda;
   auto [flux, flux_jac] = compute_euler_flux_jac(q, normal);
-  computeEigenDecomp(q, normal, R, lambda, Rinv);
+  compute_eigen_decomp(q, normal, R, lambda, Rinv);
 
   // The rows of Rinv should be the left eigenvectors of the flux Jacobian,
   // which are defined as v^T * A = lambda*v^T
@@ -149,13 +149,12 @@ TEST(EulerFlux, EigenDecompLeftEigenVectors)
 TEST(EulerFlux, EigenDecompLeftEigenVectorsInv)
 {
   Vec4<Real> prim_vars = {2, 20, 30, 300};
-  std::array<Real, 2> normal = {2, 3};  //TODO: was 2, 3
+  std::array<Real, 2> normal = {2, 3};
   auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
   
   Matrix<Real, 4, 4> R, Rinv;
   Vec4<Real> lambda;
-  auto [flux, flux_jac] = compute_euler_flux_jac(q, normal);
-  computeEigenDecomp(q, normal, R, lambda, Rinv);
+  compute_eigen_decomp(q, normal, R, lambda, Rinv);
 
   Matrix<Real, 4, 4> identity;
 
@@ -173,4 +172,190 @@ TEST(EulerFlux, EigenDecompLeftEigenVectorsInv)
       {
         EXPECT_NEAR(identity(i, j), 0.0, 1e-13);
       }
+}
+
+TEST(EulerFlux, EigenDecompEigenvaluesSorted)
+{
+  Vec4<Real> prim_vars = {2, 0, 0, 300};
+  std::array<Real, 2> normal = {1, 0};  //TODO: was 2, 3
+  auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
+  
+  Matrix<Real, 4, 4> R, Rinv;
+  Vec4<Real> lambda;
+  compute_eigen_decomp(q, normal, R, lambda, Rinv);
+
+  for (int i=1; i < 4; ++i)
+    EXPECT_GE(lambda[i], lambda[i-1]); 
+}
+
+namespace {
+
+void solveLinearizedRiemannProblem(const Vec4<Real>& qL, const Vec4<Real>& qR,
+                                   const Vec2<Real>& normal)
+{
+  Matrix<Real, 4, 4> R, Rinv;
+  Vec4<Real> lambda;
+  compute_eigen_decomp(qL, normal, R, lambda, Rinv);
+
+  auto delta_q = qR - qL;
+  auto alpha = Rinv * delta_q;
+  auto fL = compute_euler_flux(qL, normal);
+
+  std::cout << "lambdas = " << lambda << std::endl;
+  std::cout << "alphas = " << alpha << std::endl;
+  auto q_i = qL;
+  auto f_i = fL;
+  for (UInt i=0; i < 5; ++i)
+  {
+    std::cout << "\nstate " << i << ":" << std::endl;
+
+    if (i > 0)
+    {
+      q_i += alpha[i-1] * R(Column{i-1});
+      f_i += lambda[i-1] * alpha[i-1] * R(Column{i-1});
+    }
+
+    auto f_qi = compute_euler_flux(q_i, normal);
+
+
+
+    std::cout << "q = " << q_i << std::endl;
+    std::cout << "flux = " << f_i << std::endl;
+    std::cout << "f(q) = " << f_qi << std::endl;
+    std::cout << "diff = " << f_i - f_qi << std::endl;
+
+    if (i == 4)
+    {
+      std::cout << "qR = " << qR << std::endl;
+      std::cout << "diff = " << qR - q_i << std::endl;
+
+      auto fR = compute_euler_flux(qR, normal);
+      std::cout << "fR = " << fR << std::endl;
+      std::cout << "diff = " << f_i - fR << std::endl;
+    }
+  }
+
+}
+}
+
+TEST(EulerFlux, LinearizedRiemannProblem)
+{
+  std::array<Real, 2> normal = {1, 0};
+
+  Vec4<Real> prim_varsL = {2, 400, 0, 300};
+  Vec4<Real> prim_varsR = {2, 500, 0, 300};
+
+  auto qL = compute_conservative_variables(prim_varsL, PrimitiveVarTag());
+  auto qR = compute_conservative_variables(prim_varsR, PrimitiveVarTag());
+
+  solveLinearizedRiemannProblem(qL, qR, normal);
+}
+
+
+namespace acoustics {
+
+// acoustics coupled with advection
+// the state vector is [p, u, phi], where p is the pressure,
+// u is velocity, and phi is a passive tracer being advected
+// by the fluid
+
+struct AcousticsParams
+{
+  Real rho;
+  Real K;
+  Real u0;
+};
+
+std::array<Real, 3> compute_acoustics_flux(const AcousticsParams& params, const std::array<Real, 3>& u)
+{
+  return {params.u0 * u[0] + params.K*u[1], u[0]/params.rho + params.u0*u[1], params.u0*u[2]};
+}
+
+void compute_eigen_decomp(const AcousticsParams& params,
+                        Matrix<Real, 3, 3>& R, std::array<Real, 3>& lambda)
+{
+  
+  Real c0 = std::sqrt(params.K/params.rho);
+  Real z0 = params.rho*c0;
+
+  R(0, 0) = -z0;
+  R(0, 1) = 0;
+  R(0, 2) = z0;
+
+  R(1, 0) = 1;
+  R(1, 1) = 0;
+  R(1, 2) = 1;
+
+  R(2, 0) = 0;
+  R(2, 1) = 1;
+  R(2, 2) = 0;
+
+  lambda[0] = params.u0 - c0;
+  lambda[1] = params.u0;
+  lambda[2] = params.u0 + c0;
+}
+
+std::array<Real, 3> solveForAlpha(const AcousticsParams& params, const std::array<Real, 3>& uL, const std::array<Real, 3>& uR)
+{
+  Real c0 = std::sqrt(params.K/params.rho);
+  Real z0 = params.rho*c0;  
+
+  Real alpha1 = (-(uR[0] - uL[0]) + z0*(uR[1] - uL[1]))/(2*z0);
+  Real alpha2 = uR[2] - uL[2];
+  Real alpha3 = ( (uR[0] - uL[0]) + z0*(uR[1] - uL[1]))/(2*z0);
+
+  return {alpha1, alpha2, alpha3};
+}
+
+void solveLinearizedRiemannProblem(const AcousticsParams& params, const std::array<Real, 3>& uL, const std::array<Real, 3>& uR)
+{
+  Matrix<Real, 3, 3> R;
+  std::array<Real, 3> lambda;
+  compute_eigen_decomp(params, R, lambda);
+  std::array<Real, 3> alpha = solveForAlpha(params, uL, uR);
+
+  std::cout << "lambda = " << lambda << std::endl;
+  std::cout << "alpha = " << alpha << std::endl;
+
+  auto fL = compute_acoustics_flux(params, uL);
+
+  auto u_i = uL;
+  auto f_i = fL;
+
+  for (UInt i=0; i < 4; ++i)
+  {
+    std::cout << "\nstate " << i << ":" << std::endl;
+    if (i > 0)
+    {
+      u_i += alpha[i-1] * R(Column{i-1});
+      f_i += lambda[i-1] * alpha[i-1] * R(Column{i-1});
+    }
+
+    auto f_qi = compute_acoustics_flux(params, u_i);
+
+    std::cout << "q = " << u_i << std::endl;
+    std::cout << "flux = " << f_i << std::endl;
+    std::cout << "f(q) = " << f_qi << std::endl;
+    std::cout << "diff = " << f_i - f_qi << std::endl;
+
+    if (i == 3)
+    {
+      std::cout << "qR = " << uR << std::endl;
+      std::cout << "diff = " << uR - u_i << std::endl;
+
+      auto fR = compute_acoustics_flux(params, uR);
+      std::cout << "fR = " << fR << std::endl;
+      std::cout << "diff = " << f_i - fR << std::endl;
+    }
+  }
+}
+
+TEST(AcousticsFlux, LinearizedRiemannProblem)
+{
+  AcousticsParams params{2, 100, 5};
+  std::array<Real, 3> uL = {10, 20, 2};
+  std::array<Real, 3> uR = {20, 5, 1};
+  solveLinearizedRiemannProblem(params, uL, uR);
+}
+
 }

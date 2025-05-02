@@ -1,4 +1,5 @@
 #include "euler_model.h"
+#include "roe_flux.h"
 
 namespace structured_fv {
 namespace euler {
@@ -14,7 +15,8 @@ void EulerModel::evaluateRhs(DiscVectorPtr<Real> q, Real t,
   m_residual->set(0);
 
   //HLLEFlux flux;
-  LaxFriedrichFlux flux;
+  //LaxFriedrichFlux flux;
+  RoeFlux flux;
   evaluateInterfaceTerms(m_solution, t, flux, XDirTag(), m_residual);
   evaluateInterfaceTerms(m_solution, t, flux, YDirTag(), m_residual);
 
