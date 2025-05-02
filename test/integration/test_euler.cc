@@ -100,7 +100,6 @@ TEST(Euler, XSolutionConvergenceSupersonic)
   runConvergenceStudy(opts, ncells, 2, u_ex, src_term);
 }
 
-// Not sure why this doesnt converge
 TEST(Euler, XSolutionConvergenceSubsonic)
 {
   std::vector<UInt> ncells = {3, 6, 12, 24}; // {3, 6, 12};
