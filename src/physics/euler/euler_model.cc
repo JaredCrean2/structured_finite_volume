@@ -1,8 +1,15 @@
 #include "euler_model.h"
+#include <iostream>
+
+#include "physics/euler/euler_flux.h"
 #include "roe_flux.h"
+#include "hlle_flux.h"
+#include "lax_friedrich_flux.h"
+#include "disc/face_field.h"
 
 namespace structured_fv {
 namespace euler {
+
 
 void EulerModel::evaluateRhs(DiscVectorPtr<Real> q, Real t, 
                              DiscVectorPtr<Real> residual)
@@ -14,11 +21,22 @@ void EulerModel::evaluateRhs(DiscVectorPtr<Real> q, Real t,
   std::cout << "max wave speed = " << computeMaxWaveSpeed(m_solution) << std::endl;
   m_residual->set(0);
 
-  HLLEFlux flux;
-  //LaxFriedrichFlux flux;
-  //RoeFlux flux;
-  evaluateInterfaceTerms(m_solution, t, flux, XDirTag(), m_residual);
-  evaluateInterfaceTerms(m_solution, t, flux, YDirTag(), m_residual);
+  if (m_opts.flux == FluxFunction::Roe)
+  {
+    RoeFlux flux(m_opts.roe_efix_delta);
+    evaluateInterfaceTerms(m_solution, t, flux, XDirTag(), m_residual);
+    evaluateInterfaceTerms(m_solution, t, flux, YDirTag(), m_residual);
+  } else if (m_opts.flux == FluxFunction::HLLE)
+  {
+    HLLEFlux flux;
+    evaluateInterfaceTerms(m_solution, t, flux, XDirTag(), m_residual);
+    evaluateInterfaceTerms(m_solution, t, flux, YDirTag(), m_residual);    
+  } else if (m_opts.flux == FluxFunction::LLF)
+  {
+    LaxFriedrichFlux flux;
+    evaluateInterfaceTerms(m_solution, t, flux, XDirTag(), m_residual);
+    evaluateInterfaceTerms(m_solution, t, flux, YDirTag(), m_residual);    
+  }
 
   evaluateSourceTerm(t, m_residual);
 

@@ -2,22 +2,20 @@
 #define STRUCTURED_FINITE_VOLUME_PHYSICS_EULER_MODEL_H
 
 #include "disc/discretization.h"
-#include "physics/euler/euler_flux.h"
 #include "utils/project_defs.h"
 #include "physics/physics_model.h"
-
+#include "flux_function_enums.h"
 #include "typedefs.h"
-#include "hlle_flux.h"
-#include "lax_friedrich_flux.h"
-#include "disc/face_field.h"
-#include "disc/elem_field.h"
-
-#include <iostream>
 
 namespace structured_fv {
 namespace euler {
 
-struct EulerOpts {};
+
+struct EulerOpts
+{
+  FluxFunction flux = FluxFunction::Roe;
+  Real roe_efix_delta = 0.3;
+};
 
 class EulerModel : public PhysicsModel
 {
@@ -25,7 +23,7 @@ class EulerModel : public PhysicsModel
     EulerModel(const EulerOpts& opts, StructuredDiscPtr disc,
                const std::vector<Fxyt>& bc_functions,
                Fxyt source_func) :
-      //m_opts(opts),
+      m_opts(opts),
       m_disc(disc),
       m_bc_functions(bc_functions),
       m_source_func(source_func),
@@ -60,7 +58,7 @@ class EulerModel : public PhysicsModel
     Real computeMaxWaveSpeed(ElementFieldPtr<Real> solution);
 
 
-    //EulerOpts m_opts;
+    EulerOpts m_opts;
     StructuredDiscPtr m_disc;
     std::vector<Fxyt> m_bc_functions;
     Fxyt m_source_func;
