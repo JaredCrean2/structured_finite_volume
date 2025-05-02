@@ -18,3 +18,29 @@ TEST(HLLEFlux, SameState)
   for (UInt i=0; i < DofsPerCell; ++i)
     EXPECT_NEAR(flux_val[i], flux_expected[i], 1e-8);
 }
+
+TEST(HLLEFlux, Supersonic)
+{
+  Vec4<Real> prim_varsL = {2, 400, 500, 300};
+  Vec4<Real> prim_varsR = {2, 500, 700, 300};
+  auto qL = compute_conservative_variables(prim_varsL, PrimitiveVarTag());
+  auto qR = compute_conservative_variables(prim_varsR, PrimitiveVarTag());
+  Vec2<Real> normalR = {1.0, 0.0};
+  Vec2<Real> normalL = {-1.0, 0.0};
+
+  HLLEFlux flux;
+  {
+    Vec4<Real> flux_val = flux(qL, qR, normalR);
+    Vec4<Real> flux_expected = compute_euler_flux(qL, normalR);
+    for (UInt i=0; i < DofsPerCell; ++i)
+      EXPECT_NEAR(flux_val[i], flux_expected[i], 1e-8);
+  }
+
+
+  {
+    Vec4<Real> flux_val = flux(qL, qR, normalL);
+    Vec4<Real> flux_expected = compute_euler_flux(qR, normalL);
+    for (UInt i=0; i < DofsPerCell; ++i)
+      EXPECT_NEAR(flux_val[i], flux_expected[i], 1e-8);
+  }
+}

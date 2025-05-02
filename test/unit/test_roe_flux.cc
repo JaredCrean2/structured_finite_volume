@@ -34,9 +34,7 @@ TEST(RoeFlux, Supersonic)
     Vec4<Real> flux_val = flux(qL, qR, normalR);
     Vec4<Real> flux_expected = compute_euler_flux(qL, normalR);
     for (UInt i=0; i < DofsPerCell; ++i)
-    {
       EXPECT_NEAR(flux_val[i], flux_expected[i], 1e-8);
-    }
   }
 
 
@@ -46,5 +44,4 @@ TEST(RoeFlux, Supersonic)
     for (UInt i=0; i < DofsPerCell; ++i)
       EXPECT_NEAR(flux_val[i], flux_expected[i], 1e-8);
   }
-
 }

@@ -14,9 +14,9 @@ void EulerModel::evaluateRhs(DiscVectorPtr<Real> q, Real t,
   std::cout << "max wave speed = " << computeMaxWaveSpeed(m_solution) << std::endl;
   m_residual->set(0);
 
-  //HLLEFlux flux;
+  HLLEFlux flux;
   //LaxFriedrichFlux flux;
-  RoeFlux flux;
+  //RoeFlux flux;
   evaluateInterfaceTerms(m_solution, t, flux, XDirTag(), m_residual);
   evaluateInterfaceTerms(m_solution, t, flux, YDirTag(), m_residual);
 
