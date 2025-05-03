@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "physics/euler/flux_function_enums.h"
 #include "physics/euler/roe_flux.h"
-#include "physics/euler/roe_hht_flux.h"
+#include "physics/euler/roe_hh_flux.h"
 #include "physics/euler/hlle_flux.h"
 #include "physics/euler/lax_friedrich_flux.h"
 

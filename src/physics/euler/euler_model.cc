@@ -3,7 +3,7 @@
 
 #include "physics/euler/euler_flux.h"
 #include "roe_flux.h"
-#include "roe_hht_flux.h"
+#include "roe_hh_flux.h"
 #include "hlle_flux.h"
 #include "lax_friedrich_flux.h"
 #include "disc/face_field.h"
