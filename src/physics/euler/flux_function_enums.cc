@@ -11,6 +11,7 @@ std::string get_name(FluxFunction flux)
   switch(flux)
   {
     case FluxFunction::Roe: { return "Roe"; }
+    case FluxFunction::RoeHH: { return "RoeHH"; }
     case FluxFunction::HLLE: { return "HLLE"; }
     case FluxFunction::LLF: { return "Local_Lax_Friedrich"; }
     default:  throw std::runtime_error("Unhandled FluxFunction enum");

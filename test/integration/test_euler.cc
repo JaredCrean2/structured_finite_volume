@@ -204,6 +204,7 @@ TEST_P(EulerConvergenceTest, XSolutionSubsonicVelocity)
 
 INSTANTIATE_TEST_SUITE_P(, EulerConvergenceTest, 
                          testing::Values(euler::FluxFunction::Roe,
+                                         euler::FluxFunction::RoeHH,
                                          euler::FluxFunction::HLLE,
                                          euler::FluxFunction::LLF),
                         [](const testing::TestParamInfo<euler::FluxFunction>& info)

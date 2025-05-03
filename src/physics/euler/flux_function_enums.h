@@ -9,6 +9,7 @@ namespace euler {
 enum class FluxFunction
 {
   Roe,
+  RoeHH,
   LLF,
   HLLE,
 };

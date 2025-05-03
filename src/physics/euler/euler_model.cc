@@ -3,6 +3,7 @@
 
 #include "physics/euler/euler_flux.h"
 #include "roe_flux.h"
+#include "roe_hht_flux.h"
 #include "hlle_flux.h"
 #include "lax_friedrich_flux.h"
 #include "disc/face_field.h"
@@ -26,6 +27,11 @@ void EulerModel::evaluateRhs(DiscVectorPtr<Real> q, Real t,
     RoeFlux flux(m_opts.roe_efix_delta);
     evaluateInterfaceTerms(m_solution, t, flux, XDirTag(), m_residual);
     evaluateInterfaceTerms(m_solution, t, flux, YDirTag(), m_residual);
+  } else if (m_opts.flux == FluxFunction::RoeHH)
+  {
+    RoeHHFlux flux;
+    evaluateInterfaceTerms(m_solution, t, flux, XDirTag(), m_residual);
+    evaluateInterfaceTerms(m_solution, t, flux, YDirTag(), m_residual);    
   } else if (m_opts.flux == FluxFunction::HLLE)
   {
     HLLEFlux flux;
@@ -35,7 +41,10 @@ void EulerModel::evaluateRhs(DiscVectorPtr<Real> q, Real t,
   {
     LaxFriedrichFlux flux;
     evaluateInterfaceTerms(m_solution, t, flux, XDirTag(), m_residual);
-    evaluateInterfaceTerms(m_solution, t, flux, YDirTag(), m_residual);    
+    evaluateInterfaceTerms(m_solution, t, flux, YDirTag(), m_residual);  
+  } else
+  {
+    throw std::runtime_error("unhandled FluxFunction enum");
   }
 
   evaluateSourceTerm(t, m_residual);
