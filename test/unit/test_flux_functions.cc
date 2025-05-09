@@ -4,6 +4,7 @@
 #include "physics/euler/roe_hh_flux.h"
 #include "physics/euler/hlle_flux.h"
 #include "physics/euler/lax_friedrich_flux.h"
+#include "physics/euler/hllc_flux.h"
 
 
 namespace {
@@ -19,7 +20,8 @@ class FluxFunctionTester : public testing::Test
 using FluxFunctions = ::testing::Types<euler::RoeFlux,
                                        euler::RoeHHFlux,
                                        euler::HLLEFlux,
-                                       euler::LaxFriedrichFlux>;
+                                       euler::LaxFriedrichFlux,
+                                       euler::HLLCFlux>;
 
 class NameGenerator
 {
@@ -35,6 +37,8 @@ class NameGenerator
         return euler::get_name(euler::FluxFunction::HLLE);
       if constexpr (std::is_same_v<T, euler::LaxFriedrichFlux>)
         return euler::get_name(euler::FluxFunction::LLF);
+      if constexpr (std::is_same_v<T, euler::HLLCFlux>)
+        return euler::get_name(euler::FluxFunction::HLLC);
       else
         throw std::runtime_error("unhandled enum");       
     }
@@ -57,7 +61,10 @@ TYPED_TEST(FluxFunctionTester, SameState)
   Vec4<Real> flux_expected = compute_euler_flux(q, normal);
 
   for (UInt i=0; i < DofsPerCell; ++i)
+  {
+    std::cout << "\ni = " << i << std::endl;
     EXPECT_NEAR(flux_val[i], flux_expected[i], 1e-8);
+  }
 }
 
 TYPED_TEST(FluxFunctionTester, Supersonic)

@@ -206,7 +206,8 @@ INSTANTIATE_TEST_SUITE_P(, EulerConvergenceTest,
                          testing::Values(euler::FluxFunction::Roe,
                                          euler::FluxFunction::RoeHH,
                                          euler::FluxFunction::HLLE,
-                                         euler::FluxFunction::LLF),
+                                         euler::FluxFunction::LLF,
+                                         euler::FluxFunction::HLLC),
                         [](const testing::TestParamInfo<euler::FluxFunction>& info)
                         { return euler::get_name(info.param);
                         });

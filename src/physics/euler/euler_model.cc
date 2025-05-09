@@ -6,6 +6,7 @@
 #include "roe_hh_flux.h"
 #include "hlle_flux.h"
 #include "lax_friedrich_flux.h"
+#include "hllc_flux.h"
 #include "disc/face_field.h"
 
 namespace structured_fv {
@@ -42,6 +43,11 @@ void EulerModel::evaluateRhs(DiscVectorPtr<Real> q, Real t,
     LaxFriedrichFlux flux;
     evaluateInterfaceTerms(m_solution, t, flux, XDirTag(), m_residual);
     evaluateInterfaceTerms(m_solution, t, flux, YDirTag(), m_residual);  
+  } else if (m_opts.flux == FluxFunction::HLLC)
+  {
+    HLLCFlux flux;
+    evaluateInterfaceTerms(m_solution, t, flux, XDirTag(), m_residual);
+    evaluateInterfaceTerms(m_solution, t, flux, YDirTag(), m_residual);      
   } else
   {
     throw std::runtime_error("unhandled FluxFunction enum");

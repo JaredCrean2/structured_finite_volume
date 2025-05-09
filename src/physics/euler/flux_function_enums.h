@@ -12,6 +12,7 @@ enum class FluxFunction
   RoeHH,
   LLF,
   HLLE,
+  HLLC,
 };
 
 std::string get_name(FluxFunction flux);

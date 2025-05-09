@@ -58,9 +58,15 @@ constexpr T compute_sos(const Vec4<T>& sol)
 }
 
 template <typename T>
+constexpr T compute_momentum_n(const Vec4<T>& sol, const Vec2<Real>& normal)
+{
+  return (sol[1]*normal[0] + sol[2]*normal[1]);
+}
+
+template <typename T>
 constexpr T compute_un(const Vec4<T>& sol, const Vec2<Real>& normal)
 {
-  return (sol[1]*normal[0] + sol[2]*normal[1])/sol[0];
+  return compute_momentum_n(sol, normal)/sol[0];
 }
 
 template <typename T>
