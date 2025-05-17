@@ -37,6 +37,15 @@ target_include_directories(physics PUBLIC
 )
 target_link_libraries(physics PUBLIC disc utils)
 
+### Physics common
+file(GLOB physics_common_files physics/common/*.cc)
+add_library(physics_common "${physics_common_files}")
+target_include_directories(physics_common PUBLIC
+                          "${CMAKE_CURRENT_SOURCE_DIR}"
+                          "${PROJECT_BINARY_DIR}/include"  # needed for configured header
+)
+target_link_libraries(physics_common PUBLIC utils)
+
 ### Advection
 file(GLOB advection_files physics/advection/*.cc)
 add_library(advection "${advection_files}")
@@ -44,7 +53,7 @@ target_include_directories(advection PUBLIC
                           "${CMAKE_CURRENT_SOURCE_DIR}"
                           "${PROJECT_BINARY_DIR}/include"  # needed for configured header
 )
-target_link_libraries(advection PUBLIC physics disc utils)
+target_link_libraries(advection PUBLIC physics physics_common disc utils)
 
 
 ### Euler
@@ -54,7 +63,7 @@ target_include_directories(euler PUBLIC
                           "${CMAKE_CURRENT_SOURCE_DIR}"
                           "${PROJECT_BINARY_DIR}/include"  # needed for configured header
 )
-target_link_libraries(euler PUBLIC physics disc utils)
+target_link_libraries(euler PUBLIC physics physics_common disc utils)
 
 
 
@@ -66,9 +75,6 @@ target_include_directories(nlsolvers PUBLIC
                           "${PROJECT_BINARY_DIR}/include"  # needed for configured header
 )
 target_link_libraries(nlsolvers PUBLIC physics disc utils)
-
-
-
 
 
 #set(ALL_LIBS ${ALL_LIBS} structured_partition PARENT_SCOPE)

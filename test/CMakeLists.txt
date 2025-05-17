@@ -35,7 +35,8 @@ target_link_libraries(unit_tests
                      advection
                      euler
                      nlsolvers
-                     test_utils)
+                     test_utils
+                     physics_common)
 
 
 # integration tests
