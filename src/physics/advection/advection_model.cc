@@ -1,6 +1,7 @@
 #include "advection_model.h"
 #include "disc/discretization.h"
 #include "utils/face_iter_per_direction.h"
+#include "physics/common/slope_limiters.h"
 
 #include "utils/math.h"
 #include "disc/elem_field.h"
@@ -21,7 +22,7 @@ class FluxFunctionUpwind
       m_adv_velocity(advection_velocity)
     {}
 
-    Real operator()(Real qL, Real qR, const Vec2<Real>& normal)
+    constexpr Real operator()(Real qL, Real qR, const Vec2<Real>& normal) const
     {
       //TODO: do this more efficiently
       Real a_normal = dot(m_adv_velocity, normal);
@@ -47,6 +48,9 @@ AdvectionModel::AdvectionModel(const AdvectionOpts& opts, StructuredDiscPtr disc
 
   if (m_bc_functions.size() != disc->getNumGhostBCBlocks())
     throw std::runtime_error("number of BC functions must be equal to number of BC blocks");
+
+  if (m_disc->getNumGhostCells() < 2)
+    throw std::runtime_error("must have at least 2 ghost cells");
 }
 
 // evaluate the right hand side of the equation:
@@ -59,9 +63,36 @@ void AdvectionModel::evaluateRhs(DiscVectorPtr<Real> q, Real t,
   m_solution->updateGhostValues();
   m_residual->set(0);
 
-  FluxFunctionUpwind flux(m_opts.adv_velocity);
-  evaluateInterfaceTerms(m_solution, t, flux, XDirTag(), m_residual);
-  evaluateInterfaceTerms(m_solution, t, flux, YDirTag(), m_residual);
+  FluxFunctionUpwind flux(m_opts.adv_velocity);  
+  if (m_opts.limiter == common::SlopeLimiter::FirstOrder)
+  {
+    common::SlopeLimiterFirstOrder limiter;
+    evaluateInterfaceTerms(m_solution, t, flux, limiter, XDirTag(), m_residual);
+    evaluateInterfaceTerms(m_solution, t, flux, limiter, YDirTag(), m_residual);
+  } else if (m_opts.limiter == common::SlopeLimiter::MinMod)
+  {
+    common::SlopeLimiterMinMod limiter;
+    evaluateInterfaceTerms(m_solution, t, flux, limiter, XDirTag(), m_residual);
+    evaluateInterfaceTerms(m_solution, t, flux, limiter, YDirTag(), m_residual);
+  } else if (m_opts.limiter == common::SlopeLimiter::SuperBee)
+  {
+    common::SlopeLimiterSuperBee limiter;
+    evaluateInterfaceTerms(m_solution, t, flux, limiter, XDirTag(), m_residual);
+    evaluateInterfaceTerms(m_solution, t, flux, limiter, YDirTag(), m_residual);
+  } else if (m_opts.limiter == common::SlopeLimiter::VanAlba)
+  {
+    common::SlopeLimiterVanAlba limiter;
+    evaluateInterfaceTerms(m_solution, t, flux, limiter, XDirTag(), m_residual);
+    evaluateInterfaceTerms(m_solution, t, flux, limiter, YDirTag(), m_residual);
+  } else if (m_opts.limiter == common::SlopeLimiter::VanLeer)
+  {
+    common::SlopeLimiterVanLeer limiter;
+    evaluateInterfaceTerms(m_solution, t, flux, limiter, XDirTag(), m_residual);
+    evaluateInterfaceTerms(m_solution, t, flux, limiter, YDirTag(), m_residual);
+  } else
+  {
+    throw std::runtime_error("unsupported SlopeLimiter: " + common::get_name(m_opts.limiter));
+  }
 
   evaluateSourceTerm(t, m_residual);
 
@@ -99,10 +130,12 @@ void AdvectionModel::setBCValues(ElementFieldPtr<Real> solution, Real t)
 }
 
 
-template <typename Flux, typename Tag>
+template <typename Flux, typename SlopeLimiter, typename Tag>
 void AdvectionModel::evaluateInterfaceTerms(const ElementFieldPtr<Real>& solution, Real t,
-                                            Flux& flux_func, Tag dir_tag, ElementFieldPtr<Real> residual)
+                                            const Flux& flux_func, const SlopeLimiter& limiter, 
+                                            Tag dir_tag, ElementFieldPtr<Real> residual)
 {
+  constexpr double epsilon = 1e-15;
   NeighborDirection dir = toNeighborDirection(dir_tag);
 
   for (UInt block_id : m_disc->getRegularBlocksIds())
@@ -112,17 +145,29 @@ void AdvectionModel::evaluateInterfaceTerms(const ElementFieldPtr<Real>& solutio
     const auto& cell_inv_volume  = m_disc->getInvCellVolumeField()->getData(block_id);
     const auto& normals          = m_disc->getNormalField()->getData(block_id, dir);
     auto& res                    = residual->getData(block_id);
-
+    
     FaceRangePerDirection faces = block.getOwnedFaces();
     for (UInt i : faces.getXRange(dir_tag))
       for (UInt j : faces.getYRange(dir_tag))
       {
-
         FaceId face_id = faces.getFaceId(dir_tag, i, j);
+        const auto [cell_im1_left, cell_jm1_left] = increment(dir_tag, face_id.cell_i_left, face_id.cell_j_left, -1);
+        const auto [cell_ip1_right, cell_jp1_right] = increment(dir_tag, face_id.cell_i_right, face_id.cell_j_right, 1);
+        Real qLm1      = sol(cell_im1_left, cell_jm1_left, 0);
         Real qL        = sol(face_id.cell_i_left, face_id.cell_j_left, 0);
         Real qR        = sol(face_id.cell_i_right, face_id.cell_j_right, 0);
+        Real qRp1      = sol(cell_ip1_right, cell_jp1_right, 0);
+
+        Real rL = (qL - qLm1)/(qR - qL + epsilon);
+        Real rR = (qR - qL)/(qRp1 - qR + epsilon);
+        Real slopeL = (qR - qLm1)/2;
+        Real slopeR = (qRp1 - qL)/2;
+
+        Real qLhalf = qL + 0.5*limiter(rL)*slopeL;
+        Real qRhalf = qR - 0.5*limiter(rR)*slopeR;
+
         Vec2<Real> normal{normals(i, j, 0), normals(i, j, 1)};
-        Real flux      = flux_func(qL, qR, normal);
+        Real flux      = flux_func(qLhalf, qRhalf, normal);
 
         res(face_id.cell_i_left, face_id.cell_j_left, 0)   -= cell_inv_volume(face_id.cell_i_left, face_id.cell_j_left, 0) * flux;
         res(face_id.cell_i_right, face_id.cell_j_right, 0) += cell_inv_volume(face_id.cell_i_right, face_id.cell_j_right, 0) * flux;

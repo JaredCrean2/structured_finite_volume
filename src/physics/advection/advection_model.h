@@ -2,6 +2,7 @@
 #define STRUCTURED_FINITE_VOLUME_PHYSICS_ADVECTION_MODEL_H
 
 #include "disc/disc_interface.h"
+#include "physics/common/slope_limiters.h"
 #include "physics/physics_model.h"
 #include "disc/discretization.h"
 #include "utils/math.h"
@@ -22,6 +23,7 @@ using Fxyt = std::function<Real(Real, Real, Real)>;
 struct AdvectionOpts
 {
   Vec2<Real> adv_velocity{0, 0};
+  common::SlopeLimiter limiter = common::SlopeLimiter::FirstOrder;
 };
 
 class AdvectionModel : public PhysicsModel
@@ -43,9 +45,10 @@ class AdvectionModel : public PhysicsModel
 
     void setBCValues(ElementFieldPtr<Real> solution, Real t);
 
-    template <typename Flux, typename Tag>
+    template <typename Flux, typename SlopeLimiter, typename Tag>
     void evaluateInterfaceTerms(const ElementFieldPtr<Real>& solution, Real t,
-                                Flux& flux, Tag tag, ElementFieldPtr<Real> resdual);
+                                const Flux& flux, const SlopeLimiter& limiter, 
+                                Tag tag, ElementFieldPtr<Real> resdual);
 
     void evaluateSourceTerm(Real t, ElementFieldPtr<Real> residual);
 

@@ -31,7 +31,7 @@ class AdvectionTester : public ::testing::Test
 
 
     UInt m_dofs_per_cell = 1;
-    int m_num_bc_ghost_cells = 1;
+    int m_num_bc_ghost_cells = 2;
     mesh::MeshSpec spec;
     std::shared_ptr<mesh::StructuredMesh> m_mesh;
     std::shared_ptr<disc::StructuredDisc> m_disc;

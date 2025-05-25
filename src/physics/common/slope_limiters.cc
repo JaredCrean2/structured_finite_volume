@@ -10,7 +10,7 @@ std::string get_name(SlopeLimiter limiter)
   {
     case SlopeLimiter::FirstOrder: { return "Slope_Limiter_FirstOrder"; }
     case SlopeLimiter::MinMod:     { return "Slope_Limiter_MinMod"; }
-    case SlopeLimiter::SuperBee:   { return "Slope_Limiter_SuperMod"; }
+    case SlopeLimiter::SuperBee:   { return "Slope_Limiter_SuperBee"; }
     case SlopeLimiter::VanAlba:    { return "Slope_Limiter_VanAlba"; }
     case SlopeLimiter::VanLeer:    { return "Slope_Limiter_VanLeer"; }
     default:

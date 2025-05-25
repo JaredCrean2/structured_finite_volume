@@ -20,6 +20,16 @@ constexpr NeighborDirection toNeighborDirection(YDirTag)
   return NeighborDirection::North;
 }
 
+constexpr std::pair<UInt, UInt> increment(XDirTag, UInt i, UInt j, Int offset)
+{
+  return {i + offset, j};
+}
+
+constexpr std::pair<UInt, UInt> increment(YDirTag, UInt i, UInt j, Int offset)
+{
+  return {i, j + offset};
+}
+
 class FaceRangePerDirection
 {
   public:

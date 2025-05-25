@@ -1,17 +1,10 @@
 #include "explicit_euler.h"
 
+#include <stdexcept>
+#include <iostream>
+
 namespace structured_fv {
 namespace nlsolvers {
-
-void checkOpts(const ExplicitEulerOpts& opts)
-{
-  if (opts.delta_t == 0)
-    throw std::runtime_error("delta_t cannot be zero");
-
-  if (opts.t_end <= opts.t_start)
-    throw std::runtime_error("t_end must be greater than t_start");
-}
-
 
 void explicitEuler(const ExplicitEulerOpts& opts, PhysicsModelPtr model, disc::DiscVectorPtr<Real> sol)
 {
@@ -24,7 +17,8 @@ void explicitEuler(const ExplicitEulerOpts& opts, PhysicsModelPtr model, disc::D
   UInt iter = 0;
   while (t < opts.t_end && !converged && iter != opts.itermax)
   {
-    std::cout << "\niter " << iter << std::endl;
+    std::cout << "\niter " << iter  << ", t = " << t << std::endl;
+    Real delta_t = std::min(opts.delta_t, opts.t_end - t);
     model->evaluateRhs(sol, t, dudt);
 
     
@@ -38,13 +32,15 @@ void explicitEuler(const ExplicitEulerOpts& opts, PhysicsModelPtr model, disc::D
     if (!converged)
     {
       for (GlobalDof i=0; i < sol->size(); ++i)
-        (*sol)(i) += opts.delta_t * (*dudt)(i);
+        (*sol)(i) += delta_t * (*dudt)(i);
 
-      t = std::min(t + opts.delta_t, opts.t_end);
+      t += delta_t;
     }
 
     iter++;
   }
+
+  std::cout << "final t = " << t << std::endl;
 
   if (t < opts.t_end && (opts.residual_tol >= 0 && !converged))
     throw std::runtime_error("ExplicitEuler failed");

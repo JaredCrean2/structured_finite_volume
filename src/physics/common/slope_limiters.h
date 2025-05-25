@@ -4,6 +4,7 @@
 #include "flux_limiters.h"
 #include <algorithm>
 #include <string>
+#include <iostream>
 
 namespace structured_fv {
 namespace common {
@@ -26,6 +27,12 @@ enum class SlopeLimiter
 };
 
 std::string get_name(SlopeLimiter limiter);
+
+inline std::ostream& operator<<(std::ostream& os, SlopeLimiter limiter)
+{
+  os << get_name(limiter);
+  return os;
+}
 
 
 template <typename FluxLimiterType>
@@ -77,6 +84,13 @@ constexpr SlopeLimiter get_enum(SlopeLimiterVanLeer)
   return SlopeLimiter::VanLeer;
 }
 
+
+template <typename FluxLimiter>
+std::ostream& operator<<(std::ostream& os, const SlopeLimiterAdaptor<FluxLimiter>& limiter)
+{
+  os << get_name(get_enum(limiter));
+  return os;
+}
 }
 }
 

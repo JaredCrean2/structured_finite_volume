@@ -110,3 +110,32 @@ TEST(FaceIterPerDirection, YDirectionWithGhostsFaceCount)
 
   EXPECT_EQ(nfaces, 15);
 }
+
+TEST(FaceIterPerDirection, Increment)
+{
+  UInt i = 2;
+  UInt j = 3;
+  {
+    auto [i2, j2] = increment(XDirTag(), i, j, 2);
+    EXPECT_EQ(i2, 4);
+    EXPECT_EQ(j2, j);
+  }
+
+  {
+    auto [i2, j2] = increment(XDirTag(), i, j, -2);
+    EXPECT_EQ(i2, 0);
+    EXPECT_EQ(j2, j);
+  }
+
+  {
+    auto [i2, j2] = increment(YDirTag(), i, j, 2);
+    EXPECT_EQ(i2, i);
+    EXPECT_EQ(j2, 5);
+  }
+
+  {
+    auto [i2, j2] = increment(YDirTag(), i, j, -2);
+    EXPECT_EQ(i2, i);
+    EXPECT_EQ(j2, 1);
+  }  
+}
