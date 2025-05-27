@@ -16,6 +16,15 @@ TEST(EulerFlux, Pressure)
   EXPECT_NEAR(compute_pressure(q), 1.01325E5, 100.0);
 }
 
+TEST(EulerFlux, PrimitiveVariables)
+{
+  Vec4<Real> prim_vars = {1.225, 100, 200, 288.16};
+  auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());  
+  Vec4<Real> prim_vars2 = compute_primitive_variables(q);
+  for (UInt i=0; i < 4; ++i)
+    EXPECT_NEAR(prim_vars[i], prim_vars2[i], 1e-13);
+}
+
 TEST(EulerFlux, PressureJac)
 {
   Vec4<Real> prim_vars = {1.225, 10, 20, 288.16};

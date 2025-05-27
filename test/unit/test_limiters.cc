@@ -32,6 +32,10 @@ class NameGenerator
 
 TYPED_TEST_SUITE(LimiterTestFixture, MyTypes, NameGenerator);
 
+
+struct Foo
+{};
+
 }
 
 
@@ -46,5 +50,12 @@ TYPED_TEST(LimiterTestFixture, SpecialValues)
   Limiter limiter;
   EXPECT_DOUBLE_EQ(limiter(-1.0), 0.0);
   EXPECT_DOUBLE_EQ(limiter(0.0),  0.0);
-  EXPECT_DOUBLE_EQ(limiter(1.0),  1.0);  
+  EXPECT_DOUBLE_EQ(limiter(1.0),  1.0);
+}
+
+TEST(Limiters, IsSlopeLimiter)
+{
+  static_assert(IsSlopeLimiter<SlopeLimiterMinMod>);
+  EXPECT_FALSE(IsSlopeLimiter<FluxLimiterMinMod>);
+  EXPECT_FALSE(IsSlopeLimiter<Foo>);
 }

@@ -203,14 +203,26 @@ constexpr void compute_eigen_decomp(const Vec4<T>& sol, const Vec2<Real>& normal
 }
 
 struct PrimitiveVarTag {};
+struct ConservativeVarTag {};
 
 template <typename T>
-constexpr Vec4<T> compute_conservative_variables(const Vec4<T>& primitive_vars, PrimitiveVarTag)
+constexpr Vec4<T> compute_conservative_variables(const Vec4<T>& primitive_vars, PrimitiveVarTag = PrimitiveVarTag{})
 {
   T e = Cv*primitive_vars[3];
   T E = primitive_vars[0]*(e + 0.5*(primitive_vars[1]*primitive_vars[1] + primitive_vars[2]*primitive_vars[2]));
 
   return {primitive_vars[0], primitive_vars[0]*primitive_vars[1], primitive_vars[0]*primitive_vars[2], E};
+}
+
+template <typename T>
+constexpr Vec4<T> compute_primitive_variables(const Vec4<T>& conservative_vars, ConservativeVarTag = ConservativeVarTag{})
+{
+  T u = conservative_vars[1]/conservative_vars[0];
+  T v = conservative_vars[2]/conservative_vars[0];
+  T e = conservative_vars[3]/conservative_vars[0] - 0.5*(u*u + v*v);
+  T temp = e/Cv;
+
+  return {conservative_vars[0], u, v, temp};
 }
 
 // For now, rotate solution into the x direction and rotate the flux

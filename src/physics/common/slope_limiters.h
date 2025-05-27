@@ -34,9 +34,14 @@ inline std::ostream& operator<<(std::ostream& os, SlopeLimiter limiter)
   return os;
 }
 
+class SlopeLimiterBase
+{};
+
+template <typename SlopeLimiterType>
+constexpr bool IsSlopeLimiter = std::is_base_of_v<SlopeLimiterBase, SlopeLimiterType>;
 
 template <typename FluxLimiterType>
-class SlopeLimiterAdaptor
+class SlopeLimiterAdaptor : public SlopeLimiterBase
 {
   public:
 
