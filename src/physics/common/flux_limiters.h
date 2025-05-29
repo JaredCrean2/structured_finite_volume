@@ -69,7 +69,12 @@ class FluxLimiterVanAlba
   template <typename T>
   constexpr T operator()(const T& r) const
   {
-    return std::max(T(0), (r*r + r)/(r*r + 1));
+    // the textbook form of the van Alba limiter is
+    //  psi = (r*r + r)/(r*r + 1) for r >= 0 and 
+    //  psi = 0 for r < 0.
+    // To get psi = 0 for r < 0, modify it as
+    T num = r + 1;
+    return 0.5*(r*num + std::abs(r)*num)/(r*r + 1);
   }  
 };
 

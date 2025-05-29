@@ -68,7 +68,7 @@ inline std::array<Real, 2> computeCellCentroid(StructuredBlock::CoordsHostView v
   return {(vert_coords(i, j, 0) + vert_coords(i+1, j, 0) + 
            vert_coords(i+1, j+1, 0) + vert_coords(i, j+1, 0))/4,
           (vert_coords(i, j, 1) + vert_coords(i+1, j, 1) + 
-           vert_coords(i+1, j+1, 1) + vert_coords(i+1, j+1, 1))/4};
+           vert_coords(i+1, j+1, 1) + vert_coords(i, j+1, 1))/4};
 }
 
 

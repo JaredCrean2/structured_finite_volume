@@ -27,6 +27,8 @@ class ReconstructionSimple final : public ReconstructionBase
   static_assert(common::IsSlopeLimiter<SlopeLimiter>);
 
   public:
+    using Limiter = SlopeLimiter;
+
     ReconstructionSimple(SlopeLimiter limiter) :
       m_limiter(limiter)
     {}
@@ -36,7 +38,7 @@ class ReconstructionSimple final : public ReconstructionBase
     // sign = +1 gives the solution at the right end of the cell,
     // sign = -1 gives the solution at the left end of the cell
     template <typename T>
-    /*constexpr*/ Vec4<T> operator()(const Vec4<T>& q_im1, const Vec4<T>& q_i,
+    constexpr Vec4<T> operator()(const Vec4<T>& q_im1, const Vec4<T>& q_i,
                                  const Vec4<T>& q_ip1, Int sign) const
     {
       constexpr T epsilon = 1e-15;
@@ -62,10 +64,14 @@ template <typename SlopeLimiter>
 using ReconstructionConservative = ReconstructionSimple<SlopeLimiter>;
 
 
+// takes in conservative variables, converts to primitive, applies slope
+// limiter, then converts result back to conservative
 template <typename SlopeLimiter>
 class ReconstructionPrimitive final : public ReconstructionBase
 {
   public:
+    using Limiter = SlopeLimiter;
+
     ReconstructionPrimitive(SlopeLimiter limiter) :
       m_reconstruction(limiter)
     {}

@@ -2,9 +2,11 @@
 #define STRUCTURED_FINITE_VOLUME_PHYSICS_EULER_MODEL_H
 
 #include "disc/discretization.h"
+#include "physics/common/slope_limiters.h"  // TODO: separate out enums from defs
 #include "utils/project_defs.h"
 #include "physics/physics_model.h"
 #include "flux_function_enums.h"
+#include "reconstruction_enum.h"
 #include "typedefs.h"
 
 namespace structured_fv {
@@ -13,6 +15,8 @@ namespace euler {
 
 struct EulerOpts
 {
+  common::SlopeLimiter limiter = common::SlopeLimiter::FirstOrder;
+  Reconstruction recon = Reconstruction::Conservative;
   FluxFunction flux = FluxFunction::Roe;
   Real roe_efix_delta = 0.3;
 };

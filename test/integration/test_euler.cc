@@ -1,4 +1,5 @@
 #include "gtest/gtest.h"
+#include "physics/common/slope_limiters.h"
 #include "physics/euler/euler_flux.h"
 #include "physics/euler/euler_model.h"
 #include "nonlinear_solvers/explicit_euler.h"
@@ -11,15 +12,16 @@ class EulerConvergenceTest : public testing::TestWithParam<euler::FluxFunction>
 {};
 
 template <typename Tsol, typename Tsrc>
-void runConvergenceStudy(const euler::EulerOpts opts, const std::vector<UInt>& ncells, Real expected_ratio,
+void runConvergenceStudy(const euler::EulerOpts opts, const std::vector<UInt>& ncells,
                          Tsol u_ex, Tsrc src_term)
 {
   std::vector<Real> errors, ratios;
+  int expected_ratio = opts.limiter == common::SlopeLimiter::FirstOrder ? 2 : 4;
 
   for (UInt ncell : ncells)
   {
     std::cout << "\nncells = " << ncell << std::endl;
-    UInt num_bc_ghost_cells = 1;
+    UInt num_bc_ghost_cells = 2;
     UInt dofs_per_cell = 4;
     mesh::MeshSpec spec(1, 1, num_bc_ghost_cells);
     spec.blocks(0, 0) = mesh::MeshBlockSpec(ncell, ncell, 0, [](Real x, Real y) { return std::array<Real, 2>{x, y}; });
@@ -41,7 +43,7 @@ void runConvergenceStudy(const euler::EulerOpts opts, const std::vector<UInt>& n
 
     nlsolvers::ExplicitEulerOpts time_solver_opts;
     time_solver_opts.t_end = 9999;
-    time_solver_opts.residual_tol = 1e-7;
+    time_solver_opts.residual_tol = 2e-7;
     Real delta_x = 1.0/spec.blocks(0, 0).num_cells_x;
     Real delta_y = 1.0/spec.blocks(0, 0).num_cells_y;
     time_solver_opts.delta_t = 0.25 * std::min(delta_x, delta_y)/(746.0);
@@ -49,6 +51,7 @@ void runConvergenceStudy(const euler::EulerOpts opts, const std::vector<UInt>& n
     auto sol = std::make_shared<disc::DiscVector<Real>>(disc, "solution");
     sol->set(u0);
 
+    //TODO: use rk2ssp for 2nd order
     nlsolvers::explicitEuler(time_solver_opts, euler_model, sol);
 
     Real error = 0.0;
@@ -86,7 +89,7 @@ void runConvergenceStudy(const euler::EulerOpts opts, const std::vector<UInt>& n
     std::cout << ncells[i] << ": " << errors[i] << ", ratios = " << ratios[i] << std::endl;
   }
 
-  EXPECT_NEAR(ratios.back(), 2, 0.25);
+  EXPECT_NEAR(ratios.back(), expected_ratio, 0.25);
 }
 }
 
@@ -101,7 +104,7 @@ TEST_P(EulerConvergenceTest, XSolutionSupersonic)
   euler::EulerOpts opts;
   opts.flux = GetParam();
 
-  runConvergenceStudy(opts, ncells, 2, u_ex, src_term);
+  runConvergenceStudy(opts, ncells, u_ex, src_term);
 }
 
 TEST_P(EulerConvergenceTest, YSolutionSupersonic)
@@ -115,7 +118,7 @@ TEST_P(EulerConvergenceTest, YSolutionSupersonic)
   euler::EulerOpts opts;
   opts.flux = GetParam();
 
-  runConvergenceStudy(opts, ncells, 2, u_ex, src_term);
+  runConvergenceStudy(opts, ncells, u_ex, src_term);
 }
 
 TEST_P(EulerConvergenceTest, XSolutionSubsonic)
@@ -129,7 +132,37 @@ TEST_P(EulerConvergenceTest, XSolutionSubsonic)
   euler::EulerOpts opts;
   opts.flux = GetParam();
 
-  runConvergenceStudy(opts, ncells, 2, u_ex, src_term);
+  runConvergenceStudy(opts, ncells, u_ex, src_term);
+}
+
+TEST_P(EulerConvergenceTest, XSolutionSubsonicVanAlba)
+{
+  std::vector<UInt> ncells = {3, 6, 12, 24}; // {3, 6, 12};
+  Real u = 40;
+  Real T = 298;
+  auto u_ex = [&](Real x, Real y, Real t) { return std::array<Real, 4>{x*x+1, u*(x*x+1), 0, (x*x+1)*(euler::Cv*T + 0.5*u*u)}; };
+  auto src_term = [&](Real x, Real y, Real t) { return std::array<Real, 4>{2*x*u, 2*x*u*u + 2*x*euler::R*T, 0, 2*x*(euler::Cv*T + 0.5*u*u + euler::R*T)*u}; };
+
+  euler::EulerOpts opts;
+  opts.flux = GetParam();
+  opts.limiter = common::SlopeLimiter::VanAlba;
+
+  runConvergenceStudy(opts, ncells, u_ex, src_term);
+}
+
+TEST_P(EulerConvergenceTest, XSolutionSubsonicVanLeer)
+{
+  std::vector<UInt> ncells = {3, 6, 12, 24}; // {3, 6, 12};
+  Real u = 40;
+  Real T = 298;
+  auto u_ex = [&](Real x, Real y, Real t) { return std::array<Real, 4>{x*x+1, u*(x*x+1), 0, (x*x+1)*(euler::Cv*T + 0.5*u*u)}; };
+  auto src_term = [&](Real x, Real y, Real t) { return std::array<Real, 4>{2*x*u, 2*x*u*u + 2*x*euler::R*T, 0, 2*x*(euler::Cv*T + 0.5*u*u + euler::R*T)*u}; };
+
+  euler::EulerOpts opts;
+  opts.flux = GetParam();
+  opts.limiter = common::SlopeLimiter::VanLeer;
+
+  runConvergenceStudy(opts, ncells, u_ex, src_term);
 }
 
 TEST_P(EulerConvergenceTest, YSolutionSubsonic)
@@ -143,7 +176,7 @@ TEST_P(EulerConvergenceTest, YSolutionSubsonic)
   euler::EulerOpts opts;
   opts.flux = GetParam();
 
-  runConvergenceStudy(opts, ncells, 2, u_ex, src_term);
+  runConvergenceStudy(opts, ncells, u_ex, src_term);
 }
 
 TEST_P(EulerConvergenceTest, XSolutionSupersonicNegative)
@@ -158,7 +191,7 @@ TEST_P(EulerConvergenceTest, XSolutionSupersonicNegative)
   opts.flux = GetParam();
 
 
-  runConvergenceStudy(opts, ncells, 2, u_ex, src_term);
+  runConvergenceStudy(opts, ncells, u_ex, src_term);
 }
 
 TEST_P(EulerConvergenceTest, YSolutionSupersonicNegative)
@@ -173,7 +206,7 @@ TEST_P(EulerConvergenceTest, YSolutionSupersonicNegative)
   opts.flux = GetParam();
 
 
-  runConvergenceStudy(opts, ncells, 2, u_ex, src_term);
+  runConvergenceStudy(opts, ncells, u_ex, src_term);
 }
 
 TEST_P(EulerConvergenceTest, XSolutionSubsonicNegative)
@@ -188,7 +221,7 @@ TEST_P(EulerConvergenceTest, XSolutionSubsonicNegative)
   opts.flux = GetParam();
 
 
-  runConvergenceStudy(opts, ncells, 2, u_ex, src_term);
+  runConvergenceStudy(opts, ncells, u_ex, src_term);
 }
 
 TEST_P(EulerConvergenceTest, YSolutionSubsonicNegative)
@@ -203,7 +236,7 @@ TEST_P(EulerConvergenceTest, YSolutionSubsonicNegative)
   opts.flux = GetParam();
 
 
-  runConvergenceStudy(opts, ncells, 2, u_ex, src_term);
+  runConvergenceStudy(opts, ncells, u_ex, src_term);
 }
 
 
@@ -233,7 +266,7 @@ TEST_P(EulerConvergenceTest, XSolutionSubsonicVelocity)
   euler::EulerOpts opts;
   opts.flux = GetParam();
 
-  runConvergenceStudy(opts, ncells, 2, u_ex, src_term);
+  runConvergenceStudy(opts, ncells, u_ex, src_term);
 }
 
 TEST_P(EulerConvergenceTest, YSolutionSubsonicVelocity)
@@ -262,7 +295,7 @@ TEST_P(EulerConvergenceTest, YSolutionSubsonicVelocity)
   euler::EulerOpts opts;
   opts.flux = GetParam();
 
-  runConvergenceStudy(opts, ncells, 2, u_ex, src_term);
+  runConvergenceStudy(opts, ncells, u_ex, src_term);
 }
 
 INSTANTIATE_TEST_SUITE_P(, EulerConvergenceTest, 

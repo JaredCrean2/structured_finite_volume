@@ -7,6 +7,7 @@ namespace structured_fv {
 namespace mesh {
 
 
+using Fxy = std::function<std::array<double, 2>(double x, double y)>;
 struct MeshBlockSpec
 {
   // Note: num_cells_x and num_cells_y are the number of cells in each
@@ -19,7 +20,7 @@ struct MeshBlockSpec
   //       coordinate system, and should map from the unit square into
   //       the desired shape
   MeshBlockSpec(UInt num_cells_x=0, UInt num_cells_y=0, UInt rotation=0,
-                std::function<std::array<double, 2>(double x, double y)> coord_func = 
+                Fxy coord_func = 
                   [](double x, double y) {return std::array<double, 2>{x, y};}) :
     num_cells_x(num_cells_x),
     num_cells_y(num_cells_y),
@@ -32,7 +33,7 @@ struct MeshBlockSpec
 
   UInt rotation;  // 0 = no rotation, 1 = rotate 90 degrees counter-clockwise, 2 = 180 degrees, 3 = 270 degrees
                   // this allows testing the transform between block interfaces
-  std::function<std::array<double, 2>(double x, double y)> coord_func;
+  Fxy coord_func;
 };
 
 

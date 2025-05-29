@@ -48,9 +48,23 @@ TYPED_TEST(LimiterTestFixture, SpecialValues)
 
   using Limiter = TypeParam;
   Limiter limiter;
+  EXPECT_DOUBLE_EQ(limiter(-1000.0), 0.0);
   EXPECT_DOUBLE_EQ(limiter(-1.0), 0.0);
   EXPECT_DOUBLE_EQ(limiter(0.0),  0.0);
   EXPECT_DOUBLE_EQ(limiter(1.0),  1.0);
+}
+
+TEST(Limiters, VanAlbaReformulation)
+{
+  auto psi = [](double r) { return (r*r + r)/(r*r+1); };
+  FluxLimiterVanAlba limiter;
+
+  EXPECT_DOUBLE_EQ(limiter(0.0),   psi(0.0));
+  EXPECT_DOUBLE_EQ(limiter(0.25),  psi(0.25));
+  EXPECT_DOUBLE_EQ(limiter(0.5),   psi(0.5));
+  EXPECT_DOUBLE_EQ(limiter(1.0),   psi(1.0));
+  EXPECT_DOUBLE_EQ(limiter(2.0),   psi(2.0));
+  EXPECT_DOUBLE_EQ(limiter(100.0), psi(100.0));  
 }
 
 TEST(Limiters, IsSlopeLimiter)

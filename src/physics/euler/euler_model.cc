@@ -2,12 +2,8 @@
 #include <iostream>
 
 #include "physics/euler/euler_flux.h"
-#include "roe_flux.h"
-#include "roe_hh_flux.h"
-#include "hlle_flux.h"
-#include "lax_friedrich_flux.h"
-#include "hllc_flux.h"
-#include "disc/face_field.h"
+#include "physics/euler/typedefs.h"
+#include "interface_term.h"
 
 namespace structured_fv {
 namespace euler {
@@ -23,35 +19,7 @@ void EulerModel::evaluateRhs(DiscVectorPtr<Real> q, Real t,
   std::cout << "max wave speed = " << computeMaxWaveSpeed(m_solution) << std::endl;
   m_residual->set(0);
 
-  if (m_opts.flux == FluxFunction::Roe)
-  {
-    RoeFlux flux(m_opts.roe_efix_delta);
-    evaluateInterfaceTerms(m_solution, t, flux, XDirTag(), m_residual);
-    evaluateInterfaceTerms(m_solution, t, flux, YDirTag(), m_residual);
-  } else if (m_opts.flux == FluxFunction::RoeHH)
-  {
-    RoeHHFlux flux;
-    evaluateInterfaceTerms(m_solution, t, flux, XDirTag(), m_residual);
-    evaluateInterfaceTerms(m_solution, t, flux, YDirTag(), m_residual);    
-  } else if (m_opts.flux == FluxFunction::HLLE)
-  {
-    HLLEFlux flux;
-    evaluateInterfaceTerms(m_solution, t, flux, XDirTag(), m_residual);
-    evaluateInterfaceTerms(m_solution, t, flux, YDirTag(), m_residual);    
-  } else if (m_opts.flux == FluxFunction::LLF)
-  {
-    LaxFriedrichFlux flux;
-    evaluateInterfaceTerms(m_solution, t, flux, XDirTag(), m_residual);
-    evaluateInterfaceTerms(m_solution, t, flux, YDirTag(), m_residual);  
-  } else if (m_opts.flux == FluxFunction::HLLC)
-  {
-    HLLCFlux flux;
-    evaluateInterfaceTerms(m_solution, t, flux, XDirTag(), m_residual);
-    evaluateInterfaceTerms(m_solution, t, flux, YDirTag(), m_residual);      
-  } else
-  {
-    throw std::runtime_error("unhandled FluxFunction enum");
-  }
+  evaluateInterfaceTermsEntryPoint(m_opts, m_solution, t, m_disc, m_residual);
 
   evaluateSourceTerm(t, m_residual);
 
@@ -90,40 +58,6 @@ void EulerModel::setBCValues(ElementFieldPtr<Real> solution, Real t)
   }
 }
 
-template <typename Flux, typename Tag>
-void EulerModel::evaluateInterfaceTerms(const ElementFieldPtr<Real>& solution, Real t,
-                                            Flux& flux_func, Tag dir_tag, ElementFieldPtr<Real> residual)
-{
-  NeighborDirection dir = toNeighborDirection(dir_tag);
-
-  for (UInt block_id : m_disc->getRegularBlocksIds())
-  {
-    const StructuredBlock& block = m_disc->getBlock(block_id);
-    const auto& sol              = solution->getData(block_id);
-    const auto& cell_inv_volume  = m_disc->getInvCellVolumeField()->getData(block_id);
-    const auto& normals          = m_disc->getNormalField()->getData(block_id, dir);
-    auto& res                    = residual->getData(block_id);
-
-    FaceRangePerDirection faces = block.getOwnedFaces();
-    for (UInt i : faces.getXRange(dir_tag))
-      for (UInt j : faces.getYRange(dir_tag))
-      {
-        FaceId face_id = faces.getFaceId(dir_tag, i, j);
-        Vec4<Real> qL        = getValues(sol, face_id.cell_i_left, face_id.cell_j_left);
-        Vec4<Real> qR        = getValues(sol, face_id.cell_i_right, face_id.cell_j_right);
-        Vec2<Real> normal{normals(i, j, 0), normals(i, j, 1)};
-        Vec4<Real> flux      = flux_func(qL, qR, normal);
-        Real inv_volL = cell_inv_volume(face_id.cell_i_left, face_id.cell_j_left, 0);
-        Real inv_volR = cell_inv_volume(face_id.cell_i_right, face_id.cell_j_right, 0);
-
-        for (UInt k=0; k < DofsPerCell; ++k)
-        {
-          res(face_id.cell_i_left, face_id.cell_j_left, k)   -=  inv_volL * flux[k];
-          res(face_id.cell_i_right, face_id.cell_j_right, k) +=  inv_volR * flux[k];
-        }
-      }
-  }
-}
 
 void EulerModel::evaluateSourceTerm(Real t, ElementFieldPtr<Real> residual)
 {
