@@ -14,6 +14,9 @@ template <typename T>
 class DiscVector
 {
   public:
+    using ViewType = Kokkos::View<T*, HostMemorySpace>;
+    using ConstViewType = Kokkos::View<const T*, HostMemorySpace>;
+
     explicit DiscVector(StructuredDiscPtr disc, const std::string& name) :
       m_disc(*disc),
       m_data(name, disc->getNumDofs())
@@ -62,6 +65,10 @@ class DiscVector
           }
       }
     }
+
+    ViewType getData() { return m_data; }
+
+    ConstViewType getData() const { return m_data; }
 
   private:
     const StructuredDisc& m_disc;

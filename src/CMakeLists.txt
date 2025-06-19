@@ -7,7 +7,7 @@ target_include_directories(utils PUBLIC
                           "${CMAKE_CURRENT_SOURCE_DIR}"
                           "${PROJECT_BINARY_DIR}/include"  # needed for configured header
 )
-target_link_libraries(utils PUBLIC Kokkos::kokkos MPI::MPI_CXX)
+target_link_libraries(utils PUBLIC Kokkos::kokkos MPI::MPI_CXX Petsc)
 
 ### Mesh
 file(GLOB mesh_files mesh/*.cc)
@@ -16,7 +16,7 @@ target_include_directories(mesh PUBLIC
                           "${CMAKE_CURRENT_SOURCE_DIR}"
                           "${PROJECT_BINARY_DIR}/include"  # needed for configured header
 )
-target_link_libraries(mesh Kokkos::kokkos MPI::MPI_CXX)
+target_link_libraries(mesh Kokkos::kokkos MPI::MPI_CXX utils)
 
 
 ### Disc
@@ -66,8 +66,19 @@ target_include_directories(euler PUBLIC
 target_link_libraries(euler PUBLIC physics physics_common disc utils)
 
 
+### Linear System
+file(GLOB linear_system_files linear_system/*.cc)
+add_library(linear_system "${linear_system_files}")
+target_include_directories(linear_system PUBLIC
+                          "${CMAKE_CURRENT_SOURCE_DIR}"
+                          "${PROJECT_BINARY_DIR}/include"  # needed for configured header
+)
+target_link_libraries(linear_system PUBLIC disc utils BLAS::BLAS LAPACK::LAPACK Petsc)
+
 
 ### Nonlinear solvers
+#TODO: need to split out the PhysicsModel interface into its own
+#      library
 file(GLOB nlsolver_files nonlinear_solvers/*.cc)
 add_library(nlsolvers "${nlsolver_files}")
 target_include_directories(nlsolvers PUBLIC

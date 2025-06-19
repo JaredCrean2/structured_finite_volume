@@ -1,4 +1,5 @@
 #include "euler_model.h"
+#include "physics/euler/numerical_flux_base.h"
 #include "physics/euler/typedefs.h"
 #include "physics/common/slope_limiters.h"
 #include "physics/euler/reconstruction.h"
@@ -137,7 +138,7 @@ void evaluateInterfaceTerms(const ElementFieldPtr<Real>& solution, Real t, const
                             const Reconstruction& recon, const Flux& flux_func, ElementFieldPtr<Real> residual)
 {
   static_assert(IsReconstruction<Reconstruction>);
-  //TODO: add trait for flux functions
+  static_assert(IsNumericalFlux<Flux>);
 
   evaluateInterfaceTerm(solution, t, disc, recon, flux_func, XDirTag(), residual);
   evaluateInterfaceTerm(solution, t, disc, recon, flux_func, YDirTag(), residual);  

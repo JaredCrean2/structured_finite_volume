@@ -51,9 +51,9 @@ class Matrix
       return vals;
     }    
 
-    constexpr T* getData() { m_data.data(); }
+    constexpr T* getData() { return m_data.data(); }
 
-    constexpr const T* getData() const { m_data.data(); }
+    constexpr const T* getData() const { return m_data.data(); }
 
     constexpr UInt extent0() const { return M; }
 

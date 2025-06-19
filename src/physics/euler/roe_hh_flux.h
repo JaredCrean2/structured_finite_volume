@@ -2,16 +2,14 @@
 #define STRUCTURED_FINITE_VOLUME_PHYSICS_EULER_ROEHHT_H
 
 #include "euler_flux.h"
+#include "numerical_flux_base.h"
 #include "roe_state.h"
-
-#include <iomanip>
-
 
 namespace structured_fv {
 namespace euler {
 
 // Roe flux with the Harten-Hyman entropy fix
-class RoeHHFlux
+class RoeHHFlux final : public NumericalFlux
 {
   public:
     RoeHHFlux()
@@ -54,8 +52,6 @@ class RoeHHFlux
 
         if (lambda_kL < 0 && lambda_kR > 0)
         {
-          std::cout << std::setprecision(16);
-
           Real beta = (lambda_kR - lambdas[i])/(lambda_kR - lambda_kL);
           Real beta_c = 1 - beta;
           for (UInt j=0; j < 4; ++j)

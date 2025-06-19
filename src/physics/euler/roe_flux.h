@@ -2,6 +2,7 @@
 #define STRUCTURED_FINITE_VOLUME_PHYSICS_EULER_ROE_H
 
 #include "euler_flux.h"
+#include "numerical_flux_base.h"
 #include "roe_state.h"
 
 
@@ -10,7 +11,7 @@ namespace euler {
 
 // Roe flux with Hartens entropy fix.  Setting delta = 0 gives
 // Roe's original scheme
-class RoeFlux
+class RoeFlux final : public NumericalFlux
 {
   public:
     RoeFlux(Real delta=0.3) :

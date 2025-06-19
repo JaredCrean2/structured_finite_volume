@@ -2,13 +2,14 @@
 #define STRUCTURED_FINITE_VOLUME_PHYSICS_EULER_HLLC_H
 
 #include "euler_flux.h"
+#include "numerical_flux_base.h"
 #include "roe_state.h"
 
 
 namespace structured_fv {
 namespace euler {
 
-class HLLCFlux
+class HLLCFlux final : public NumericalFlux
 {
   public:
     /*constexpr*/ Vec4<Real> operator()(const Vec4<Real>& qL, const Vec4<Real>& qR, 

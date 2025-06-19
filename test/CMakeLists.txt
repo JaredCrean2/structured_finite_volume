@@ -34,6 +34,7 @@ target_link_libraries(unit_tests
                      disc
                      advection
                      euler
+                     linear_system
                      nlsolvers
                      test_utils
                      physics_common)
