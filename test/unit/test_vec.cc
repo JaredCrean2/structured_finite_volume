@@ -2,15 +2,7 @@
 #include "utils/vec.h"
 
 namespace {
-using Vec3 = structured_fv::Vec<int, 3>;
-/*
-void expect_eq(const Vec3& arr1, const std::array<int, 3>& arr2)
-{
-  EXPECT_EQ(arr1[0], arr2[0]);
-  EXPECT_EQ(arr1[1], arr2[1]);
-  EXPECT_EQ(arr1[2], arr2[2]);
-}
-*/
+using Vec3 = structured_fv::FixedVec<int, 3>;
 
 void expect_eq(const Vec3& arr1, const Vec3& arr2)
 {
@@ -153,7 +145,7 @@ TEST(Vec, Empty)
   Vec3 v1{1, 2, 3};
 
   EXPECT_FALSE(v1.empty());
-  structured_fv::Vec<int, 0> v2{};
+  structured_fv::FixedVec<int, 0> v2{};
   EXPECT_TRUE(v2.empty());
 }
 

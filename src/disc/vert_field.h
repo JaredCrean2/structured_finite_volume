@@ -44,7 +44,7 @@ class VertexField
 
     void set(const T& val);
 
-    // Func is a callable object (Real x, Real y) -> std::array<T, num_vals_per_element>
+    // Func is a callable object (Real x, Real y) -> FixedVec<T, num_vals_per_element>
     // return type can be anything of the correct length that supports operator[]
     template <typename Func, IsFuncXY_t<Func> = true>
     void set(Func func);
@@ -72,7 +72,7 @@ void VertexField<T>::set(const T& val)
   }
 }
 
-// Func is a callable object (Real x, Real y) -> std::array<T, num_vals_per_element>
+// Func is a callable object (Real x, Real y) -> FixedVec<T, num_vals_per_element>
 // return type can be anything of the correct length that supports operator[]
 template <typename T>
 template <typename Func, IsFuncXY_t<Func>>

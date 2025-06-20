@@ -36,12 +36,10 @@ class LargeMatrixDense final : public LargeMatrix
 
     void printToStdout();
 
-    template <UInt M, UInt N, size_t M2, size_t N2>
-    void assembleValues(const std::array<GlobalDof, M2>& dofs_row, const std::array<GlobalDof, N2>& dofs_col,
+    template <UInt M, UInt N>
+    void assembleValues(const FixedVec<GlobalDof, M>& dofs_row, const FixedVec<GlobalDof, N>& dofs_col,
                         const Matrix<Real, M, N>& jac)
     {
-      static_assert(M == M2);
-      static_assert(N == N2);
       checkDofsForAssembly(dofs_row, dofs_col);
 
       for (unsigned int j=0; j < dofs_col.size(); ++j)

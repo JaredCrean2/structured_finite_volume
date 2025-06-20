@@ -6,7 +6,7 @@ using namespace structured_fv::mesh;
 
 namespace {
 
-std::array<UInt, 2> make_array(const std::array<UInt, 2>& arr)
+FixedVec<UInt, 2> make_array(const FixedVec<UInt, 2>& arr)
 {
   return arr;
 }
@@ -14,7 +14,7 @@ std::array<UInt, 2> make_array(const std::array<UInt, 2>& arr)
 
 TEST(StructuredBlock, SimpleBlock)
 {
-  auto coord_func = [](double x, double y) { return std::array<double, 2>{x, 4*y}; };
+  auto coord_func = [](double x, double y) { return FixedVec<double, 2>{x, 4*y}; };
   MeshBlockSpec spec(2, 4, 0, coord_func);
   StructuredBlock block(spec, 2, BlockType::Regular);
 
@@ -53,7 +53,7 @@ TEST(StructuredBlock, SimpleBlock)
 
 TEST(StructuredBlock, SimpleBlockTransform1)
 {
-  auto coord_func = [](double x, double y) { return std::array<double, 2>{x, 4*y}; };
+  auto coord_func = [](double x, double y) { return FixedVec<double, 2>{x, 4*y}; };
   MeshBlockSpec spec(2, 4, 1, coord_func);
   StructuredBlock block(spec, 2, BlockType::Regular);
 
@@ -78,7 +78,7 @@ TEST(StructuredBlock, SimpleBlockTransform1)
 
 TEST(StructuredBlock, SimpleBlockTransform2)
 {
-  auto coord_func = [](double x, double y) { return std::array<double, 2>{x, 4*y}; };
+  auto coord_func = [](double x, double y) { return FixedVec<double, 2>{x, 4*y}; };
   MeshBlockSpec spec(2, 4, 2, coord_func);
   StructuredBlock block(spec, 2, BlockType::Regular);
 
@@ -103,7 +103,7 @@ TEST(StructuredBlock, SimpleBlockTransform2)
 
 TEST(StructuredBlock, SimpleBlockTransform3)
 {
-  auto coord_func = [](double x, double y) { return std::array<double, 2>{x, 4*y}; };
+  auto coord_func = [](double x, double y) { return FixedVec<double, 2>{x, 4*y}; };
   MeshBlockSpec spec(2, 4, 3, coord_func);
   StructuredBlock block(spec, 2, BlockType::Regular);
 

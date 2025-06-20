@@ -46,10 +46,10 @@ class StructuredBlock
 
     const CoordsHostView& getOwnedVertCoords() const;
 
-    std::array<UInt, 2> getOffsetIntoBlock() const; // owned idx + offset = block idx
+    FixedVec<UInt, 2> getOffsetIntoBlock() const; // owned idx + offset = block idx
 
     // returns size of the entire block (including non-owned cells)
-    std::array<UInt, 2> getAllBlockSize() const;
+    FixedVec<UInt, 2> getAllBlockSize() const;
 
   private:
     UInt m_block_id;
@@ -57,8 +57,8 @@ class StructuredBlock
     Range2D m_owned_cell_range;
     Range2D m_owned_vert_range;
     CoordsHostView m_owned_vert_coords;
-    std::array<UInt, 2> m_offset_into_block;
-    std::array<UInt, 2> m_all_block_size;
+    FixedVec<UInt, 2> m_offset_into_block;
+    FixedVec<UInt, 2> m_all_block_size;
 };
 
 UInt getNumOwnedCells(const StructuredBlock& block, NeighborDirection dir);

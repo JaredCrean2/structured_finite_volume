@@ -14,11 +14,11 @@ UInt StructuredBlock::getBlockId() const { return m_mesh_block.getBlockId(); }
 
 mesh::BlockType StructuredBlock::getBlockType() const { return m_mesh_block.getBlockType(); }
 
-std::array<UInt, 2> StructuredBlock::getCellDimensions() const { return getOwnedAndGhostCells().getDimensions(); }
+FixedVec<UInt, 2> StructuredBlock::getCellDimensions() const { return getOwnedAndGhostCells().getDimensions(); }
 
-std::array<UInt, 2> StructuredBlock::getVertDimensions() const { return getOwnedAndGhostVerts().getDimensions(); }
+FixedVec<UInt, 2> StructuredBlock::getVertDimensions() const { return getOwnedAndGhostVerts().getDimensions(); }
 
-const std::array<UInt, 4> StructuredBlock::getNumGhostCellsPerDirection() const { return m_num_ghost_cells_per_direction; }
+const FixedVec<UInt, 4> StructuredBlock::getNumGhostCellsPerDirection() const { return m_num_ghost_cells_per_direction; }
 
 Range2D StructuredBlock::getOwnedVerts() const
 {
@@ -106,9 +106,9 @@ std::pair<UInt, UInt> StructuredBlock::blockVertToMeshVert(UInt i, UInt j) const
   return {i - xoffset, j - yoffset};
 }
 
-std::array<UInt, 4> StructuredBlock::computeNumGhostsPerDirection(const mesh::StructuredMesh& mesh, int nghost)
+FixedVec<UInt, 4> StructuredBlock::computeNumGhostsPerDirection(const mesh::StructuredMesh& mesh, int nghost)
 {
-  std::array<UInt, 4> num_ghost_cells_per_direction;
+  FixedVec<UInt, 4> num_ghost_cells_per_direction;
   const auto& block_iface_idxs = mesh.getBlockInterfaces(m_mesh_block.getBlockId());
   for (int i=0; i < 4; ++i)
   {

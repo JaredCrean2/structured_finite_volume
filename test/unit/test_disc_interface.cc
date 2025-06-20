@@ -24,7 +24,7 @@ class DiscIfaceTester : public ::testing::Test
     std::shared_ptr<disc::StructuredDisc> m_disc;
 };
 
-std::array<UInt, 2> make_array2(const std::array<UInt, 2>& arr)
+FixedVec<UInt, 2> make_array2(const FixedVec<UInt, 2>& arr)
 {
   return arr;
 }

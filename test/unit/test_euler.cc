@@ -19,7 +19,7 @@ class EulerTester : public ::testing::Test
     EulerTester() :
       spec(1, 1, m_num_bc_ghost_cells)
     {
-      spec.blocks(0, 0) = mesh::MeshBlockSpec(3, 4, 0, [](Real x, Real y) { return std::array<Real, 2>{x, y}; });
+      spec.blocks(0, 0) = mesh::MeshBlockSpec(3, 4, 0, [](Real x, Real y) { return FixedVec<Real, 2>{x, y}; });
       m_mesh = std::make_shared<mesh::StructuredMesh>(spec);
       m_disc = std::make_shared<disc::StructuredDisc>(m_mesh, m_num_bc_ghost_cells, m_dofs_per_cell);
     }
@@ -74,8 +74,8 @@ TEST_F(EulerTester, SourceTerm)
 
   Real t = 1.0;
   euler::EulerOpts opts;
-  auto bc_func = [](Real x, Real y, Real t){ return std::array<Real, 4>{1, 0, 0, 10000}; };
-  auto source_func = [](Real x, Real y, Real t){ return std::array<Real, 4>{x+y+t, x+y+t+1, x+y+t+2, x+y+t+3}; };
+  auto bc_func = [](Real x, Real y, Real t){ return FixedVec<Real, 4>{1, 0, 0, 10000}; };
+  auto source_func = [](Real x, Real y, Real t){ return FixedVec<Real, 4>{x+y+t, x+y+t+1, x+y+t+2, x+y+t+3}; };
   setup(opts, bc_func, source_func);
   m_euler_model->evaluateRhs(solution, t, residual);
 
@@ -107,8 +107,8 @@ TEST_F(EulerTester, BoundaryTerm)
 
   Real t = 1.0;
   euler::EulerOpts opts;
-  auto bc_func = [](Real x, Real y, Real t){ return std::array<Real, 4>{1, 2, 3, 40000}; };
-  auto source_func = [](Real x, Real y, Real t){ return std::array<Real, 4>{0, 0, 0, 0}; };
+  auto bc_func = [](Real x, Real y, Real t){ return FixedVec<Real, 4>{1, 2, 3, 40000}; };
+  auto source_func = [](Real x, Real y, Real t){ return FixedVec<Real, 4>{0, 0, 0, 0}; };
   setup(opts, bc_func, source_func);
   m_euler_model->evaluateRhs(solution, t, residual);
 
@@ -141,8 +141,8 @@ TEST_F(EulerTesterMultiBlock, ConsistencyFirstOrder) {
 
   Real u = 40;
   Real T = 298;
-  auto u_ex     = [&](Real x, Real y, Real t) { return std::array<Real, 4>{x*x+1, u*(x*x+1), 0, (x*x+1)*(euler::Cv*T + 0.5*u*u)}; };
-  auto src_term = [&](Real x, Real y, Real t) { return std::array<Real, 4>{2*x*u, 2*x*u*u + 2*x*euler::R*T, 0, 2*x*(euler::Cv*T + 0.5*u*u + euler::R*T)*u}; };
+  auto u_ex     = [&](Real x, Real y, Real t) { return FixedVec<Real, 4>{x*x+1, u*(x*x+1), 0, (x*x+1)*(euler::Cv*T + 0.5*u*u)}; };
+  auto src_term = [&](Real x, Real y, Real t) { return FixedVec<Real, 4>{2*x*u, 2*x*u*u + 2*x*euler::R*T, 0, 2*x*(euler::Cv*T + 0.5*u*u + euler::R*T)*u}; };
   auto bc_func  = [&](Real x, Real y, Real t) { return u_ex(x, y, t); };
   auto u0       = [&](Real x, Real y) { return u_ex(x, y, 0); };
 
@@ -164,8 +164,8 @@ TEST_F(EulerTesterMultiBlock, ConsistencySecondOrder) {
 
   Real u = 40;
   Real T = 298;
-  auto u_ex     = [&](Real x, Real y, Real t) { return std::array<Real, 4>{x*x+1, u*(x*x+1), 0, (x*x+1)*(euler::Cv*T + 0.5*u*u)}; };
-  auto src_term = [&](Real x, Real y, Real t) { return std::array<Real, 4>{2*x*u, 2*x*u*u + 2*x*euler::R*T, 0, 2*x*(euler::Cv*T + 0.5*u*u + euler::R*T)*u}; };
+  auto u_ex     = [&](Real x, Real y, Real t) { return FixedVec<Real, 4>{x*x+1, u*(x*x+1), 0, (x*x+1)*(euler::Cv*T + 0.5*u*u)}; };
+  auto src_term = [&](Real x, Real y, Real t) { return FixedVec<Real, 4>{2*x*u, 2*x*u*u + 2*x*euler::R*T, 0, 2*x*(euler::Cv*T + 0.5*u*u + euler::R*T)*u}; };
   auto bc_func  = [&](Real x, Real y, Real t) { return u_ex(x, y, t); };
   auto u0       = [&](Real x, Real y) { return u_ex(x, y, 0); };
 

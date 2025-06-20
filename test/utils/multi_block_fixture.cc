@@ -7,16 +7,16 @@ namespace test_utils {
 MultiBlockFixture::MultiBlockFixture()
     : spec1(1, 1, m_num_bc_ghost_cells), spec2(2, 2, m_num_bc_ghost_cells) {
   spec1.blocks(0, 0) = mesh::MeshBlockSpec(6, 8, 0, [](Real x, Real y) {
-    return std::array<Real, 2>{2 * x, 2 * y};
+    return FixedVec<Real, 2>{2 * x, 2 * y};
   });
   m_mesh1 = std::make_shared<mesh::StructuredMesh>(spec1);
   m_disc1 = std::make_shared<disc::StructuredDisc>(
       m_mesh1, m_num_bc_ghost_cells, m_dofs_per_cell);
 
-  auto f1 = [](Real x, Real y) { return std::array<Real, 2>{x, y}; };
-  auto f2 = [](Real x, Real y) { return std::array<Real, 2>{x + 1, y}; };
-  auto f3 = [](Real x, Real y) { return std::array<Real, 2>{x, y + 1}; };
-  auto f4 = [](Real x, Real y) { return std::array<Real, 2>{x + 1, y + 1}; };
+  auto f1 = [](Real x, Real y) { return FixedVec<Real, 2>{x, y}; };
+  auto f2 = [](Real x, Real y) { return FixedVec<Real, 2>{x + 1, y}; };
+  auto f3 = [](Real x, Real y) { return FixedVec<Real, 2>{x, y + 1}; };
+  auto f4 = [](Real x, Real y) { return FixedVec<Real, 2>{x + 1, y + 1}; };
   spec2.blocks(0, 0) = test_utils::rotate_block(mesh::MeshBlockSpec(3, 4, 0, f1), 0);
   spec2.blocks(1, 0) = test_utils::rotate_block(mesh::MeshBlockSpec(3, 4, 0, f2), 1);
   spec2.blocks(0, 1) = test_utils::rotate_block(mesh::MeshBlockSpec(3, 4, 0, f3), 2);

@@ -54,8 +54,8 @@ TEST(Matrix, DefaultTemplateArgument)
 TEST(Matrix, MatVec)
 {
   Matrix<Int, 3, 2> mat({1, 2, 3, 4, 5, 6});
-  std::array<Int, 2> x{2, 3};
-  std::array<Int, 3> b = mat * x;
+  FixedVec<Int, 2> x{2, 3};
+  FixedVec<Int, 3> b = mat * x;
 
   EXPECT_EQ(b[0], 1*2 + 2*3);
   EXPECT_EQ(b[1], 3*2 + 4*3);

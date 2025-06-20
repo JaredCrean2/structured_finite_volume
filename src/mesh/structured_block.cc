@@ -64,10 +64,10 @@ Range2D StructuredBlock::getOwnedCells() const { return m_owned_cell_range; };
 
 const StructuredBlock::CoordsHostView& StructuredBlock::getOwnedVertCoords() const { return m_owned_vert_coords; };
 
-std::array<UInt, 2> StructuredBlock::getOffsetIntoBlock() const { return m_offset_into_block; };  // owned idx + offset = block idx
+FixedVec<UInt, 2> StructuredBlock::getOffsetIntoBlock() const { return m_offset_into_block; };  // owned idx + offset = block idx
 
 // returns size of the entire block (including non-owned cells)
-std::array<UInt, 2> StructuredBlock::getAllBlockSize() const { return m_all_block_size; };
+FixedVec<UInt, 2> StructuredBlock::getAllBlockSize() const { return m_all_block_size; };
 
 UInt getNumOwnedCells(const StructuredBlock& block, NeighborDirection dir)
 {

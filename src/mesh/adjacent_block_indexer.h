@@ -17,14 +17,14 @@ class AdjacentBlockIndexer
     // the right block.  For example, if the +x direction of the left block
     // is the -y direction of the right block, then transform[0] = -2
     // Note: this is a little weird because CGNS uses 1 based indexing, but
-    // std::array uses zero based.
+    // Vec uses zero based.
     // left_block_min_cell is the minimum cell on the left block that is adjacent
     // to a cell on the right block
     // right_block_min_cell is the index of the adjacent cell in the right block
-    AdjacentBlockIndexer(const std::array<Int, 2>& transform,
-                         const std::array<UInt, 2>& left_block_min_cell,
+    AdjacentBlockIndexer(const FixedVec<Int, 2>& transform,
+                         const FixedVec<UInt, 2>& left_block_min_cell,
                          NeighborDirection direction,
-                         const std::array<UInt, 2>& right_block_min_cell) :
+                         const FixedVec<UInt, 2>& right_block_min_cell) :
       m_transform_matrix("transform_matrix"),
       m_left_block_min_cell(left_block_min_cell),
       m_direction(direction),
@@ -51,10 +51,10 @@ class AdjacentBlockIndexer
     // If the blocks are joined to the West, then (-1, 0) gives the indices of
     // the cell in the adjacent block next to the lower left cell of the current
     // block
-    std::array<UInt, 2> operator()(Int i, Int j) const
+    FixedVec<UInt, 2> operator()(Int i, Int j) const
     {
-      std::array<Int, 4> ioffset{0,  -1, 0, 1};
-      std::array<Int, 4> joffset{-1,  0, 1, 0};
+      FixedVec<Int, 4> ioffset{0,  -1, 0, 1};
+      FixedVec<Int, 4> joffset{-1,  0, 1, 0};
 
       i += ioffset[static_cast<int>(m_direction)];
       j += joffset[static_cast<int>(m_direction)];
@@ -67,24 +67,24 @@ class AdjacentBlockIndexer
       return {iprime + m_right_block_min_cell[0], jprime + m_right_block_min_cell[1]};
     }
 
-    std::array<UInt, 2> operator()(const std::array<UInt, 2>& ij) const
+    FixedVec<UInt, 2> operator()(const FixedVec<UInt, 2>& ij) const
     {
       return this->operator()(ij[0], ij[1]);
     }
 
-    std::array<UInt, 2> operator()(const std::array<Int, 2>& ij) const
+    FixedVec<UInt, 2> operator()(const FixedVec<Int, 2>& ij) const
     {
       return this->operator()(ij[0], ij[1]);
     }
 
-    const std::array<UInt, 2>& getRightBlockMinEntity() const { return m_right_block_min_cell; }
+    const FixedVec<UInt, 2>& getRightBlockMinEntity() const { return m_right_block_min_cell; }
 
   private:
     // TODO: put this on stack?
     Kokkos::View<Int[2][2], HostMemorySpace> m_transform_matrix; 
-    std::array<UInt, 2> m_left_block_min_cell;
+    FixedVec<UInt, 2> m_left_block_min_cell;
     NeighborDirection m_direction;
-    std::array<UInt, 2> m_right_block_min_cell;
+    FixedVec<UInt, 2> m_right_block_min_cell;
 };
 
 }

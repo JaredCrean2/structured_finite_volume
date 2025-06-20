@@ -82,7 +82,7 @@ TEST(EulerFlux, Ydirection)
 TEST(EulerFlux, Jacobian)
 {
   Vec4<Real> prim_vars = {1.225, 10, 20, 288.16};
-  std::array<Real, 2> normal = {2, 3};
+  FixedVec<Real, 2> normal = {2, 3};
   auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
   auto [flux, flux_jac] = compute_euler_flux_jac(q, normal);
 
@@ -103,7 +103,7 @@ TEST(EulerFlux, Jacobian)
 TEST(EulerFlux, EigenDecompRightEigenVectors)
 {
   Vec4<Real> prim_vars = {2, 10, 20, 300};
-  std::array<Real, 2> normal = {2, 3};  //TODO: was 2, 3
+  FixedVec<Real, 2> normal = {2, 3};  //TODO: was 2, 3
   auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
   
   Matrix<Real, 4, 4> R, Rinv;
@@ -131,7 +131,7 @@ TEST(EulerFlux, EigenDecompRightEigenVectors)
 TEST(EulerFlux, EigenDecompLeftEigenVectors)
 {
   Vec4<Real> prim_vars = {2, 20, 30, 300};
-  std::array<Real, 2> normal = {1, 0};  //TODO: was 2, 3
+  FixedVec<Real, 2> normal = {1, 0};  //TODO: was 2, 3
   auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
   
   Matrix<Real, 4, 4> R, Rinv;
@@ -158,7 +158,7 @@ TEST(EulerFlux, EigenDecompLeftEigenVectors)
 TEST(EulerFlux, EigenDecompLeftEigenVectorsInv)
 {
   Vec4<Real> prim_vars = {2, 20, 30, 300};
-  std::array<Real, 2> normal = {2, 3};
+  FixedVec<Real, 2> normal = {2, 3};
   auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
   
   Matrix<Real, 4, 4> R, Rinv;
@@ -186,7 +186,7 @@ TEST(EulerFlux, EigenDecompLeftEigenVectorsInv)
 TEST(EulerFlux, EigenDecompEigenvaluesSorted)
 {
   Vec4<Real> prim_vars = {2, 0, 0, 300};
-  std::array<Real, 2> normal = {1, 0};  //TODO: was 2, 3
+  FixedVec<Real, 2> normal = {1, 0};  //TODO: was 2, 3
   auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
   
   Matrix<Real, 4, 4> R, Rinv;
@@ -249,7 +249,7 @@ void solveLinearizedRiemannProblem(const Vec4<Real>& qL, const Vec4<Real>& qR,
 
 TEST(EulerFlux, LinearizedRiemannProblem)
 {
-  std::array<Real, 2> normal = {1, 0};
+  FixedVec<Real, 2> normal = {1, 0};
 
   Vec4<Real> prim_varsL = {2, 400, 0, 300};
   Vec4<Real> prim_varsR = {2, 500, 0, 300};
@@ -275,13 +275,13 @@ struct AcousticsParams
   Real u0;
 };
 
-std::array<Real, 3> compute_acoustics_flux(const AcousticsParams& params, const std::array<Real, 3>& u)
+FixedVec<Real, 3> compute_acoustics_flux(const AcousticsParams& params, const FixedVec<Real, 3>& u)
 {
   return {params.u0 * u[0] + params.K*u[1], u[0]/params.rho + params.u0*u[1], params.u0*u[2]};
 }
 
 void compute_eigen_decomp(const AcousticsParams& params,
-                        Matrix<Real, 3, 3>& R, std::array<Real, 3>& lambda)
+                        Matrix<Real, 3, 3>& R, FixedVec<Real, 3>& lambda)
 {
   
   Real c0 = std::sqrt(params.K/params.rho);
@@ -304,7 +304,7 @@ void compute_eigen_decomp(const AcousticsParams& params,
   lambda[2] = params.u0 + c0;
 }
 
-std::array<Real, 3> solveForAlpha(const AcousticsParams& params, const std::array<Real, 3>& uL, const std::array<Real, 3>& uR)
+FixedVec<Real, 3> solveForAlpha(const AcousticsParams& params, const FixedVec<Real, 3>& uL, const FixedVec<Real, 3>& uR)
 {
   Real c0 = std::sqrt(params.K/params.rho);
   Real z0 = params.rho*c0;  
@@ -316,12 +316,12 @@ std::array<Real, 3> solveForAlpha(const AcousticsParams& params, const std::arra
   return {alpha1, alpha2, alpha3};
 }
 
-void solveLinearizedRiemannProblem(const AcousticsParams& params, const std::array<Real, 3>& uL, const std::array<Real, 3>& uR)
+void solveLinearizedRiemannProblem(const AcousticsParams& params, const FixedVec<Real, 3>& uL, const FixedVec<Real, 3>& uR)
 {
   Matrix<Real, 3, 3> R;
-  std::array<Real, 3> lambda;
+  FixedVec<Real, 3> lambda;
   compute_eigen_decomp(params, R, lambda);
-  std::array<Real, 3> alpha = solveForAlpha(params, uL, uR);
+  FixedVec<Real, 3> alpha = solveForAlpha(params, uL, uR);
 
   std::cout << "lambda = " << lambda << std::endl;
   std::cout << "alpha = " << alpha << std::endl;
@@ -362,8 +362,8 @@ void solveLinearizedRiemannProblem(const AcousticsParams& params, const std::arr
 TEST(AcousticsFlux, LinearizedRiemannProblem)
 {
   AcousticsParams params{2, 100, 5};
-  std::array<Real, 3> uL = {10, 20, 2};
-  std::array<Real, 3> uR = {20, 5, 1};
+  FixedVec<Real, 3> uL = {10, 20, 2};
+  FixedVec<Real, 3> uR = {20, 5, 1};
   solveLinearizedRiemannProblem(params, uL, uR);
 }
 

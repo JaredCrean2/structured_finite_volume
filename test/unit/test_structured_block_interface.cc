@@ -10,7 +10,7 @@ using namespace structured_fv::mesh;
 
 namespace {
 
-std::array<UInt, 2> make_array(const std::array<UInt, 2>& arr)
+FixedVec<UInt, 2> make_array(const FixedVec<UInt, 2>& arr)
 {
   return arr;
 }

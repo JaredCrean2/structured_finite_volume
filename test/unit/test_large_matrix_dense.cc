@@ -20,7 +20,7 @@ TEST(LargeMatrixDense, GeneralSolve)
   EXPECT_EQ(mat.getMLocal(), 3);
   EXPECT_EQ(mat.getNLocal(), 3);
 
-  std::array<GlobalDof, 3> dofs{0, 1, 2};
+  FixedVec<GlobalDof, 3> dofs{0, 1, 2};
   Mat3 jac({1, 2, 3,
             4, 5, 6,
             8, 8, 9});
@@ -51,7 +51,7 @@ TEST(LargeMatrixDense, AssembleValuesAdditive)
   EXPECT_EQ(mat.getMLocal(), 3);
   EXPECT_EQ(mat.getNLocal(), 3);
 
-  std::array<GlobalDof, 3> dofs{0, 1, 2};
+  FixedVec<GlobalDof, 3> dofs{0, 1, 2};
   Mat3 vals({1, 2, 3,
              4, 5, 3,
              4, 4, 9});
@@ -87,7 +87,7 @@ TEST(LargeMatrixDense, AssembleValuesIgnore)
   EXPECT_EQ(mat.getMLocal(), 3);
   EXPECT_EQ(mat.getNLocal(), 3);
 
-  std::array<GlobalDof, 4> dofs{0, 1, 2, -1};
+  FixedVec<GlobalDof, 4> dofs{0, 1, 2, -1};
   Matrix<Real, 4, 4> vals({1, 2, 3,       666,
                            4, 5, 6,       666,
                            8, 8, 9,       666,
@@ -120,7 +120,7 @@ TEST(LargeMatrixDense, ZeroMatrix)
   EXPECT_EQ(mat.getMLocal(), 3);
   EXPECT_EQ(mat.getNLocal(), 3);
 
-  std::array<GlobalDof, 3> dofs{0, 1, 2};
+  FixedVec<GlobalDof, 3> dofs{0, 1, 2};
   Mat3 vals({1, 2, 3,
              4, 5, 6,
              8, 8, 9});
@@ -165,7 +165,7 @@ TEST(LargeMatrixDense, FactorInPlace)
   EXPECT_EQ(mat.getMLocal(), 3);
   EXPECT_EQ(mat.getNLocal(), 3);
 
-  std::array<GlobalDof, 3> dofs{0, 1, 2};
+  FixedVec<GlobalDof, 3> dofs{0, 1, 2};
   Mat3 vals({1, 2, 3,
              4, 5, 6,
              8, 8, 9});
@@ -197,7 +197,7 @@ TEST(LargeMatrixDense, SPD)
   EXPECT_EQ(mat.getMLocal(), 3);
   EXPECT_EQ(mat.getNLocal(), 3);
 
-  std::array<GlobalDof, 3> dofs{0, 1, 2};
+  FixedVec<GlobalDof, 3> dofs{0, 1, 2};
   Mat3 vals({10, 2, 3,
              2, 12, 5,
              3, 5, 20});
@@ -230,7 +230,7 @@ TEST(LargeMatrixDense, SPDInPlace)
   EXPECT_EQ(mat.getMLocal(), 3);
   EXPECT_EQ(mat.getNLocal(), 3);
   
-  std::array<GlobalDof, 3> dofs{0, 1, 2};
+  FixedVec<GlobalDof, 3> dofs{0, 1, 2};
   Mat3 vals({10, 2, 3,
              2, 12, 5,
              3, 5, 20});

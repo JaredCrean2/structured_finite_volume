@@ -27,11 +27,11 @@ class ConvergenceTester
         UInt num_bc_ghost_cells = 2;
         UInt dofs_per_cell = 1;
         mesh::MeshSpec spec(1, 1, num_bc_ghost_cells);
-        spec.blocks(0, 0) = mesh::MeshBlockSpec(ncell, ncell, 0, [](Real x, Real y) { return std::array<Real, 2>{x, y}; });
+        spec.blocks(0, 0) = mesh::MeshBlockSpec(ncell, ncell, 0, [](Real x, Real y) { return FixedVec<Real, 2>{x, y}; });
         auto mesh = std::make_shared<mesh::StructuredMesh>(spec);
         auto disc = std::make_shared<disc::StructuredDisc>(mesh, num_bc_ghost_cells, dofs_per_cell);
 
-        auto u0 = [&](Real x, Real y) { return std::array<Real, 1>{u_ex(x, y, 0)}; };  
+        auto u0 = [&](Real x, Real y) { return FixedVec<Real, 1>{u_ex(x, y, 0)}; };  
         std::vector<advection::Fxyt> bc_funcs{u_ex, u_ex, u_ex, u_ex};
 
         auto advection_model = std::make_shared<advection::AdvectionModel>(opts, disc, bc_funcs, src_term);

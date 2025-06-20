@@ -3,6 +3,10 @@
 
 namespace {
 
+using namespace structured_fv;
+//template <typename T>
+//using Vec3 = structured_fv::Vec3<T>;
+
 void expect_near(const Vec3<double>& a, const Vec3<double>& b)
 {
   for (int i=0; i < 3; ++i)
@@ -173,7 +177,7 @@ TEST(Math, SmoothAbsDeriv)
 
 TEST(Math, QuadArea)
 {
-  std::array<std::array<Real, 2>, 4> coords;
+  FixedVec<FixedVec<Real, 2>, 4> coords;
   coords[0] = {0, 0};
   coords[1] = {1, 0};
   coords[2] = {1, 1};
@@ -183,7 +187,7 @@ TEST(Math, QuadArea)
 
 TEST(Math, QuadAreaNegative)
 {
-  std::array<std::array<Real, 2>, 4> coords;
+  FixedVec<FixedVec<Real, 2>, 4> coords;
   coords[0] = {0, 0};
   coords[1] = {0, 1};
   coords[2] = {1, 1};

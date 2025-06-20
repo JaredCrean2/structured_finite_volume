@@ -5,7 +5,7 @@
 using namespace structured_fv;
 
 namespace {
-constexpr std::array<UInt, 2> make_array(const std::array<UInt, 2>& arr)
+constexpr FixedVec<UInt, 2> make_array(const FixedVec<UInt, 2>& arr)
 {
   return arr;
 }

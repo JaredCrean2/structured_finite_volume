@@ -81,7 +81,7 @@ TEST(LargeMatrixPetsc, GeneralSolve)
   EXPECT_EQ(mat.getMLocal(), 3);
   EXPECT_EQ(mat.getNLocal(), 3);
 
-  std::array<GlobalDof, 3> dofs{0 + 3*comm_rank, 1 + 3*comm_rank, 2 + 3*comm_rank};
+  FixedVec<GlobalDof, 3> dofs{0 + 3*comm_rank, 1 + 3*comm_rank, 2 + 3*comm_rank};
   Mat3 jac({1, 2, 3,
             4, 5, 6,
             8, 8, 9});
@@ -114,7 +114,7 @@ TEST(LargeMatrixPetsc, AssembleValuesAdditive)
   EXPECT_EQ(mat.getMLocal(), 3);
   EXPECT_EQ(mat.getNLocal(), 3);
 
-  std::array<GlobalDof, 3> dofs{0 + 3*comm_rank, 1 + 3*comm_rank, 2 + 3*comm_rank};
+  FixedVec<GlobalDof, 3> dofs{0 + 3*comm_rank, 1 + 3*comm_rank, 2 + 3*comm_rank};
   Mat3 vals({1, 2, 3,
              4, 5, 3,
              4, 4, 9});
@@ -151,7 +151,7 @@ TEST(LargeMatrixPetsc, AssembleValuesIgnore)
   EXPECT_EQ(mat.getMLocal(), 3);
   EXPECT_EQ(mat.getNLocal(), 3);
 
-  std::array<GlobalDof, 4> dofs{0 + 3*comm_rank, 1 + 3*comm_rank, 2 + 3*comm_rank, -1};
+  FixedVec<GlobalDof, 4> dofs{0 + 3*comm_rank, 1 + 3*comm_rank, 2 + 3*comm_rank, -1};
   Matrix<Real, 4> vals({1, 2, 3,       666,
                         4, 5, 6,       666,
                         8, 8, 9,       666,
@@ -185,7 +185,7 @@ TEST(LargeMatrixPetsc, ZeroMatrix)
   EXPECT_EQ(mat.getMLocal(), 3);
   EXPECT_EQ(mat.getNLocal(), 3);
 
-  std::array<GlobalDof, 3> dofs{0 + 3*comm_rank, 1 + 3*comm_rank, 2 + 3*comm_rank};
+  FixedVec<GlobalDof, 3> dofs{0 + 3*comm_rank, 1 + 3*comm_rank, 2 + 3*comm_rank};
   Mat3 vals({1, 2, 3,
              4, 5, 6,
              8, 8, 9});
@@ -239,7 +239,7 @@ TEST(LargeMatrixPetsc, FactorInPlace)
   EXPECT_EQ(mat.getMLocal(), 3);
   EXPECT_EQ(mat.getNLocal(), 3);
 
-  std::array<GlobalDof, 3> dofs{0 + 3*comm_rank, 1 + 3*comm_rank, 2 + 3*comm_rank};
+  FixedVec<GlobalDof, 3> dofs{0 + 3*comm_rank, 1 + 3*comm_rank, 2 + 3*comm_rank};
   Mat3 vals({1, 2, 3,
              4, 5, 6,
              8, 8, 9});
@@ -278,7 +278,7 @@ TEST(LargeMatrixPetsc, SPD)
   EXPECT_EQ(mat.getMLocal(), 3);
   EXPECT_EQ(mat.getNLocal(), 3);
 
-  std::array<GlobalDof, 3> dofs{0 + 3*comm_rank, 1 + 3*comm_rank, 2 + 3*comm_rank};
+  FixedVec<GlobalDof, 3> dofs{0 + 3*comm_rank, 1 + 3*comm_rank, 2 + 3*comm_rank};
   Mat3 vals({10, 2, 3,
              2, 12, 5,
              3, 5, 20});

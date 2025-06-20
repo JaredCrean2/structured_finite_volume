@@ -72,7 +72,7 @@ ElementFieldPtr<Real> StructuredDisc::createInvCellVolumeField()
     for (UInt i : block.getOwnedCells().getXRange())
       for (UInt j : block.getOwnedCells().getYRange())
       {
-        std::array<std::array<Real, 2>, 4> cell_coords;
+        FixedVec<FixedVec<Real, 2>, 4> cell_coords;
         for (UInt d=0; d < 2; ++d)
         {
           cell_coords[0][d] = coords(i, j, d);

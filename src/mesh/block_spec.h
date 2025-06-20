@@ -7,7 +7,7 @@ namespace structured_fv {
 namespace mesh {
 
 
-using Fxy = std::function<std::array<double, 2>(double x, double y)>;
+using Fxy = std::function<FixedVec<double, 2>(double x, double y)>;
 struct MeshBlockSpec
 {
   // Note: num_cells_x and num_cells_y are the number of cells in each
@@ -21,7 +21,7 @@ struct MeshBlockSpec
   //       the desired shape
   MeshBlockSpec(UInt num_cells_x=0, UInt num_cells_y=0, UInt rotation=0,
                 Fxy coord_func = 
-                  [](double x, double y) {return std::array<double, 2>{x, y};}) :
+                  [](double x, double y) {return FixedVec<double, 2>{x, y};}) :
     num_cells_x(num_cells_x),
     num_cells_y(num_cells_y),
     rotation(rotation),

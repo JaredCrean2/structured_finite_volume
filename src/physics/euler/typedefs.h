@@ -16,9 +16,6 @@ using disc::StructuredBlockInterface;
 
 constexpr UInt DofsPerCell = 4;
 
-template <typename T>
-using Vec4 = std::array<T, 4>;
-
 // f(x, y, t)
 using Fxyt = std::function<Vec4<Real>(Real, Real, Real)>;
 

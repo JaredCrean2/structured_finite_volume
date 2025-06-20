@@ -23,11 +23,11 @@ class StructuredBlock
 
     mesh::BlockType getBlockType() const;
 
-    std::array<UInt, 2> getCellDimensions() const;
+    FixedVec<UInt, 2> getCellDimensions() const;
 
-    std::array<UInt, 2> getVertDimensions() const;
+    FixedVec<UInt, 2> getVertDimensions() const;
 
-    const std::array<UInt, 4> getNumGhostCellsPerDirection() const;
+    const FixedVec<UInt, 4> getNumGhostCellsPerDirection() const;
 
     Range2D getOwnedVerts() const;
 
@@ -57,13 +57,13 @@ class StructuredBlock
 
   private:
 
-    std::array<UInt, 4> computeNumGhostsPerDirection(const mesh::StructuredMesh& mesh, int nghost);
+    FixedVec<UInt, 4> computeNumGhostsPerDirection(const mesh::StructuredMesh& mesh, int nghost);
 
     const mesh::StructuredBlock& m_mesh_block;
-    std::array<UInt, 4> m_num_ghost_cells_per_direction;
+    FixedVec<UInt, 4> m_num_ghost_cells_per_direction;
 };
 
-inline std::array<Real, 2> computeCellCentroid(StructuredBlock::CoordsHostView vert_coords, int i, int j)
+inline FixedVec<Real, 2> computeCellCentroid(StructuredBlock::CoordsHostView vert_coords, int i, int j)
 {
   return {(vert_coords(i, j, 0) + vert_coords(i+1, j, 0) + 
            vert_coords(i+1, j+1, 0) + vert_coords(i, j+1, 0))/4,

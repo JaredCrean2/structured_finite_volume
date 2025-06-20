@@ -38,7 +38,7 @@ StructuredMesh::StructuredMesh(const MeshSpec& spec)
       NeighborDirection dirL = rotate(NeighborDirection::East, spec.blocks(i, j).rotation);
       Range rangeL = to_int(dirL) % 2 == 0 ? blockL.getOwnedCells().getXRange() : 
                                              blockL.getOwnedCells().getYRange();
-      std::array<Int, 2> transformL = getTransform(spec.blocks(i, j).rotation, spec.blocks(i+1, j).rotation);
+      FixedVec<Int, 2> transformL = getTransform(spec.blocks(i, j).rotation, spec.blocks(i+1, j).rotation);
 
       NeighborDirection dirR = getNeighborImage(dirL, transformL);
       Range rangeR = to_int(dirR) % 2 == 0 ?  m_blocks[right_block_id].getOwnedCells().getXRange() : 
@@ -60,7 +60,7 @@ StructuredMesh::StructuredMesh(const MeshSpec& spec)
       NeighborDirection dirB = rotate(NeighborDirection::North, spec.blocks(i, j).rotation);
       Range rangeB = to_int(dirB) % 2 == 0 ? blockB.getOwnedCells().getXRange() : 
                                              blockB.getOwnedCells().getYRange();      
-      std::array<Int, 2> transformB = getTransform(spec.blocks(i, j).rotation, spec.blocks(i, j+1).rotation);
+      FixedVec<Int, 2> transformB = getTransform(spec.blocks(i, j).rotation, spec.blocks(i, j+1).rotation);
 
       NeighborDirection dirT = getNeighborImage(dirB, transformB);
       Range rangeT = to_int(dirT) % 2 == 0 ?  m_blocks[top_block_id].getOwnedCells().getXRange() : 
@@ -134,7 +134,7 @@ Range StructuredMesh::getBCBlockRange(UInt bc) const { return m_bc_block_ranges.
 // (ie. one of the blocks in a ghost BC block)
 Range StructuredMesh::getBCInterfaceRange(UInt bc) const { return m_bc_iface_ranges.at(bc); }
 
-std::array<Int, 4> StructuredMesh::getBlockInterfaces(UInt block) const { return m_block_interface_connectivity.at(block); }
+FixedVec<Int, 4> StructuredMesh::getBlockInterfaces(UInt block) const { return m_block_interface_connectivity.at(block); }
 
 
 // dir is the direction of the interface from the ghost block perspective
@@ -152,8 +152,8 @@ Kokkos::View<double**[2], HostMemorySpace> computeGhostBCCoords(const Structured
   for (UInt i : xrange)
     for (UInt j : yrange)
     {
-      std::array<double, 2> x1;
-      std::array<double, 2> x0;
+      FixedVec<double, 2> x1;
+      FixedVec<double, 2> x0;
 
       switch(dir)
       {
@@ -211,11 +211,11 @@ Kokkos::View<double**[2], HostMemorySpace> computeGhostBCCoords(const Structured
 
 void StructuredMesh::createBCGhosts(const MeshSpec& spec)
 {
-  std::array<NeighborDirection, 4> directions = {NeighborDirection::North,
+  FixedVec<NeighborDirection, 4> directions = {NeighborDirection::North,
                                                  NeighborDirection::East,
                                                  NeighborDirection::South,
                                                  NeighborDirection::West};
-  std::array<Range2D, 4> ranges = {Range2D(0, spec.blocks.extent(0), spec.blocks.extent(1)-1, spec.blocks.extent(1)),
+  FixedVec<Range2D, 4> ranges = {Range2D(0, spec.blocks.extent(0), spec.blocks.extent(1)-1, spec.blocks.extent(1)),
                                    Range2D(spec.blocks.extent(0)-1, spec.blocks.extent(0), 0, spec.blocks.extent(1)),
                                    Range2D(0, spec.blocks.extent(0), 0, 1),
                                    Range2D(0, 1, 0, spec.blocks.extent(1))};
@@ -244,7 +244,7 @@ void StructuredMesh::createBCGhost(const MeshBlockSpec& spec, UInt regular_block
   UInt ghost_block_id = m_blocks.size();
   UInt regular_block_rotation = spec.rotation;
   // the ghost block always has the same coordinate system as the regular block
-  std::array<Int, 2> transform = {1, 2};
+  FixedVec<Int, 2> transform = {1, 2};
 
   NeighborDirection regular_block_dir = rotate(domain_boundary, regular_block_rotation);
   NeighborDirection ghost_block_dir = getNeighborImage(regular_block_dir, transform);

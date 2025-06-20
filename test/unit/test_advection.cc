@@ -18,7 +18,7 @@ class AdvectionTester : public ::testing::Test {
 public:
   AdvectionTester() : spec(1, 1, m_num_bc_ghost_cells) {
     spec.blocks(0, 0) = mesh::MeshBlockSpec(
-        3, 4, 0, [](Real x, Real y) { return std::array<Real, 2>{x, y}; });
+        3, 4, 0, [](Real x, Real y) { return FixedVec<Real, 2>{x, y}; });
     m_mesh = std::make_shared<mesh::StructuredMesh>(spec);
     m_disc = std::make_shared<disc::StructuredDisc>(
         m_mesh, m_num_bc_ghost_cells, m_dofs_per_cell);
@@ -139,7 +139,7 @@ TEST_F(AdvectionTesterMultiBlock, ConsistencyFirstOrder) {
   advection::AdvectionOpts opts;
   opts.adv_velocity = {1, 2};
   auto u           = [] (Real x, Real y, Real t) { return 2*x*x + 3*y*y + t; };
-  auto u0          = [&] (Real x, Real y) { return std::array<Real, 1>{u(x, y, 0)}; };
+  auto u0          = [&] (Real x, Real y) { return FixedVec<Real, 1>{u(x, y, 0)}; };
   auto bc_func     = [&](Real x, Real y, Real t) { return u(x, y, t); };
   auto source_func = [] (Real x, Real y, Real t) { return x*x + y*x + t*t; };
 
@@ -160,7 +160,7 @@ TEST_F(AdvectionTesterMultiBlock, ConsistencySecondOrder) {
   opts.limiter = common::SlopeLimiter::VanLeer;
   opts.adv_velocity = {1, 2};
   auto u           = [] (Real x, Real y, Real t) { return 2*x*x + 3*y*y + t; };
-  auto u0          = [&] (Real x, Real y) { return std::array<Real, 1>{u(x, y, 0)}; };
+  auto u0          = [&] (Real x, Real y) { return FixedVec<Real, 1>{u(x, y, 0)}; };
   auto bc_func     = [&](Real x, Real y, Real t) { return u(x, y, t); };
   auto source_func = [] (Real x, Real y, Real t) { return x*x + y*x + t*t; };
 

@@ -10,7 +10,7 @@ namespace structured_fv {
 
 // this is a replacement for std::array that will work on device eventually
 template <typename T, UInt N>
-struct Vec
+struct FixedVec
 {
   using value_type = T;
   using size_type = UInt;
@@ -99,7 +99,7 @@ struct Vec
       _m_vals[i] = val;
   }
 
-  constexpr void swap(Vec<T, N>& other) noexcept
+  constexpr void swap(FixedVec<T, N>& other) noexcept
   {
     for (UInt i=0; i < N; ++i)
     {
@@ -117,55 +117,68 @@ struct Vec
 // std::array is only required to implement comparisons for arrays of the same T and
 // N, which is a little weird
 template <typename T, UInt N>
-bool operator==(const Vec<T, N>& lhs, const Vec<T, N>& rhs)
+bool operator==(const FixedVec<T, N>& lhs, const FixedVec<T, N>& rhs)
 {
   return std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 }
 
 template <typename T, UInt N>
-bool operator!=(const Vec<T, N>& lhs, const Vec<T, N>& rhs)
+bool operator!=(const FixedVec<T, N>& lhs, const FixedVec<T, N>& rhs)
 {
   return !(lhs == rhs);
 }
 
 template <typename T, UInt N>
-bool operator<(const Vec<T, N>& lhs, const Vec<T, N>& rhs)
+bool operator<(const FixedVec<T, N>& lhs, const FixedVec<T, N>& rhs)
 {
   return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 }
 
 template <typename T, UInt N>
-bool operator<=(const Vec<T, N>& lhs, const Vec<T, N>& rhs)
+bool operator<=(const FixedVec<T, N>& lhs, const FixedVec<T, N>& rhs)
 {
   return (lhs < rhs) || (lhs == rhs);
 }
 
 template <typename T, UInt N>
-bool operator>(const Vec<T, N>& lhs, const Vec<T, N>& rhs)
+bool operator>(const FixedVec<T, N>& lhs, const FixedVec<T, N>& rhs)
 {
   return !(lhs <= rhs);
 }
 
 template <typename T, UInt N>
-bool operator>=(const Vec<T, N>& lhs, const Vec<T, N>& rhs)
+bool operator>=(const FixedVec<T, N>& lhs, const FixedVec<T, N>& rhs)
 {
   return !(lhs < rhs);
 }
 
 template <size_t I, typename T, UInt N>
-constexpr T& get(Vec<T, N>& arr)
+constexpr auto&& get(const FixedVec<T, N>& arr)
 {
   return arr[I];
 }
 
 template <size_t I, typename T, UInt N>
-constexpr const T& get(const Vec<T, N>& arr)
+constexpr auto&& get(FixedVec<T, N>& arr)
 {
   return arr[I];
 }
 
+template <size_t I, typename T, UInt N>
+constexpr auto&& get(FixedVec<T, N>&& arr)
+{
+  return arr[I];
+}
+
+template <size_t I, typename T, UInt N>
+constexpr auto&& get(const FixedVec<T, N>&& arr)
+{
+  return arr[I];
+}
+
+
 template <typename T, UInt N>
-std::ostream& operator<<(std::ostream& os, const Vec<T, N>& arr)
+std::ostream& operator<<(std::ostream& os, const FixedVec<T, N>& arr)
 {
   for (UInt i=0; i < N; ++i)
   {
@@ -178,16 +191,32 @@ std::ostream& operator<<(std::ostream& os, const Vec<T, N>& arr)
 }
 
 template <typename T>
-using Vec2 = Vec<T, 2>;
+using Vec2 = FixedVec<T, 2>;
 
 template <typename T>
-using Vec3 = Vec<T, 3>;
+using Vec3 = FixedVec<T, 3>;
 
 template <typename T>
-using Vec4 = Vec<T, 4>;
+using Vec4 = FixedVec<T, 4>;
 
 template <typename T>
-using Vec5 = Vec<T, 5>;
+using Vec5 = FixedVec<T, 5>;
+
+}
+
+namespace std {
+  
+template<typename T, structured_fv::UInt N>
+struct std::tuple_size<structured_fv::FixedVec<T, N>>
+{
+  static constexpr std::size_t value = N;
+};
+
+template <size_t M, typename T, structured_fv::UInt N>
+struct std::tuple_element<M, structured_fv::FixedVec<T, N>>
+{
+  using type = T;
+};
 
 }
 

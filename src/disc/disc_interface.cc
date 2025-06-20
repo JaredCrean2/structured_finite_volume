@@ -13,23 +13,23 @@ StructuredBlockInterface::StructuredBlockInterface(const StructuredBlock& blockL
 
   auto num_ghost_cells_per_directionL = blockL.getNumGhostCellsPerDirection();
   auto num_ghost_cells_per_directionR = blockR.getNumGhostCellsPerDirection();
-  std::array<UInt, 2> left_block_min_vert = {*mesh_iface.getBoundaryVertsL().getXRange().begin(),
+  FixedVec<UInt, 2> left_block_min_vert = {*mesh_iface.getBoundaryVertsL().getXRange().begin(),
                                               *mesh_iface.getBoundaryVertsL().getYRange().begin()};
-  std::array<UInt, 2> right_block_min_vert = {*mesh_iface.getBoundaryVertsR().getXRange().begin(),
+  FixedVec<UInt, 2> right_block_min_vert = {*mesh_iface.getBoundaryVertsR().getXRange().begin(),
                                               *mesh_iface.getBoundaryVertsR().getYRange().begin()};
 
-  std::array<UInt, 2> left_block_min_cell = {*mesh_iface.getBoundaryCellsL().getXRange().begin(),
+  FixedVec<UInt, 2> left_block_min_cell = {*mesh_iface.getBoundaryCellsL().getXRange().begin(),
                                               *mesh_iface.getBoundaryCellsL().getYRange().begin()};
-  std::array<UInt, 2> right_block_min_cell = {*mesh_iface.getBoundaryCellsR().getXRange().begin(),
+  FixedVec<UInt, 2> right_block_min_cell = {*mesh_iface.getBoundaryCellsR().getXRange().begin(),
                                               *mesh_iface.getBoundaryCellsR().getYRange().begin()}; 
 
-  std::array<UInt, 2> other_block_min_vertL = mesh_iface.getAdjBlockVertIndexerL().getRightBlockMinEntity();
-  std::array<UInt, 2> other_block_min_vertR = mesh_iface.getAdjBlockVertIndexerR().getRightBlockMinEntity();
+  FixedVec<UInt, 2> other_block_min_vertL = mesh_iface.getAdjBlockVertIndexerL().getRightBlockMinEntity();
+  FixedVec<UInt, 2> other_block_min_vertR = mesh_iface.getAdjBlockVertIndexerR().getRightBlockMinEntity();
 
-  std::array<UInt, 2> other_block_min_cellL = mesh_iface.getAdjBlockCellIndexerL().getRightBlockMinEntity();
-  std::array<UInt, 2> other_block_min_cellR = mesh_iface.getAdjBlockCellIndexerR().getRightBlockMinEntity();
+  FixedVec<UInt, 2> other_block_min_cellL = mesh_iface.getAdjBlockCellIndexerL().getRightBlockMinEntity();
+  FixedVec<UInt, 2> other_block_min_cellR = mesh_iface.getAdjBlockCellIndexerR().getRightBlockMinEntity();
 
-  std::array<Int, 2> offset_directions{to_int(NeighborDirection::West),
+  FixedVec<Int, 2> offset_directions{to_int(NeighborDirection::West),
                                         to_int(NeighborDirection::South)};
   for (int i=0; i < 2; ++i)
   {
@@ -56,29 +56,29 @@ StructuredBlockInterface::StructuredBlockInterface(const StructuredBlock& blockL
                                                 mesh_iface.getNeighborDirectionR(), other_block_min_cellR);
 
 
-  std::array<UInt, 2> ownedVertsXL{*mesh_iface.getBoundaryVertsL().getXRange().begin() + num_ghost_cells_per_directionL[offset_directions[0]],
+  FixedVec<UInt, 2> ownedVertsXL{*mesh_iface.getBoundaryVertsL().getXRange().begin() + num_ghost_cells_per_directionL[offset_directions[0]],
                                     *mesh_iface.getBoundaryVertsL().getXRange().end()   + num_ghost_cells_per_directionL[offset_directions[0]]};
 
-  std::array<UInt, 2> ownedVertsYL{*mesh_iface.getBoundaryVertsL().getYRange().begin() + num_ghost_cells_per_directionL[offset_directions[1]] ,
+  FixedVec<UInt, 2> ownedVertsYL{*mesh_iface.getBoundaryVertsL().getYRange().begin() + num_ghost_cells_per_directionL[offset_directions[1]] ,
                                     *mesh_iface.getBoundaryVertsL().getYRange().end()   + num_ghost_cells_per_directionL[offset_directions[1]]};
 
-  std::array<UInt, 2> ownedVertsXR{*mesh_iface.getBoundaryVertsR().getXRange().begin() + num_ghost_cells_per_directionR[offset_directions[0]] ,
+  FixedVec<UInt, 2> ownedVertsXR{*mesh_iface.getBoundaryVertsR().getXRange().begin() + num_ghost_cells_per_directionR[offset_directions[0]] ,
                                     *mesh_iface.getBoundaryVertsR().getXRange().end()   + num_ghost_cells_per_directionR[offset_directions[0]]};
 
-  std::array<UInt, 2> ownedVertsYR{*mesh_iface.getBoundaryVertsR().getYRange().begin() + num_ghost_cells_per_directionR[offset_directions[1]],
+  FixedVec<UInt, 2> ownedVertsYR{*mesh_iface.getBoundaryVertsR().getYRange().begin() + num_ghost_cells_per_directionR[offset_directions[1]],
                                     *mesh_iface.getBoundaryVertsR().getYRange().end()   + num_ghost_cells_per_directionR[offset_directions[1]]};
 
 
-  std::array<UInt, 2> ownedCellsXL{*mesh_iface.getBoundaryCellsL().getXRange().begin() + num_ghost_cells_per_directionL[offset_directions[0]],
+  FixedVec<UInt, 2> ownedCellsXL{*mesh_iface.getBoundaryCellsL().getXRange().begin() + num_ghost_cells_per_directionL[offset_directions[0]],
                                     *mesh_iface.getBoundaryCellsL().getXRange().end()   + num_ghost_cells_per_directionL[offset_directions[0]]};
 
-  std::array<UInt, 2> ownedCellsYL{*mesh_iface.getBoundaryCellsL().getYRange().begin() + num_ghost_cells_per_directionL[offset_directions[1]] ,
+  FixedVec<UInt, 2> ownedCellsYL{*mesh_iface.getBoundaryCellsL().getYRange().begin() + num_ghost_cells_per_directionL[offset_directions[1]] ,
                                     *mesh_iface.getBoundaryCellsL().getYRange().end()   + num_ghost_cells_per_directionL[offset_directions[1]]};
 
-  std::array<UInt, 2> ownedCellsXR{*mesh_iface.getBoundaryCellsR().getXRange().begin() + num_ghost_cells_per_directionR[offset_directions[0]] ,
+  FixedVec<UInt, 2> ownedCellsXR{*mesh_iface.getBoundaryCellsR().getXRange().begin() + num_ghost_cells_per_directionR[offset_directions[0]] ,
                                     *mesh_iface.getBoundaryCellsR().getXRange().end()   + num_ghost_cells_per_directionR[offset_directions[0]]};
 
-  std::array<UInt, 2> ownedCellsYR{*mesh_iface.getBoundaryCellsR().getYRange().begin() + num_ghost_cells_per_directionR[offset_directions[1]],
+  FixedVec<UInt, 2> ownedCellsYR{*mesh_iface.getBoundaryCellsR().getYRange().begin() + num_ghost_cells_per_directionR[offset_directions[1]],
                                     *mesh_iface.getBoundaryCellsR().getYRange().end()   + num_ghost_cells_per_directionR[offset_directions[1]]};
 
   m_owned_boundary_vertsL = Range2D(ownedVertsXL[0], ownedVertsXL[1], ownedVertsYL[0], ownedVertsYL[1]);

@@ -18,7 +18,7 @@ class StructuredBlockInterface
   StructuredBlockInterface(const StructuredBlock& blockL,
                           NeighborDirection dirL,
                           const Range& rangeL,
-                          const std::array<Int, 2>& transformL,
+                          const FixedVec<Int, 2>& transformL,
                           const StructuredBlock& blockR,
                           const Range& rangeR);
 
@@ -30,9 +30,9 @@ class StructuredBlockInterface
 
     NeighborDirection getNeighborDirectionR() const;
 
-    const std::array<Int, 2> getTransformL() const;
+    const FixedVec<Int, 2> getTransformL() const;
 
-    const std::array<Int, 2> getTransformR() const;
+    const FixedVec<Int, 2> getTransformR() const;
 
     const Range2D& getBoundaryVertsL() const;
 
@@ -53,13 +53,13 @@ class StructuredBlockInterface
   private:
 
     std::pair<Range2D, AdjacentBlockIndexer> createAdjacentBlockIndexer( const Range2D& block_rangeL, NeighborDirection dirL, 
-       const Range& rangeL, const std::array<Int, 2>& transformL,
+       const Range& rangeL, const FixedVec<Int, 2>& transformL,
        const Range2D& block_rangeR, NeighborDirection dirR, const Range& rangeR);
 
     UInt m_left_block_id;
     NeighborDirection m_dirL;  // gives the side of the block the
                                // interface is on, from the left block perspective
-    std::array<Int, 2> m_transformL;
+    FixedVec<Int, 2> m_transformL;
     Range2D m_boundary_vertsL;
     Range2D m_boundary_cellsL;
     AdjacentBlockIndexer m_vert_indexerL;
@@ -67,7 +67,7 @@ class StructuredBlockInterface
 
     UInt m_right_block_id;
     NeighborDirection m_dirR;
-    std::array<Int, 2> m_transformR;
+    FixedVec<Int, 2> m_transformR;
     Range2D m_boundary_vertsR;
     Range2D m_boundary_cellsR;
     AdjacentBlockIndexer m_vert_indexerR;

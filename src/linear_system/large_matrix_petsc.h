@@ -49,15 +49,13 @@ class LargeMatrixPetsc : public LargeMatrix
 
     LargeMatrixPetsc(std::shared_ptr<SparsityPattern> sparsity_pattern);
 
-    //TODO: need to deal with std::array using size_t as its length type and Mat using UInt
+    //TODO: need to deal with Vec using size_t as its length type and Mat using UInt
 
     // dofs are *global* dofs
-    template <size_t M, size_t N, UInt M2, UInt N2>
-    void assembleValues(const std::array<GlobalDof, M>& dofs_rows, const std::array<GlobalDof, N>& dofs_cols,
-                        const Matrix<Real, M2, N2>& jac)
+    template <UInt M, UInt N>
+    void assembleValues(const FixedVec<GlobalDof, M>& dofs_rows, const FixedVec<GlobalDof, N>& dofs_cols,
+                        const Matrix<Real, M, N>& jac)
     {
-      static_assert(M == M2);
-      static_assert(N == N2);
       checkDofsForAssembly(dofs_rows, dofs_cols);
       MatSetValues(m_A, dofs_rows.size(), dofs_rows.data(), dofs_cols.size(), dofs_cols.data(), jac.getData(), ADD_VALUES);
     }

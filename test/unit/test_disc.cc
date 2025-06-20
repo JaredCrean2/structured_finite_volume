@@ -19,8 +19,8 @@ class DiscTester : public ::testing::Test
       spec(2, 1, m_num_bc_ghost_cells)
     {
       //spec = mesh::MeshSpec(2, 1, m_num_bc_ghost_cells);
-      spec.blocks(0, 0) = mesh::MeshBlockSpec(3, 4, 0, [](Real x, Real y) { return std::array<Real, 2>{x, y}; });
-      spec.blocks(1, 0) = mesh::MeshBlockSpec(5, 4, 0, [](Real x, Real y) { return std::array<Real, 2>{x+1, y}; });
+      spec.blocks(0, 0) = mesh::MeshBlockSpec(3, 4, 0, [](Real x, Real y) { return FixedVec<Real, 2>{x, y}; });
+      spec.blocks(1, 0) = mesh::MeshBlockSpec(5, 4, 0, [](Real x, Real y) { return FixedVec<Real, 2>{x+1, y}; });
       m_mesh = std::make_shared<mesh::StructuredMesh>(spec);
       m_disc = std::make_shared<disc::StructuredDisc>(m_mesh, m_num_bc_ghost_cells, m_dofs_per_cell);
     }
@@ -479,13 +479,13 @@ TEST_F(DiscTester, FaceFieldSetConstant)
 TEST_F(DiscTester, FaceFieldSetField)
 {
   disc::FaceField<double> field(*m_disc, 2);
-  auto f = [](Real x, Real y) { return std::array<double, 2>{x, y}; };
+  auto f = [](Real x, Real y) { return FixedVec<double, 2>{x, y}; };
   field.set(f);
 
-  std::array<double, 2> dx = {1.0/spec.blocks(0, 0).num_cells_x, 1.0/spec.blocks(1, 0).num_cells_x};
-  std::array<double, 2> dy = {1.0/spec.blocks(0, 0).num_cells_y, 1.0/spec.blocks(1, 0).num_cells_y};
-  std::array<double, 2> x0 = {0, 1};
-  std::array<double, 2> y0 = {0, 0};
+  FixedVec<double, 2> dx = {1.0/spec.blocks(0, 0).num_cells_x, 1.0/spec.blocks(1, 0).num_cells_x};
+  FixedVec<double, 2> dy = {1.0/spec.blocks(0, 0).num_cells_y, 1.0/spec.blocks(1, 0).num_cells_y};
+  FixedVec<double, 2> x0 = {0, 1};
+  FixedVec<double, 2> y0 = {0, 0};
 
   for (UInt block_id=0; block_id < m_disc->getNumRegularBlocks(); ++block_id)
   {
@@ -512,8 +512,8 @@ TEST_F(DiscTester, FaceFieldSetField)
 
 TEST_F(DiscTester, InvVolumeField)
 {
-  std::array<double, 2> dx = {1.0/spec.blocks(0, 0).num_cells_x, 1.0/spec.blocks(1, 0).num_cells_x};
-  std::array<double, 2> dy = {1.0/spec.blocks(0, 0).num_cells_y, 1.0/spec.blocks(1, 0).num_cells_y};
+  FixedVec<double, 2> dx = {1.0/spec.blocks(0, 0).num_cells_x, 1.0/spec.blocks(1, 0).num_cells_x};
+  FixedVec<double, 2> dy = {1.0/spec.blocks(0, 0).num_cells_y, 1.0/spec.blocks(1, 0).num_cells_y};
   for (UInt block_id=0; block_id < m_disc->getNumRegularBlocks(); ++block_id)
   {
     const auto& inv_volumes = m_disc->getInvCellVolumeField()->getData(block_id);
@@ -544,8 +544,8 @@ TEST_F(DiscTester, InvVolumeField)
 TEST_F(DiscTester, NormalField)
 {
 
-std::array<double, 2> dx = {1.0/spec.blocks(0, 0).num_cells_x, 1.0/spec.blocks(1, 0).num_cells_x};
-  std::array<double, 2> dy = {1.0/spec.blocks(0, 0).num_cells_y, 1.0/spec.blocks(1, 0).num_cells_y};
+FixedVec<double, 2> dx = {1.0/spec.blocks(0, 0).num_cells_x, 1.0/spec.blocks(1, 0).num_cells_x};
+  FixedVec<double, 2> dy = {1.0/spec.blocks(0, 0).num_cells_y, 1.0/spec.blocks(1, 0).num_cells_y};
   for (UInt block_id=0; block_id < m_disc->getNumRegularBlocks(); ++block_id)
   {
     const disc::StructuredBlock& block = m_disc->getBlock(block_id);

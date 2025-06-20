@@ -5,6 +5,8 @@
 #include <iterator>
 #include <limits>
 #include <iosfwd>
+#include "vec.h"
+
 
 namespace structured_fv {
 
@@ -184,7 +186,7 @@ class Range2D
 
     constexpr const Range& getYRange() const { return m_yrange; }
 
-    constexpr std::array<UInt, 2> getDimensions() const { return {m_xrange.size(), m_yrange.size() }; }
+    constexpr FixedVec<UInt, 2> getDimensions() const { return {m_xrange.size(), m_yrange.size() }; }
 
     constexpr bool operator==(const Range2D& rhs) const
     {

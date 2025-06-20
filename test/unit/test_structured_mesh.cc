@@ -8,7 +8,7 @@ using namespace structured_fv::mesh;
 
 namespace
 {
-void checkCoords(double x0, double y0, const std::array<double, 4>& mat, StructuredBlock::CoordsHostView coords)
+void checkCoords(double x0, double y0, const FixedVec<double, 4>& mat, StructuredBlock::CoordsHostView coords)
 {
   for (UInt i=0; i < coords.extent(0); ++i)
     for (UInt j=0; j < coords.extent(1); ++j)
@@ -25,7 +25,7 @@ void checkCoords(double x0, double y0, double dx, double dy, StructuredBlock::Co
   checkCoords(x0, y0, {dx, 0, 0, dy}, coords);
 }
 
-std::array<Int, 4> make_array(const std::array<Int, 4>& vals)
+FixedVec<Int, 4> make_array(const FixedVec<Int, 4>& vals)
 {
   return vals;
 }

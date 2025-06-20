@@ -123,7 +123,7 @@ void AdvectionModel::setBCValues(ElementFieldPtr<Real> solution, Real t)
     for (UInt i : block.getOwnedCells().getXRange())
       for (UInt j : block.getOwnedCells().getYRange())
       {
-        std::array<Real, 2> x = disc::computeCellCentroid(vert_coords, i, j);        
+        FixedVec<Real, 2> x = disc::computeCellCentroid(vert_coords, i, j);        
         sol(i, j, 0) = func(x[0], x[1], t);
       }
   }

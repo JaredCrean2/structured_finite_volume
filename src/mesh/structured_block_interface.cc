@@ -11,7 +11,7 @@ namespace mesh {
 StructuredBlockInterface::StructuredBlockInterface(const StructuredBlock& blockL,
                                                    NeighborDirection dirL,
                                                    const Range& cellRangeL,
-                                                   const std::array<Int, 2>& transformL,
+                                                   const FixedVec<Int, 2>& transformL,
                                                    const StructuredBlock& blockR,
                                                    const Range& cellRangeR) :
   m_left_block_id(blockL.getBlockId()),
@@ -67,9 +67,9 @@ NeighborDirection StructuredBlockInterface::getNeighborDirectionL() const { retu
 
 NeighborDirection StructuredBlockInterface::getNeighborDirectionR() const { return m_dirR; }
 
-const std::array<Int, 2> StructuredBlockInterface::getTransformL() const { return m_transformL; }
+const FixedVec<Int, 2> StructuredBlockInterface::getTransformL() const { return m_transformL; }
 
-const std::array<Int, 2> StructuredBlockInterface::getTransformR() const { return m_transformR; }
+const FixedVec<Int, 2> StructuredBlockInterface::getTransformR() const { return m_transformR; }
 
 const Range2D& StructuredBlockInterface::getBoundaryVertsL() const { return m_boundary_vertsL; }
 
@@ -89,16 +89,16 @@ const AdjacentBlockIndexer& StructuredBlockInterface::getAdjBlockCellIndexerR() 
 
 std::pair<Range2D, AdjacentBlockIndexer> StructuredBlockInterface::createAdjacentBlockIndexer(
    const Range2D& block_rangeL, NeighborDirection dirL, 
-   const Range& rangeL, const std::array<Int, 2>& transformL,
+   const Range& rangeL, const FixedVec<Int, 2>& transformL,
    const Range2D& block_rangeR, NeighborDirection dirR, const Range& rangeR)
 {
   Range2D boundary_entities = getBoundaryRange(block_rangeL, dirL, rangeL);
-  std::array<UInt, 2> min_cellL{*boundary_entities.getXRange().begin(),
+  FixedVec<UInt, 2> min_cellL{*boundary_entities.getXRange().begin(),
                                 *boundary_entities.getYRange().begin()};
 
   UInt variable_indexR = getMinEntityOnBoundary(dirL, transformL, rangeR);
   UInt constant_indexR = getConstantIndexAlongBoundary(block_rangeR, dirR);
-  std::array<UInt, 2> min_entityR;
+  FixedVec<UInt, 2> min_entityR;
   min_entityR[0] = to_int(dirR) % 2 == 0 ? variable_indexR : constant_indexR;
   min_entityR[1] = to_int(dirR) % 2 == 0 ? constant_indexR : variable_indexR;
 

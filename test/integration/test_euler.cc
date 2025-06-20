@@ -24,7 +24,7 @@ void runConvergenceStudy(const euler::EulerOpts opts, const std::vector<UInt>& n
     UInt num_bc_ghost_cells = 2;
     UInt dofs_per_cell = 4;
     mesh::MeshSpec spec(1, 1, num_bc_ghost_cells);
-    spec.blocks(0, 0) = mesh::MeshBlockSpec(ncell, ncell, 0, [](Real x, Real y) { return std::array<Real, 2>{x, y}; });
+    spec.blocks(0, 0) = mesh::MeshBlockSpec(ncell, ncell, 0, [](Real x, Real y) { return FixedVec<Real, 2>{x, y}; });
     auto mesh = std::make_shared<mesh::StructuredMesh>(spec);
     auto disc = std::make_shared<disc::StructuredDisc>(mesh, num_bc_ghost_cells, dofs_per_cell);
 
@@ -32,9 +32,9 @@ void runConvergenceStudy(const euler::EulerOpts opts, const std::vector<UInt>& n
 
     //Real u = 40;
     //Real T = 298;
-    //auto u_ex = [&](Real x, Real y, Real t) { return std::array<Real, 4>{x*x+1, u*(x*x+1), 0, (x*x+1)*(euler::Cv*T + 0.5*u*u)}; };
-    //auto src_term = [&](Real x, Real y, Real t) { return std::array<Real, 4>{1, 1 - euler::Gamma_m1/2, 0, -euler::Gamma_m1/2}; };
-    //auto src_term = [&](Real x, Real y, Real t) { return std::array<Real, 4>{2*x*u, 2*x*u*u + 2*x*euler::R*T, 0, 2*x*(euler::Cv*T + 0.5*u*u + euler::R*T)*u}; };
+    //auto u_ex = [&](Real x, Real y, Real t) { return FixedVec<Real, 4>{x*x+1, u*(x*x+1), 0, (x*x+1)*(euler::Cv*T + 0.5*u*u)}; };
+    //auto src_term = [&](Real x, Real y, Real t) { return FixedVec<Real, 4>{1, 1 - euler::Gamma_m1/2, 0, -euler::Gamma_m1/2}; };
+    //auto src_term = [&](Real x, Real y, Real t) { return FixedVec<Real, 4>{2*x*u, 2*x*u*u + 2*x*euler::R*T, 0, 2*x*(euler::Cv*T + 0.5*u*u + euler::R*T)*u}; };
 
     auto u0 = [&](Real x, Real y) { return u_ex(x, y, 0); };  
     std::vector<euler::Fxyt> bc_funcs{u_ex, u_ex, u_ex, u_ex};
@@ -98,8 +98,8 @@ TEST_P(EulerConvergenceTest, XSolutionSupersonic)
   std::vector<UInt> ncells = {3, 6, 12, 24}; // {3, 6, 12};
   Real u = 400;
   Real T = 298;
-  auto u_ex = [&](Real x, Real y, Real t) { return std::array<Real, 4>{x*x+1, u*(x*x+1), 0, (x*x+1)*(euler::Cv*T + 0.5*u*u)}; };
-  auto src_term = [&](Real x, Real y, Real t) { return std::array<Real, 4>{2*x*u, 2*x*u*u + 2*x*euler::R*T, 0, 2*x*(euler::Cv*T + 0.5*u*u + euler::R*T)*u}; };
+  auto u_ex = [&](Real x, Real y, Real t) { return FixedVec<Real, 4>{x*x+1, u*(x*x+1), 0, (x*x+1)*(euler::Cv*T + 0.5*u*u)}; };
+  auto src_term = [&](Real x, Real y, Real t) { return FixedVec<Real, 4>{2*x*u, 2*x*u*u + 2*x*euler::R*T, 0, 2*x*(euler::Cv*T + 0.5*u*u + euler::R*T)*u}; };
 
   euler::EulerOpts opts;
   opts.flux = GetParam();
@@ -112,8 +112,8 @@ TEST_P(EulerConvergenceTest, YSolutionSupersonic)
   std::vector<UInt> ncells = {3, 6, 12, 24}; // {3, 6, 12};
   Real v = 400;
   Real T = 298;
-  auto u_ex = [&](Real x, Real y, Real t) { return std::array<Real, 4>{y*y+1, 0, v*(y*y+1), (y*y+1)*(euler::Cv*T + 0.5*v*v)}; };
-  auto src_term = [&](Real x, Real y, Real t) { return std::array<Real, 4>{2*y*v, 0, 2*y*v*v + 2*y*euler::R*T, 2*y*(euler::Cv*T + 0.5*v*v + euler::R*T)*v}; };
+  auto u_ex = [&](Real x, Real y, Real t) { return FixedVec<Real, 4>{y*y+1, 0, v*(y*y+1), (y*y+1)*(euler::Cv*T + 0.5*v*v)}; };
+  auto src_term = [&](Real x, Real y, Real t) { return FixedVec<Real, 4>{2*y*v, 0, 2*y*v*v + 2*y*euler::R*T, 2*y*(euler::Cv*T + 0.5*v*v + euler::R*T)*v}; };
 
   euler::EulerOpts opts;
   opts.flux = GetParam();
@@ -126,8 +126,8 @@ TEST_P(EulerConvergenceTest, XSolutionSubsonic)
   std::vector<UInt> ncells = {3, 6, 12, 24}; // {3, 6, 12};
   Real u = 40;
   Real T = 298;
-  auto u_ex = [&](Real x, Real y, Real t) { return std::array<Real, 4>{x*x+1, u*(x*x+1), 0, (x*x+1)*(euler::Cv*T + 0.5*u*u)}; };
-  auto src_term = [&](Real x, Real y, Real t) { return std::array<Real, 4>{2*x*u, 2*x*u*u + 2*x*euler::R*T, 0, 2*x*(euler::Cv*T + 0.5*u*u + euler::R*T)*u}; };
+  auto u_ex = [&](Real x, Real y, Real t) { return FixedVec<Real, 4>{x*x+1, u*(x*x+1), 0, (x*x+1)*(euler::Cv*T + 0.5*u*u)}; };
+  auto src_term = [&](Real x, Real y, Real t) { return FixedVec<Real, 4>{2*x*u, 2*x*u*u + 2*x*euler::R*T, 0, 2*x*(euler::Cv*T + 0.5*u*u + euler::R*T)*u}; };
 
   euler::EulerOpts opts;
   opts.flux = GetParam();
@@ -140,8 +140,8 @@ TEST_P(EulerConvergenceTest, XSolutionSubsonicVanAlba)
   std::vector<UInt> ncells = {3, 6, 12, 24}; // {3, 6, 12};
   Real u = 40;
   Real T = 298;
-  auto u_ex = [&](Real x, Real y, Real t) { return std::array<Real, 4>{x*x+1, u*(x*x+1), 0, (x*x+1)*(euler::Cv*T + 0.5*u*u)}; };
-  auto src_term = [&](Real x, Real y, Real t) { return std::array<Real, 4>{2*x*u, 2*x*u*u + 2*x*euler::R*T, 0, 2*x*(euler::Cv*T + 0.5*u*u + euler::R*T)*u}; };
+  auto u_ex = [&](Real x, Real y, Real t) { return FixedVec<Real, 4>{x*x+1, u*(x*x+1), 0, (x*x+1)*(euler::Cv*T + 0.5*u*u)}; };
+  auto src_term = [&](Real x, Real y, Real t) { return FixedVec<Real, 4>{2*x*u, 2*x*u*u + 2*x*euler::R*T, 0, 2*x*(euler::Cv*T + 0.5*u*u + euler::R*T)*u}; };
 
   euler::EulerOpts opts;
   opts.flux = GetParam();
@@ -155,8 +155,8 @@ TEST_P(EulerConvergenceTest, XSolutionSubsonicVanLeer)
   std::vector<UInt> ncells = {3, 6, 12, 24}; // {3, 6, 12};
   Real u = 40;
   Real T = 298;
-  auto u_ex = [&](Real x, Real y, Real t) { return std::array<Real, 4>{x*x+1, u*(x*x+1), 0, (x*x+1)*(euler::Cv*T + 0.5*u*u)}; };
-  auto src_term = [&](Real x, Real y, Real t) { return std::array<Real, 4>{2*x*u, 2*x*u*u + 2*x*euler::R*T, 0, 2*x*(euler::Cv*T + 0.5*u*u + euler::R*T)*u}; };
+  auto u_ex = [&](Real x, Real y, Real t) { return FixedVec<Real, 4>{x*x+1, u*(x*x+1), 0, (x*x+1)*(euler::Cv*T + 0.5*u*u)}; };
+  auto src_term = [&](Real x, Real y, Real t) { return FixedVec<Real, 4>{2*x*u, 2*x*u*u + 2*x*euler::R*T, 0, 2*x*(euler::Cv*T + 0.5*u*u + euler::R*T)*u}; };
 
   euler::EulerOpts opts;
   opts.flux = GetParam();
@@ -170,8 +170,8 @@ TEST_P(EulerConvergenceTest, YSolutionSubsonic)
   std::vector<UInt> ncells = {3, 6, 12, 24}; // {3, 6, 12};
   Real v = 40;
   Real T = 298;
-  auto u_ex = [&](Real x, Real y, Real t) { return std::array<Real, 4>{y*y+1, 0, v*(y*y+1), (y*y+1)*(euler::Cv*T + 0.5*v*v)}; };
-  auto src_term = [&](Real x, Real y, Real t) { return std::array<Real, 4>{2*y*v, 0, 2*y*v*v + 2*y*euler::R*T, 2*y*(euler::Cv*T + 0.5*v*v + euler::R*T)*v}; };
+  auto u_ex = [&](Real x, Real y, Real t) { return FixedVec<Real, 4>{y*y+1, 0, v*(y*y+1), (y*y+1)*(euler::Cv*T + 0.5*v*v)}; };
+  auto src_term = [&](Real x, Real y, Real t) { return FixedVec<Real, 4>{2*y*v, 0, 2*y*v*v + 2*y*euler::R*T, 2*y*(euler::Cv*T + 0.5*v*v + euler::R*T)*v}; };
 
   euler::EulerOpts opts;
   opts.flux = GetParam();
@@ -184,8 +184,8 @@ TEST_P(EulerConvergenceTest, XSolutionSupersonicNegative)
   std::vector<UInt> ncells = {3, 6, 12, 24}; // {3, 6, 12};
   Real u = -400;
   Real T = 298;
-  auto u_ex = [&](Real x, Real y, Real t) { return std::array<Real, 4>{x*x+1, u*(x*x+1), 0, (x*x+1)*(euler::Cv*T + 0.5*u*u)}; };
-  auto src_term = [&](Real x, Real y, Real t) { return std::array<Real, 4>{2*x*u, 2*x*u*u + 2*x*euler::R*T, 0, 2*x*(euler::Cv*T + 0.5*u*u + euler::R*T)*u}; };
+  auto u_ex = [&](Real x, Real y, Real t) { return FixedVec<Real, 4>{x*x+1, u*(x*x+1), 0, (x*x+1)*(euler::Cv*T + 0.5*u*u)}; };
+  auto src_term = [&](Real x, Real y, Real t) { return FixedVec<Real, 4>{2*x*u, 2*x*u*u + 2*x*euler::R*T, 0, 2*x*(euler::Cv*T + 0.5*u*u + euler::R*T)*u}; };
 
   euler::EulerOpts opts;
   opts.flux = GetParam();
@@ -199,8 +199,8 @@ TEST_P(EulerConvergenceTest, YSolutionSupersonicNegative)
   std::vector<UInt> ncells = {3, 6, 12, 24}; // {3, 6, 12};
   Real v = -400;
   Real T = 298;
-  auto u_ex = [&](Real x, Real y, Real t) { return std::array<Real, 4>{y*y+1, 0, v*(y*y+1), (y*y+1)*(euler::Cv*T + 0.5*v*v)}; };
-  auto src_term = [&](Real x, Real y, Real t) { return std::array<Real, 4>{2*y*v, 0, 2*y*v*v + 2*y*euler::R*T, 2*y*(euler::Cv*T + 0.5*v*v + euler::R*T)*v}; };
+  auto u_ex = [&](Real x, Real y, Real t) { return FixedVec<Real, 4>{y*y+1, 0, v*(y*y+1), (y*y+1)*(euler::Cv*T + 0.5*v*v)}; };
+  auto src_term = [&](Real x, Real y, Real t) { return FixedVec<Real, 4>{2*y*v, 0, 2*y*v*v + 2*y*euler::R*T, 2*y*(euler::Cv*T + 0.5*v*v + euler::R*T)*v}; };
 
   euler::EulerOpts opts;
   opts.flux = GetParam();
@@ -214,8 +214,8 @@ TEST_P(EulerConvergenceTest, XSolutionSubsonicNegative)
   std::vector<UInt> ncells = {3, 6, 12, 24}; // {3, 6, 12};
   Real u = -40;
   Real T = 298;
-  auto u_ex = [&](Real x, Real y, Real t) { return std::array<Real, 4>{x*x+1, u*(x*x+1), 0, (x*x+1)*(euler::Cv*T + 0.5*u*u)}; };
-  auto src_term = [&](Real x, Real y, Real t) { return std::array<Real, 4>{2*x*u, 2*x*u*u + 2*x*euler::R*T, 0, 2*x*(euler::Cv*T + 0.5*u*u + euler::R*T)*u}; };
+  auto u_ex = [&](Real x, Real y, Real t) { return FixedVec<Real, 4>{x*x+1, u*(x*x+1), 0, (x*x+1)*(euler::Cv*T + 0.5*u*u)}; };
+  auto src_term = [&](Real x, Real y, Real t) { return FixedVec<Real, 4>{2*x*u, 2*x*u*u + 2*x*euler::R*T, 0, 2*x*(euler::Cv*T + 0.5*u*u + euler::R*T)*u}; };
 
   euler::EulerOpts opts;
   opts.flux = GetParam();
@@ -229,8 +229,8 @@ TEST_P(EulerConvergenceTest, YSolutionSubsonicNegative)
   std::vector<UInt> ncells = {3, 6, 12, 24}; // {3, 6, 12};
   Real v = -40;
   Real T = 298;
-  auto u_ex = [&](Real x, Real y, Real t) { return std::array<Real, 4>{y*y+1, 0, v*(y*y+1), (y*y+1)*(euler::Cv*T + 0.5*v*v)}; };
-  auto src_term = [&](Real x, Real y, Real t) { return std::array<Real, 4>{2*y*v, 0, 2*y*v*v + 2*y*euler::R*T, 2*y*(euler::Cv*T + 0.5*v*v + euler::R*T)*v}; };
+  auto u_ex = [&](Real x, Real y, Real t) { return FixedVec<Real, 4>{y*y+1, 0, v*(y*y+1), (y*y+1)*(euler::Cv*T + 0.5*v*v)}; };
+  auto src_term = [&](Real x, Real y, Real t) { return FixedVec<Real, 4>{2*y*v, 0, 2*y*v*v + 2*y*euler::R*T, 2*y*(euler::Cv*T + 0.5*v*v + euler::R*T)*v}; };
 
   euler::EulerOpts opts;
   opts.flux = GetParam();
@@ -249,14 +249,14 @@ TEST_P(EulerConvergenceTest, XSolutionSubsonicVelocity)
   auto rho   = [](auto x, auto y, auto t) { return (x*x + 1.0); };
   auto u     = [](auto x, auto y, auto t) { return 20.0*x + 200.0; };
 
-  auto u_ex = [&](auto x, auto y, auto t) { return euler::compute_conservative_variables(euler::Vec4<decltype(x)>{rho(x, y, t), u(x, y, t), v, T}, euler::PrimitiveVarTag()); };
+  auto u_ex = [&](auto x, auto y, auto t) { return euler::compute_conservative_variables(Vec4<decltype(x)>{rho(x, y, t), u(x, y, t), v, T}, euler::PrimitiveVarTag()); };
   auto src_term = [&](Real x, Real y, Real t)
   {
     Real h = 1e-20;
     std::complex<Real> x_dot(x, h);
-    std::array<std::complex<Real>, 4> u_dot = u_ex(x_dot, y, t);
-    std::array<std::complex<Real>, 4> flux_dot = euler::compute_euler_flux(u_dot, {1, 0});
-    std::array<Real, 4> src;
+    FixedVec<std::complex<Real>, 4> u_dot = u_ex(x_dot, y, t);
+    FixedVec<std::complex<Real>, 4> flux_dot = euler::compute_euler_flux(u_dot, {1, 0});
+    FixedVec<Real, 4> src;
     for (UInt i=0; i < 4; ++i)
       src[i] = flux_dot[i].imag()/h;
 
@@ -278,14 +278,14 @@ TEST_P(EulerConvergenceTest, YSolutionSubsonicVelocity)
   auto rho   = [](auto x, auto y, auto t) { return (y*y + 1.0); };
   auto v     = [](auto x, auto y, auto t) { return 20.0*y + 200.0; };
 
-  auto u_ex = [&](auto x, auto y, auto t) { return euler::compute_conservative_variables(euler::Vec4<decltype(y)>{rho(x, y, t), u, v(x, y, t), T}, euler::PrimitiveVarTag()); };
+  auto u_ex = [&](auto x, auto y, auto t) { return euler::compute_conservative_variables(Vec4<decltype(y)>{rho(x, y, t), u, v(x, y, t), T}, euler::PrimitiveVarTag()); };
   auto src_term = [&](Real x, Real y, Real t)
   {
     Real h = 1e-20;
     std::complex<Real> y_dot(y, h);
-    std::array<std::complex<Real>, 4> u_dot = u_ex(x, y_dot, t);
-    std::array<std::complex<Real>, 4> flux_dot = euler::compute_euler_flux(u_dot, {0, 1});
-    std::array<Real, 4> src;
+    FixedVec<std::complex<Real>, 4> u_dot = u_ex(x, y_dot, t);
+    FixedVec<std::complex<Real>, 4> flux_dot = euler::compute_euler_flux(u_dot, {0, 1});
+    FixedVec<Real, 4> src;
     for (UInt i=0; i < 4; ++i)
       src[i] = flux_dot[i].imag()/h;
 

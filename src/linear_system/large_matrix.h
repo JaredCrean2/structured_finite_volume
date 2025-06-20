@@ -49,7 +49,7 @@ class LargeMatrix
 
     GlobalDof getNLocal() const { return m_nlocal; }
 
-    std::array<GlobalDof, 2> getSize() const { return {m_mlocal, m_nlocal}; }
+    FixedVec<GlobalDof, 2> getSize() const { return {m_mlocal, m_nlocal}; }
 
     std::shared_ptr<SparsityPattern> getSparsityPattern() const { return m_sparsity_pattern; }
 
@@ -61,7 +61,7 @@ class LargeMatrix
 /*
     // if dof < 0, the corresponding entries are ignored
     template <UInt M, UInt N>
-    void assembleValues(const std::array<GlobalDof, M>& dofs_row, const std::array<GlobalDof, N>& dofs_col,  const Matrix<Real, M, N>& jac)
+    void assembleValues(const FixedVec<GlobalDof, M>& dofs_row, const FixedVec<GlobalDof, N>& dofs_col,  const Matrix<Real, M, N>& jac)
     {
 #ifndef NDEBUG
       assert(!m_is_factored);
@@ -129,8 +129,8 @@ class LargeMatrix
 
     virtual AssemblerBasePtr getAssembler_impl(disc::StructuredDiscPtr disc) const = 0;
 
-    template <size_t M, size_t N>
-    void checkDofsForAssembly(const std::array<GlobalDof, M>& dofs_row, const std::array<GlobalDof, N>& dofs_col) const
+    template <UInt M, UInt N>
+    void checkDofsForAssembly(const FixedVec<GlobalDof, M>& dofs_row, const FixedVec<GlobalDof, N>& dofs_col) const
     {
 #ifndef NDEBUG
       assert(!m_is_factored);
@@ -139,8 +139,8 @@ class LargeMatrix
 #endif
     }
 
-    template <size_t M>
-    void checkDofUniqueness(const std::array<GlobalDof, M>& dofs) const
+    template <UInt M>
+    void checkDofUniqueness(const FixedVec<GlobalDof, M>& dofs) const
     {
       std::vector<GlobalDof> dofs_copy;
       for (unsigned int i=0; i < dofs.size(); ++i)

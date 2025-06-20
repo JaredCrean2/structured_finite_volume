@@ -42,14 +42,14 @@ class Assembler : public AssemblerBase
     }
 
     template <UInt M, UInt N>
-    void assembleValues(const std::array<Indices, M>& row_indices, const std::array<Indices, N>& col_indices, Matrix<Real, M, N>& jac)
+    void assembleValues(const FixedVec<Indices, M>& row_indices, const FixedVec<Indices, N>& col_indices, Matrix<Real, M, N>& jac)
     {
       for (UInt i=0; i < M; ++i)
         for (UInt j=0; j < N; ++j)
           jac[i][j] *= m_alpha;
 
-      std::array<GlobalDof, M> row_dofs;
-      std::array<GlobalDof, N> col_dofs;
+      FixedVec<GlobalDof, M> row_dofs;
+      FixedVec<GlobalDof, N> col_dofs;
       for (UInt i=0; i < M; ++i)
         row_dofs[i] = m_dof_nums(row_indices[i].i, row_indices[i].j);
 

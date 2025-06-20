@@ -66,7 +66,7 @@ class FaceField
 
     void set(const T& val);
 
-    // Func is a callable object (Real x, Real y) -> std::array<T, num_vals_per_element>
+    // Func is a callable object (Real x, Real y) -> FixedVec<T, num_vals_per_element>
     // return type can be anything of the correct length that supports operator[]
     // x and y are the centroid of each face
     template <typename Func, IsFuncXY_t<Func> = true>
@@ -80,7 +80,7 @@ class FaceField
 
     const StructuredDisc& m_disc;
     const UInt m_nvals_per_element;
-    std::array<std::vector<FieldData>, 2> m_data;
+    FixedVec<std::vector<FieldData>, 2> m_data;
 };
 
 template <typename T>

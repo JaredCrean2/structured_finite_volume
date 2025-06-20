@@ -3,6 +3,7 @@
 
 #include "utils/project_defs.h"
 #include "utils/range.h"
+#include "vec.h"
 #include <iosfwd>
 
 namespace structured_fv {
@@ -52,14 +53,14 @@ constexpr NeighborDirection rotate(NeighborDirection dir, UInt rotation)
 // Ex. East is the positive end of the x axis -> +1
 constexpr Int toSignedAxis(NeighborDirection dir)
 {
-  constexpr std::array<Int, 4> dirs{2, 1, -2, -1};
+  constexpr FixedVec<Int, 4> dirs{2, 1, -2, -1};
   return dirs[to_int(dir)];
 }
 
 // given the result of toSignedAxis, compute the NeighborDirection
 constexpr NeighborDirection toNeighborDirection(Int signed_axis)
 {
-  constexpr std::array<NeighborDirection, 5> dirs{NeighborDirection::South,
+  constexpr FixedVec<NeighborDirection, 5> dirs{NeighborDirection::South,
                                                   NeighborDirection::West,
                                                   NeighborDirection::South, // unused
                                                   NeighborDirection::East,
@@ -68,16 +69,16 @@ constexpr NeighborDirection toNeighborDirection(Int signed_axis)
   return dirs[signed_axis + 2];
 }
 
-constexpr NeighborDirection getNeighborImage(NeighborDirection dir, const std::array<Int, 2>& transform)
+constexpr NeighborDirection getNeighborImage(NeighborDirection dir, const FixedVec<Int, 2>& transform)
 {
   Int signed_axis = toSignedAxis(dir);
   Int other_block_axis = -sgn(signed_axis) *transform[std::abs(signed_axis)-1];
   return toNeighborDirection(other_block_axis);
 }
 
-constexpr std::array<Int, 2> computeIndices(NeighborDirection dir, Int offset, Int i, Int j)
+constexpr FixedVec<Int, 2> computeIndices(NeighborDirection dir, Int offset, Int i, Int j)
 {
-  std::array<Int, 2> idxs = {i, j};
+  FixedVec<Int, 2> idxs = {i, j};
   //Int sign = to_int(dir) < 2 ? 1 : -1;
   Int sign = 1 - 2*(to_int(dir)/2);
   idxs[0] += sign * (to_int(dir) % 2) * offset;
@@ -92,13 +93,13 @@ Range getVariableIndexAlongBoundary(const Range2D& block_range, NeighborDirectio
 
 Range2D getBoundaryRange(const Range2D& block_range, NeighborDirection dir, const Range& boundary_subset);
 
-std::array<Int, 2> getTransform(Int rotation_left, Int rotation_right);
+FixedVec<Int, 2> getTransform(Int rotation_left, Int rotation_right);
 
-std::array<Int, 2> getInverseTransform(const std::array<Int, 2>& transform);
+FixedVec<Int, 2> getInverseTransform(const FixedVec<Int, 2>& transform);
 
 // given an direction and a transfrom from the left block perspective, return
 // the entry of rangeR that corresponds to the first cell on the boundary in blockL
-UInt getMinEntityOnBoundary(NeighborDirection dirL, const std::array<Int, 2>& transformL, const Range& rangeR);
+UInt getMinEntityOnBoundary(NeighborDirection dirL, const FixedVec<Int, 2>& transformL, const Range& rangeR);
 
 }
 
