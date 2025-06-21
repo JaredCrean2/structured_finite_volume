@@ -4,6 +4,7 @@
 #include "disc/disc_vector.h"
 #include "disc/discretization.h"
 #include "utils/math.h"
+#include "utils/matrix.h"
 
 namespace structured_fv {
 namespace euler {
@@ -15,6 +16,12 @@ using disc::StructuredBlock;
 using disc::StructuredBlockInterface;
 
 constexpr UInt DofsPerCell = 4;
+
+template <typename T>
+using ScalarVectorPair = std::pair<T, Vec4<T>>;
+
+template <typename T>
+using VectorMatrixPair = std::pair<Vec4<T>, Matrix<T, 4>>;
 
 // f(x, y, t)
 using Fxyt = std::function<Vec4<Real>(Real, Real, Real)>;

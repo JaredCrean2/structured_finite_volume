@@ -82,3 +82,13 @@ TEST(Matrix, ColIndex)
   EXPECT_EQ(x[1], 4);
   EXPECT_EQ(x[2], 6);
 }
+
+TEST(Matrix, RowMajor)
+{
+  Matrix<Int, 3, 2> mat({1, 2, 3, 4, 5, 6});
+  Int* data = mat.getData();
+  EXPECT_EQ(&(mat(0, 0)), data);
+  EXPECT_EQ(&(mat(0, 1)), data+1);
+  EXPECT_EQ(&(mat(1, 0)), data+2);
+  EXPECT_EQ(&(mat(1, 1)), data+3);
+}

@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include "physics/euler/euler_flux.h"
+#include "jacobian.h"
 
 using namespace structured_fv;
 using namespace structured_fv::euler;
@@ -11,9 +12,48 @@ namespace {
 TEST(EulerFlux, Pressure)
 {
   // standard atmosphere at 0 altitude
-  Vec4<Real> prim_vars = {1.225, 0, 0, 288.16};
+  Vec4<Real> prim_vars = {1.225, 5, 10, 288.16};
   auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
   EXPECT_NEAR(compute_pressure(q), 1.01325E5, 100.0);
+}
+
+TEST(EulerFlux, PressureJac)
+{
+  //TODO: make velocity nonzero
+  Vec4<Real> prim_vars = {1.225, 5, 10, 288.16};
+  auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
+  test_utils::checkJacobianScalar(q, &compute_pressure<Complex>, &compute_pressure_jac<Real>);
+}
+
+TEST(EulerFlux, Sos2Jac)
+{
+  Vec4<Real> prim_vars = {1.225, 5, 10, 288.16};
+  auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
+  test_utils::checkJacobianScalar(q, &compute_sos2<Complex>, &compute_sos2_jac<Real>);
+}
+
+TEST(EulerFlux, SosJac)
+{
+  Vec4<Real> prim_vars = {1.225, 5, 10, 288.16};
+  auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
+  test_utils::checkJacobianScalar(q, &compute_sos<Complex>, &compute_sos_jac<Real>);
+}
+
+TEST(EulerFlux, NormalMomenutmJac)
+{
+  Vec4<Real> prim_vars = {1.225, 5, 10, 288.16};
+  auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
+  auto func = [&](auto q) { return compute_momentum_n(q, {2, 3}); };
+  auto func_jac = [&](auto q) { return compute_momentum_n_jac(q, {2, 3}); };
+  test_utils::checkJacobianScalar(q, func, func_jac);
+}
+
+
+TEST(EulerFlux, ComputeTemperatureJac)
+{
+  Vec4<Real> prim_vars = {1.225, 5, 10, 288.16};
+  auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
+  test_utils::checkJacobianScalar(q, &compute_temperature<Complex>, &compute_temperature_jac<Real>);
 }
 
 TEST(EulerFlux, PrimitiveVariables)
@@ -25,6 +65,25 @@ TEST(EulerFlux, PrimitiveVariables)
     EXPECT_NEAR(prim_vars[i], prim_vars2[i], 1e-13);
 }
 
+
+TEST(EulerFlux, ComputeConservativeVarsJac)
+{
+  Vec4<Real> prim_vars = {1.225, 5, 10, 288.16};
+  auto func = [&](auto primitive) { return compute_conservative_variables(primitive, PrimitiveVarTag{}); };
+  auto func_jac = [&](auto primitive) { return compute_conservative_variables_jac(primitive, PrimitiveVarTag{}); };
+  test_utils::checkJacobianVector(prim_vars, func, func_jac);
+}
+
+TEST(EulerFlux, ComputePrimitiveVarsJac)
+{
+  Vec4<Real> prim_vars = {1.225, 5, 10, 288.16};
+  auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
+  auto func = [&](auto q) { return compute_primitive_variables(q, ConservativeVarTag{}); };
+  auto func_jac = [&](auto q) { return compute_primitive_variables_jac(q, ConservativeVarTag{}); };
+  test_utils::checkJacobianVector(q, func, func_jac);
+}
+
+/*
 TEST(EulerFlux, PressureJac)
 {
   Vec4<Real> prim_vars = {1.225, 10, 20, 288.16};
@@ -40,12 +99,22 @@ TEST(EulerFlux, PressureJac)
     q_c[i] -= Complex(0, h);
   }
 }
+*/
 
 TEST(EulerFlux, NormalVelocity)
 {
   Vec4<Real> prim_vars = {2, 5, 10, 300};
   auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
   EXPECT_NEAR(compute_un(q, {2, 3}), 5*2 + 10*3, 1e-13);
+}
+
+TEST(EulerFlux, NormalVelocityJac)
+{
+  Vec4<Real> prim_vars = {1.225, 5, 10, 288.16};
+  auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
+  auto func = [&](auto q) { return compute_un(q, {2, 3}); };
+  auto func_jac = [&](auto q) { return compute_un_jac(q, {2, 3}); };
+  test_utils::checkJacobianScalar(q, func, func_jac);
 }
 
 TEST(EulerFlux, Xdirection)
@@ -78,26 +147,13 @@ TEST(EulerFlux, Ydirection)
   EXPECT_NEAR(flux[3], (E + p)*prim_vars[2], 1e-13);
 }
 
-
-TEST(EulerFlux, Jacobian)
+TEST(EulerFlux, EulerFluxJac)
 {
-  Vec4<Real> prim_vars = {1.225, 10, 20, 288.16};
-  FixedVec<Real, 2> normal = {2, 3};
+  Vec4<Real> prim_vars = {1.225, 5, 10, 288.16};
   auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
-  auto [flux, flux_jac] = compute_euler_flux_jac(q, normal);
-
-  Real h = 1e-20;
-  auto q_c = convert<Complex>(q);
-  for (int i=0; i < 4; ++i)
-  {
-    q_c[i] += Complex(0, h);
-    Vec4<Complex> flux_dot = compute_euler_flux(q_c, normal);
-    for (int j=0; j < 4; ++j)
-    {
-      EXPECT_DOUBLE_EQ(flux_dot[j].imag()/h, flux_jac(j, i));
-    }
-    q_c[i] -= Complex(0, h);
-  }
+  auto func = [&](auto q) { return compute_euler_flux(q, {2, 3}); };
+  auto func_jac = [&](auto q) { return compute_euler_flux_jac(q, {2, 3}); };
+  test_utils::checkJacobianVector(q, func, func_jac);
 }
 
 TEST(EulerFlux, EigenDecompRightEigenVectors)
@@ -127,6 +183,32 @@ TEST(EulerFlux, EigenDecompRightEigenVectors)
   }
 }
 
+TEST(EulerFlux, EigenDecompRightEigenVectorsJac)
+{
+  Vec4<Real> prim_vars = {2, 10, 20, 300};
+  auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
+
+  auto func = [](auto q)
+  {
+    Matrix<Complex, 4, 4> R, Rinv;
+    Vec4<Complex> lambda;
+    euler::compute_eigen_decomp(q, {3, 4}, R, lambda, Rinv);
+    return R;
+  };
+
+  auto func_jac = [](auto q)
+  {
+    Matrix<Real, 4, 4> R, Rinv;
+    Vec4<Real> lambda;
+
+    Matrix<Real, 4, 4> lambda_jac;
+    Array3<Real, 4> R_jac, Rinv_jac;
+    euler::compute_eigen_decomp_jac(q, {3, 4}, R, R_jac, lambda, lambda_jac, Rinv, Rinv_jac);
+    return std::make_pair(R, R_jac);
+  };
+  test_utils::checkJacobianMatrix(q, func, func_jac);
+}
+
 
 TEST(EulerFlux, EigenDecompLeftEigenVectors)
 {
@@ -153,6 +235,32 @@ TEST(EulerFlux, EigenDecompLeftEigenVectors)
       EXPECT_NEAR(vA[k], lambda[j]*Rinv(j, k), 1e-6);
     }
   }
+}
+
+TEST(EulerFlux, EigenDecompLeftEigenVectorsJac)
+{
+  Vec4<Real> prim_vars = {2, 10, 20, 300};
+  auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
+
+  auto func = [](auto q)
+  {
+    Matrix<Complex, 4, 4> R, Rinv;
+    Vec4<Complex> lambda;
+    euler::compute_eigen_decomp(q, {3, 4}, R, lambda, Rinv);
+    return Rinv;
+  };
+
+  auto func_jac = [](auto q)
+  {
+    Matrix<Real, 4, 4> R, Rinv;
+    Vec4<Real> lambda;
+
+    Matrix<Real, 4, 4> lambda_jac;
+    Array3<Real, 4> R_jac, Rinv_jac;
+    euler::compute_eigen_decomp_jac(q, {3, 4}, R, R_jac, lambda, lambda_jac, Rinv, Rinv_jac);
+    return std::make_pair(Rinv, Rinv_jac);
+  };
+  test_utils::checkJacobianMatrix(q, func, func_jac);
 }
 
 TEST(EulerFlux, EigenDecompLeftEigenVectorsInv)
@@ -195,6 +303,32 @@ TEST(EulerFlux, EigenDecompEigenvaluesSorted)
 
   for (int i=1; i < 4; ++i)
     EXPECT_GE(lambda[i], lambda[i-1]); 
+}
+
+TEST(EulerFlux, EigenDecompLeftEigenvaluesJac)
+{
+  Vec4<Real> prim_vars = {2, 10, 20, 300};
+  auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
+
+  auto func = [](auto q)
+  {
+    Matrix<Complex, 4, 4> R, Rinv;
+    Vec4<Complex> lambda;
+    euler::compute_eigen_decomp(q, {3, 4}, R, lambda, Rinv);
+    return lambda;
+  };
+
+  auto func_jac = [](auto q)
+  {
+    Matrix<Real, 4, 4> R, Rinv;
+    Vec4<Real> lambda;
+
+    Matrix<Real, 4, 4> lambda_jac;
+    Array3<Real, 4> R_jac, Rinv_jac;
+    euler::compute_eigen_decomp_jac(q, {3, 4}, R, R_jac, lambda, lambda_jac, Rinv, Rinv_jac);
+    return std::make_pair(lambda, lambda_jac);
+  };
+  test_utils::checkJacobianVector(q, func, func_jac);
 }
 
 namespace {
