@@ -15,8 +15,35 @@ namespace structured_fv {
 */
   static constexpr double PI = 3.141592653589793238462643383279502884;
   //using structured_fv::Real;
+}
+
+namespace std {
+
+// these definitions make Complex numbers work as dual numbers
+constexpr bool operator<(const structured_fv::Complex& lhs, const structured_fv::Complex& rhs)
+{
+  return lhs.real() < rhs.real();
+}
+
+constexpr bool operator<=(const structured_fv::Complex& lhs, const structured_fv::Complex& rhs)
+{
+  return lhs.real() <= rhs.real();
+}
+
+constexpr bool operator>(const structured_fv::Complex& lhs, const structured_fv::Complex& rhs)
+{
+  return lhs.real() > rhs.real();
+}
+
+constexpr bool operator>=(const structured_fv::Complex& lhs, const structured_fv::Complex& rhs)
+{
+  return lhs.real() >= rhs.real();
+}
+
+}
 
 
+namespace structured_fv {
 
 template <typename T,  UInt N>
 constexpr FixedVec<T, N> operator+(const FixedVec<T, N>& a, const FixedVec<T, N>& b)
@@ -274,22 +301,33 @@ constexpr Real radiansToDegrees(Real radians)
   return radians * 180/ PI;
 }
 
-constexpr Real smoothAbs(Real x, Real delta)
+//TODO: finish this
+template <typename T>
+constexpr T smoothAbs(T x, Real delta=1e-6)
 {
-  Real val1 = std::abs(x);
-  Real val2 = x*x/delta;
-  return val1 > delta ? val1 : val2;
+  //Real val1 = std::abs(x);
+  T minus_x = -x;
+  T abs_x = x > 0 ? x : minus_x;
+  T val2 = x*x/delta;
+  return abs_x > delta ? abs_x : val2;
 }
 
-constexpr Real smoothAbsDeriv(Real x, Real delta)
+template <typename T>
+constexpr std::pair<T, T> smoothAbs_dot(T x, Real x_dot, Real delta=1e-6)
 {
-  double val1 = std::abs(x);
-  Real val1_deriv = x > 0 ? 1 : -1;
+  T minus_x = -x;
+  T minus_x_dot = -x_dot;
 
-  //Real val2 = x*x/delta;
-  Real val2_deriv = 2*x/delta;
+  T abs_x = x > 0 ? x : minus_x;
+  T abs_x_dot = x > 0 ? x_dot : minus_x_dot;
 
-  return val1 > delta ? val1_deriv : val2_deriv;
+  T val2 = x*x/delta;
+  T val2_dot = 2*x*x_dot/delta;
+
+  T v =  abs_x > delta ? abs_x : val2;
+  T v_dot = abs_x > delta ? abs_x_dot : val2_dot;
+
+  return {v, v_dot};
 }
 
 // coords should be in couter-clockwise order
@@ -306,6 +344,12 @@ constexpr Real computeQuadArea(const FixedVec<FixedVec<Real, 2>, 4>& coords)
   }
 
   return 0.5*(cross(a1, a2)[2] + cross(b1, b2)[2]);
+}
+
+template <typename T>
+constexpr Int sgn(T val)
+{
+  return (T(0) < val) - (val < T(0));
 }
 
 }

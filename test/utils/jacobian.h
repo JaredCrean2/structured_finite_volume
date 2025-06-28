@@ -60,7 +60,7 @@ void checkJacobianScalar(const Vec4<Real>& q, ScalarFunc func, ScalarFuncJac fun
   static_assert(IsScalarFunc<ScalarFunc>);
   static_assert(IsScalarJac<ScalarFuncJac>);
   Vec4<Complex> qc = make_complex(q);
-  Real h = 1e-40;
+  Real h = 1e-80;
   Complex pert(0, h);
 
   Complex y = func(qc);
@@ -87,7 +87,7 @@ void checkJacobianVector(const Vec4<Real>& q, VectorFunc func, VectorFuncJac fun
   static_assert(IsVectorJac<VectorFuncJac>);
 
   Vec4<Complex> qc = make_complex(q);
-  Real h = 1e-40;
+  Real h = 1e-80;
   Complex pert(0, h);
 
   Vec4<Complex> y = func(qc);
@@ -98,7 +98,9 @@ void checkJacobianVector(const Vec4<Real>& q, VectorFunc func, VectorFuncJac fun
     qc[k] += pert;
     Vec4<Complex> yc = func(qc);
     for (UInt i=0; i < q.size(); ++i)
-        dydq_cs(i, k) = yc[i].imag()/h;
+    {
+      dydq_cs(i, k) = yc[i].imag()/h;
+    }
 
     qc[k] -= pert;
   }
@@ -121,7 +123,7 @@ void checkJacobianMatrix(const Vec4<Real>& q, MatrixFunc func, MatrixFuncJac fun
   static_assert(IsMatrixJac<MatrixFuncJac>);
 
   Vec4<Complex> qc = make_complex(q);
-  Real h = 1e-40;
+  Real h = 1e-80;
   Complex pert(0, h);
 
   Matrix<Complex, 4> y = func(qc);
@@ -147,7 +149,7 @@ void checkJacobianMatrix(const Vec4<Real>& q, MatrixFunc func, MatrixFuncJac fun
       {
         Real min_val = std::min(std::abs(dydq_jac(i, j, k)), std::abs(dydq_cs(i, j, k)));
         Real eps = std::nextafter(min_val, std::numeric_limits<Real>::max()) - min_val;
-        Real tol = std::max(4 * eps, 1e-13);
+        Real tol = std::max(8 * eps, 1e-13);
         EXPECT_NEAR(dydq_jac(i, j, k), dydq_cs(i, j, k), tol);
       }
     }

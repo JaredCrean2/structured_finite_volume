@@ -14,6 +14,23 @@ void expect_near(const Vec3<double>& a, const Vec3<double>& b)
 }
 }
 
+TEST(Math, ComplexCompare)
+{
+  Complex one(1.0, 2.0), two(2.0, 1.0);
+  EXPECT_TRUE(one <   two);
+  EXPECT_TRUE(one <=  two);
+  EXPECT_FALSE(one >  two);
+  EXPECT_FALSE(one >= two);
+
+  EXPECT_TRUE(one <= one);
+  EXPECT_TRUE(one >= one);
+
+  EXPECT_FALSE(two <   one);
+  EXPECT_FALSE(two <=  one);
+  EXPECT_TRUE(two >  one);
+  EXPECT_TRUE(two >= one);  
+} 
+
 TEST(Math, ArrayPlusArray)
 {
   Vec3<double> a = {1, 2, 3};
@@ -160,19 +177,47 @@ TEST(Math, RadianConversion)
 TEST(Math, SmoothAbs)
 {
   double delta = 0.1;
-  EXPECT_EQ(smoothAbs(5, delta), std::abs(5));
-  EXPECT_EQ(smoothAbs(-5, delta), std::abs(-5));
+  EXPECT_EQ(smoothAbs(5.0, delta), std::abs(5.0));
+  EXPECT_EQ(smoothAbs(-5.0, delta), std::abs(-5.0));
   EXPECT_NEAR(smoothAbs(0.05, delta), 0.05*0.05/delta, 1e-13);
   EXPECT_NEAR(smoothAbs(-0.05, delta), 0.05*0.05/delta, 1e-13);
+
+
+  EXPECT_EQ(smoothAbs(Complex(5, 10), delta), Complex(5, 10));
+  EXPECT_EQ(smoothAbs(Complex(-5, 10), delta), Complex(5, -10));
 }
 
-TEST(Math, SmoothAbsDeriv)
+TEST(Math, SmoothAbsDot)
 {
+  Real h = 1e-40;
+  Complex pert(0, h);
+
   double delta = 0.1;
-  EXPECT_EQ(smoothAbsDeriv(5, delta), 1); 
-  EXPECT_EQ(smoothAbsDeriv(-5, delta), -1);
-  EXPECT_NEAR(smoothAbsDeriv(0.05, delta), 2*0.05/delta, 1e-13);
-  EXPECT_NEAR(smoothAbsDeriv(-0.05, delta), -2*0.05/delta, 1e-13);
+  for (double val : {-2.0, -0.05, 0.05, 2.0})
+  {
+
+    Complex x = val + pert;
+    Complex abs_xc = smoothAbs(x, delta);
+    Real x_dotc = abs_xc.imag()/h;
+
+    auto [abs_x, abs_x_dot] = smoothAbs_dot(val, 2, delta);
+    EXPECT_NEAR(2.0*x_dotc, abs_x_dot, 1e-13);
+  }
+}
+
+TEST(Math, Sgn)
+{
+  EXPECT_EQ(sgn(2), 1);
+  EXPECT_EQ(sgn(0), 0);
+  EXPECT_EQ(sgn(-2), -1);
+
+  EXPECT_EQ(sgn(2.0), 1);
+  EXPECT_EQ(sgn(0.0), 0);
+  EXPECT_EQ(sgn(-2.0), -1);  
+
+  EXPECT_EQ(sgn(Complex(2, 5)), 1);
+  EXPECT_EQ(sgn(Complex(0, 5)), 0);
+  EXPECT_EQ(sgn(Complex(-2, 5)), -1);  
 }
 
 TEST(Math, QuadArea)

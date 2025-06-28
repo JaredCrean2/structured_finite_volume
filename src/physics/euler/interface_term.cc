@@ -187,7 +187,7 @@ void evaluateInterfaceTerm(const ElementFieldPtr<Real>& solution, Real t,
           Vec2<Real> normal{normals(i, j, 0), normals(i, j, 1)};
 
           Vec4<Real> qLhalf = recon(qLm1, qL, qR, 1);
-          Vec4<Real> qRhalf = recon(qL, qR, qRp1, -1);                     
+          Vec4<Real> qRhalf = recon(qL, qR, qRp1, -1);
           flux      = flux_func(qLhalf, qRhalf, normal);
         }
 

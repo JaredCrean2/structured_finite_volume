@@ -21,7 +21,7 @@ class RoeFlux final : public NumericalFlux
     constexpr Vec4<Real> operator()(const Vec4<Real>& qL, const Vec4<Real>& qR, 
                                     const Vec2<Real>& normal) const
     {
-      RoeAvgState avg_state = compute_roe_avg(qL, qR);
+      RoeAvgState<Real> avg_state = compute_roe_avg(qL, qR);
       Vec4<Real> q_avg = compute_conservative_variables(avg_state, RoeStateTag());
 
       Matrix<Real, 4, 4> R, Rinv;

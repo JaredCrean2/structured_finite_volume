@@ -27,7 +27,15 @@ class Matrix
 
     constexpr Matrix() :
       m_data{}
-    {}    
+    {}
+
+    Matrix<T, M, N>& operator=(const FixedVec<T, M*N>& other)
+    {
+      for (UInt i=0; i < M*N; ++i)
+        m_data[i] = other[i];
+
+      return *this;
+    }
 
     constexpr T& operator()(UInt i, UInt j) {return m_data[getIdx(i, j)]; }
 

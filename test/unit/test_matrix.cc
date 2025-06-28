@@ -42,6 +42,19 @@ TEST(Matrix, ValueConstructor)
       EXPECT_EQ(mat_const(i, j), val++);
 }
 
+TEST(Matrix, AssignmentOperator)
+{
+  Matrix<Int, 3, 4> mat;
+  mat = {1,  2,  3,  4,
+         5,  6,  7,  8,
+         9, 10, 11, 12};
+  
+  Int val = 1;
+  for (UInt i=0; i < 3; ++i)
+    for (UInt j=0; j < 4; ++j)
+      EXPECT_EQ(mat(i, j), val++);
+}
+
 TEST(Matrix, DefaultTemplateArgument)
 {
   Matrix<Int, 3> mat;

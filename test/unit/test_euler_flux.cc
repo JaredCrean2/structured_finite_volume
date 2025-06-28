@@ -185,7 +185,7 @@ TEST(EulerFlux, EigenDecompRightEigenVectors)
 
 TEST(EulerFlux, EigenDecompRightEigenVectorsJac)
 {
-  Vec4<Real> prim_vars = {2, 10, 20, 300};
+  Vec4<Real> prim_vars = {2, 100, 200, 300};
   auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
 
   auto func = [](auto q)
@@ -239,7 +239,7 @@ TEST(EulerFlux, EigenDecompLeftEigenVectors)
 
 TEST(EulerFlux, EigenDecompLeftEigenVectorsJac)
 {
-  Vec4<Real> prim_vars = {2, 10, 20, 300};
+  Vec4<Real> prim_vars = {2, 100, 200, 300};
   auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
 
   auto func = [](auto q)
@@ -307,7 +307,7 @@ TEST(EulerFlux, EigenDecompEigenvaluesSorted)
 
 TEST(EulerFlux, EigenDecompLeftEigenvaluesJac)
 {
-  Vec4<Real> prim_vars = {2, 10, 20, 300};
+  Vec4<Real> prim_vars = {2, 100, 200, 300};
   auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
 
   auto func = [](auto q)

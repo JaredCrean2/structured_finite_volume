@@ -18,7 +18,7 @@ class HLLEFlux final : public NumericalFlux
       Real aL = compute_sos(qL);
       Real aR = compute_sos(qR);
 
-      RoeAvgState avg_state = compute_roe_avg(qL, qR);
+      RoeAvgState<Real> avg_state = compute_roe_avg(qL, qR);
       Real aAvg = compute_sos(avg_state);
 
       Real unL = compute_un(qL, normal);

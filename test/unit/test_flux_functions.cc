@@ -5,6 +5,7 @@
 #include "physics/euler/hlle_flux.h"
 #include "physics/euler/lax_friedrich_flux.h"
 #include "physics/euler/hllc_flux.h"
+#include "jacobian.h"
 
 
 namespace {
@@ -17,11 +18,17 @@ template <typename T>
 class FluxFunctionTester : public testing::Test
 {};
 
+template <typename T>
+class FluxFunctionJacTester : public testing::Test
+{};
+
 using FluxFunctions = ::testing::Types<euler::RoeFlux,
                                        euler::RoeHHFlux,
                                        euler::HLLEFlux,
                                        euler::LaxFriedrichFlux,
                                        euler::HLLCFlux>;
+
+using FluxFunctionsJac = ::testing::Types<euler::LaxFriedrichFlux>;
 
 class NameGenerator
 {
@@ -45,6 +52,9 @@ class NameGenerator
 };
 
 TYPED_TEST_SUITE(FluxFunctionTester, FluxFunctions, NameGenerator);
+
+TYPED_TEST_SUITE(FluxFunctionJacTester, FluxFunctionsJac, NameGenerator);
+
 }
 
 
@@ -97,6 +107,51 @@ TYPED_TEST(FluxFunctionTester, Supersonic)
     for (UInt i=0; i < DofsPerCell; ++i)
       EXPECT_NEAR(flux_val[i], flux_expected[i], 1e-8);
   }
+}
+
+TYPED_TEST(FluxFunctionJacTester, Supersonic)
+{
+  using FluxFunc = TypeParam;
+
+  Vec4<Real> prim_varsL = {2, 400, 500, 300};
+  Vec4<Real> prim_varsR = {2, 500, 700, 300};
+  auto qL = compute_conservative_variables(prim_varsL, PrimitiveVarTag());
+  auto qR = compute_conservative_variables(prim_varsR, PrimitiveVarTag());
+  auto qLc = test_utils::make_complex(qL);
+  auto qRc = test_utils::make_complex(qR);
+  Vec2<Real> normal = {1.0, 0.0};
+
+  FluxFunc flux;
+
+  auto funcL = [&](auto qL)
+  {
+    return flux(qL, qRc, normal);
+  };
+
+  auto jacL = [&](auto qL)
+  {
+    Matrix<Real, 4> flux_dotL, flux_dotR;
+    Vec4<Real> f = flux(qL, qR, normal, flux_dotL, flux_dotR);
+
+    return std::make_pair(f, flux_dotL);
+  };
+
+  auto funcR = [&](auto qR)
+  {
+    return flux(qLc, qR, normal);
+  };
+
+  auto jacR = [&](auto qR)
+  {
+    Matrix<Real, 4> flux_dotL, flux_dotR;
+    Vec4<Real> f = flux(qL, qR, normal, flux_dotL, flux_dotR);
+
+    return std::make_pair(f, flux_dotR);
+  };  
+
+  test_utils::checkJacobianVector(qL, funcL, jacL);
+  test_utils::checkJacobianVector(qL, funcR, jacR);
+
 }
 
 TYPED_TEST(FluxFunctionTester, Symmetry)

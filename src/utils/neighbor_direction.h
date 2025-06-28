@@ -4,16 +4,11 @@
 #include "utils/project_defs.h"
 #include "utils/range.h"
 #include "vec.h"
+#include "math.h"
 #include <iosfwd>
 
 namespace structured_fv {
 
-
-template <typename T>
-constexpr Int sgn(T val)
-{
-  return (T(0) < val) - (val < T(0));
-}
 
 template <typename T>
 constexpr Int del(T val1, T val2)
