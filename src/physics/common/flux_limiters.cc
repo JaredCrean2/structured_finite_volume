@@ -10,7 +10,7 @@ std::string get_name(FluxLimiter limiter)
   {
     case FluxLimiter::FirstOrder: { return "Flux_Limiter_FirstOrder"; }
     case FluxLimiter::MinMod:     { return "Flux_Limiter_MinMod"; }
-    case FluxLimiter::SuperBee:   { return "Flux_Limiter_SuperMod"; }
+    case FluxLimiter::SuperBee:   { return "Flux_Limiter_SuperBee"; }
     case FluxLimiter::VanAlba:    { return "Flux_Limiter_VanAlba"; }
     case FluxLimiter::VanLeer:    { return "Flux_Limiter_VanLeer"; }
     default:

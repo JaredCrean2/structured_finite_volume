@@ -77,8 +77,6 @@ target_link_libraries(linear_system PUBLIC disc utils BLAS::BLAS LAPACK::LAPACK 
 
 
 ### Nonlinear solvers
-#TODO: need to split out the PhysicsModel interface into its own
-#      library
 file(GLOB nlsolver_files nonlinear_solvers/*.cc)
 add_library(nlsolvers "${nlsolver_files}")
 target_include_directories(nlsolvers PUBLIC

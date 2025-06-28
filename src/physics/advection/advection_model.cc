@@ -22,12 +22,24 @@ class FluxFunctionUpwind
       m_adv_velocity(advection_velocity)
     {}
 
-    constexpr Real operator()(Real qL, Real qR, const Vec2<Real>& normal) const
+    template <typename T>
+    constexpr T operator()(T qL, T qR, const Vec2<Real>& normal) const
     {
       //TODO: do this more efficiently
-      Real a_normal = dot(m_adv_velocity, normal);
+      T a_normal = dot(m_adv_velocity, normal);
       return a_normal > 0 ? a_normal * qL : a_normal * qR;
     }
+
+    template <typename T>
+    constexpr T operator()(T qL, T qR, const Vec2<Real>& normal, T& flux_dotL, T& flux_dotR) const
+    {
+      T a_normal = dot(m_adv_velocity, normal);
+      T flux = a_normal > 0 ? a_normal * qL : a_normal * qR;
+      flux_dotL = a_normal > 0 ? a_normal : 0;
+      flux_dotR = a_normal > 0 ? 0 : a_normal;
+
+      return flux;
+    }    
 
   private:
     Vec2<Real> m_adv_velocity;
@@ -174,6 +186,53 @@ void AdvectionModel::evaluateInterfaceTerms(const ElementFieldPtr<Real>& solutio
       }     
   }
 }
+
+/*
+template <typename Flux, typename SlopeLimiter, typename Assembler, typename Tag>
+void AdvectionModel::evaluateInterfaceTermsJac(const ElementFieldPtr<Real>& solution, Real t,
+                                            const Flux& flux_func, const SlopeLimiter& limiter, 
+                                            Tag dir_tag, ElementFieldPtr<Real> residual, Assembler& assembler)
+{
+  constexpr double epsilon = 1e-15;
+  NeighborDirection dir = toNeighborDirection(dir_tag);
+
+  for (UInt block_id : m_disc->getRegularBlocksIds())
+  {
+    const StructuredBlock& block = m_disc->getBlock(block_id);
+    const auto& sol              = solution->getData(block_id);
+    const auto& cell_inv_volume  = m_disc->getInvCellVolumeField()->getData(block_id);
+    const auto& normals          = m_disc->getNormalField()->getData(block_id, dir);
+    auto& res                    = residual->getData(block_id);
+    
+    FaceRangePerDirection faces = block.getOwnedFaces();
+    for (UInt i : faces.getXRange(dir_tag))
+      for (UInt j : faces.getYRange(dir_tag))
+      {
+        FaceId face_id = faces.getFaceId(dir_tag, i, j);
+        const auto [cell_im1_left, cell_jm1_left] = increment(dir_tag, face_id.cell_i_left, face_id.cell_j_left, -1);
+        const auto [cell_ip1_right, cell_jp1_right] = increment(dir_tag, face_id.cell_i_right, face_id.cell_j_right, 1);
+        Real qLm1      = sol(cell_im1_left, cell_jm1_left, 0);
+        Real qL        = sol(face_id.cell_i_left, face_id.cell_j_left, 0);
+        Real qR        = sol(face_id.cell_i_right, face_id.cell_j_right, 0);
+        Real qRp1      = sol(cell_ip1_right, cell_jp1_right, 0);
+
+        Real rL = (qL - qLm1)/(qR - qL + epsilon);
+        Real rR = (qR - qL)/(qRp1 - qR + epsilon);
+        Real slopeL = (qR - qLm1)/2;
+        Real slopeR = (qRp1 - qL)/2;
+
+        Real qLhalf = qL + 0.5*limiter(rL)*slopeL;
+        Real qRhalf = qR - 0.5*limiter(rR)*slopeR;
+
+        Vec2<Real> normal{normals(i, j, 0), normals(i, j, 1)};
+        Real flux      = flux_func(qLhalf, qRhalf, normal);
+
+        res(face_id.cell_i_left, face_id.cell_j_left, 0)   -= cell_inv_volume(face_id.cell_i_left, face_id.cell_j_left, 0) * flux;
+        res(face_id.cell_i_right, face_id.cell_j_right, 0) += cell_inv_volume(face_id.cell_i_right, face_id.cell_j_right, 0) * flux;
+      }     
+  }
+}
+*/
 
 void AdvectionModel::evaluateSourceTerm(Real t, ElementFieldPtr<Real> residual)
 {

@@ -1,9 +1,11 @@
 #include "gtest/gtest.h"
 #include "physics/common/flux_limiters.h"
 #include "physics/common//slope_limiters.h"
+#include "utils/project_defs.h"
 
 namespace  {
 
+using namespace structured_fv;
 using namespace structured_fv::common;
 
 template <typename T>
@@ -52,6 +54,26 @@ TYPED_TEST(LimiterTestFixture, SpecialValues)
   EXPECT_DOUBLE_EQ(limiter(-1.0), 0.0);
   EXPECT_DOUBLE_EQ(limiter(0.0),  0.0);
   EXPECT_DOUBLE_EQ(limiter(1.0),  1.0);
+}
+
+TYPED_TEST(LimiterTestFixture, Derivative)
+{
+  using Limiter = TypeParam;
+  Limiter limiter;
+
+  Real h = 1e-80;
+  Complex pert(0, h);
+
+  for (Real r : {-10.0, -2.0, -0.1, 0.1, 0.4, 0.6, 1.5, 10.0})
+  {
+    Complex rc = r + pert;
+    Complex phic = limiter(rc);
+    Real phic_dotc = phic.imag()/h;
+
+    auto [phi, phi_dot] = limiter(r, 2.0);
+    EXPECT_DOUBLE_EQ(phi_dot, 2*phic_dotc);
+  }
+
 }
 
 TEST(Limiters, VanAlbaReformulation)

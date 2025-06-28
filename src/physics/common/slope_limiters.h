@@ -50,9 +50,29 @@ class SlopeLimiterAdaptor : public SlopeLimiterBase
   {
     // all TVD flux limiters have phi(r) = 0 for r < 0
     // The conversion factor is 2/(1+r), so we need to guard against r=-1
-    T factor = T(2)/(1 + std::max(r, T(0)));
+    T factor = T(2)/(T(1) + std::max(r, T(0)));
     return factor*m_flux_limiter(r);
   }
+
+  template <typename T>
+  constexpr std::pair<T, T> operator()(const T& r, const T& r_dot) const
+  {
+    // all TVD flux limiters have phi(r) = 0 for r < 0
+    // The conversion factor is 2/(1+r), so we need to guard against r=-1
+
+    T den = 1 + std::max(r, T(0));
+    T den_dot = r > T(0) ? r_dot : 0.0;  //TODO: maybe smooth this?
+
+    T factor = T(2)/den;
+    T factor_dot = -T(2)*den_dot/(den*den);
+
+    auto [psi, psi_dot] = m_flux_limiter(r, r_dot);
+    T phi =  factor*psi;
+    T phi_dot = factor*psi_dot + factor_dot*psi;
+
+    return {phi, phi_dot};
+  }
+
 
   private:
     FluxLimiterType m_flux_limiter;
