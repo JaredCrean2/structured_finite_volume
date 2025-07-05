@@ -31,6 +31,7 @@ void evaluateInterfaceTermsJacImpl(Fields<Real> fields, Real t, StructuredDiscPt
     const auto& normals          = disc->getNormalField()->getData(block_id, dir);
     auto& res                    = fields.residual->getData(block_id);
     
+    assembler.setBlock(block_id);
     FaceRangePerDirection faces = block.getOwnedFaces();
     for (UInt i : faces.getXRange(dir_tag))
       for (UInt j : faces.getYRange(dir_tag))

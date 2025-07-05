@@ -5,6 +5,8 @@
 #include "nonlinear_solvers/explicit_euler.h"
 #include "physics/advection/advection_model.h"
 #include "physics/common/slope_limiters.h"
+#include "linear_system/large_matrix_dense.h"
+#include "linear_system/assembler.h"
 #include "utils/math.h"
 #include "rotation_utils.h"
 #include "gtest/gtest.h"
@@ -13,6 +15,8 @@
 namespace {
 
 using namespace structured_fv;
+using MatrixType = linear_system::LargeMatrixDense;
+using AssemblerType = linear_system::Assembler<MatrixType>;
 
 class AdvectionTester : public ::testing::Test
 {
@@ -24,6 +28,10 @@ class AdvectionTester : public ::testing::Test
                            [](Real x, Real y) { return FixedVec<Real, 2>{x, y}; });
       m_mesh = std::make_shared<mesh::StructuredMesh>(spec);
       m_disc = std::make_shared<disc::StructuredDisc>(m_mesh, m_num_bc_ghost_cells, m_dofs_per_cell);
+
+      linear_system::LargeMatrixOpts opts;
+      m_matrix = std::make_shared<MatrixType>("A", m_disc->getNumDofs(), m_disc->getNumDofs(), opts);
+      m_assembler = std::make_shared<AssemblerType>(m_disc, *m_matrix);      
     }
 
     void setup(const advection::AdvectionOpts &opts, advection::Fxyt bc_func,
@@ -39,6 +47,8 @@ class AdvectionTester : public ::testing::Test
     mesh::MeshSpec spec;
     std::shared_ptr<mesh::StructuredMesh> m_mesh;
     std::shared_ptr<disc::StructuredDisc> m_disc;
+    std::shared_ptr<MatrixType> m_matrix;
+    std::shared_ptr<AssemblerType> m_assembler;
     std::shared_ptr<advection::AdvectionModel> m_adv_model;
 };
 
@@ -180,4 +190,79 @@ TEST_F(AdvectionTesterMultiBlock, ConsistencySecondOrder)
   m_adv_model2->evaluateRhs(m_solution2, t, m_residual2);
 
   test_residuals_equal(m_residual1, m_residual2);
+}
+
+
+TEST_F(AdvectionTester, JacobianVectorProductFiniteDifference)
+{
+  Real t = 1.0;
+  advection::AdvectionOpts opts;
+  opts.adv_velocity = {1, 2};
+  auto u           = [] (Real x, Real y, Real t) { return 2*x*x + 3*y*y + t; };
+  auto u0          = [&] (Real x, Real y) { return FixedVec<Real, 1>{u(x, y, 0)}; };
+  auto bc_func     = [&](Real x, Real y, Real t) { return u(x, y, t); };
+  auto source_func = [] (Real x, Real y, Real t) { return x*x + y*x + t*t; };
+
+  setup(opts, bc_func, source_func);
+
+  auto solution = std::make_shared<disc::DiscVector<Real>>(m_disc, "solution");
+  auto v = std::make_shared<disc::DiscVector<Real>>(m_disc, "v");
+  auto residual1 = std::make_shared<disc::DiscVector<Real>>(m_disc, "residual1");
+  auto residual2 = std::make_shared<disc::DiscVector<Real>>(m_disc, "residual2");
+  auto dRdq_v = std::make_shared<disc::DiscVector<Real>>(m_disc, "dR/dq v");
+
+  solution->set(u0);
+  v->set(0);
+  Real h = 1e-6;
+  for (GlobalDof dof=0; dof < m_disc->getNumDofs(); ++dof)
+    {
+      m_adv_model->evaluateRhs(solution, t, residual1);
+
+      (*solution)(dof) += h;
+      m_adv_model->evaluateRhs(solution, t, residual2);
+      (*solution)(dof) -= h;
+
+      (*v)(dof) = 1;
+      m_adv_model->computeJacVecProduct(solution, t, v, dRdq_v);
+      (*v)(dof) = 0;
+
+      for (GlobalDof dof2=0; dof2 < m_disc->getNumDofs(); ++dof2)
+      {
+        Real val_fd = ((*residual2)(dof2) - (*residual1)(dof2))/h;
+        EXPECT_NEAR(val_fd, (*dRdq_v)(dof2), 1e-6);
+      }
+    }
+}
+
+TEST_F(AdvectionTester, Jacobian)
+{
+  Real t = 1.0;
+  advection::AdvectionOpts opts;
+  opts.adv_velocity = {1, 2};
+  auto u           = [] (Real x, Real y, Real t) { return 2*x*x + 3*y*y + t; };
+  auto u0          = [&] (Real x, Real y) { return FixedVec<Real, 1>{u(x, y, 0)}; };
+  auto bc_func     = [&](Real x, Real y, Real t) { return u(x, y, t); };
+  auto source_func = [] (Real x, Real y, Real t) { return x*x + y*x + t*t; };
+
+  setup(opts, bc_func, source_func);
+
+  auto solution = std::make_shared<disc::DiscVector<Real>>(m_disc, "solution");
+  auto v = std::make_shared<disc::DiscVector<Real>>(m_disc, "v");
+  auto residual1 = std::make_shared<disc::DiscVector<Real>>(m_disc, "residual1");
+  auto dRdq_v = std::make_shared<disc::DiscVector<Real>>(m_disc, "dR/dq v");
+
+  solution->set(u0);
+  v->set(0);
+  m_adv_model->evaluateJacobian(solution, t, residual1, m_assembler);
+  for (GlobalDof dof=0; dof < m_disc->getNumDofs(); ++dof)
+    {
+      (*v)(dof) = 1;
+      m_adv_model->computeJacVecProduct(solution, t, v, dRdq_v);
+      (*v)(dof) = 0;
+
+      for (GlobalDof dof2=0; dof2 < m_disc->getNumDofs(); ++dof2)
+      {
+        EXPECT_NEAR((*m_matrix)(dof2, dof), (*dRdq_v)(dof2), 1e-6);
+      }
+    }
 }
