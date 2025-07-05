@@ -55,6 +55,11 @@ class ElementField
     // overwrite ghost values with the owner values
     void updateGhostValues();
 
+    // overwrites the owner values by applying owner_val = func(owner_val, ghost_val)
+    // repeatedly (once for each ghost_val).  Ghost values are left unchanged
+    template <typename BinaryFunction>
+    void reduceGhostValuesToOwner(const BinaryFunction& func);
+
   private:
     const StructuredDisc& m_disc;
     const UInt m_nvals_per_element;
@@ -137,6 +142,52 @@ void ElementField<T>::updateGhostValues()
           for (UInt d=0; d < fieldL.extent(2); ++d)
           {
             fieldR(iprime, jprime, d) = fieldL(ineighbor, jneighbor, d);
+          }      
+        }        
+  }
+}
+
+template <typename T>
+template <typename BinaryFunc>
+void ElementField<T>::reduceGhostValuesToOwner(const BinaryFunc& func)
+{
+  for (UInt i=0; i < m_disc.getNumBlockInterfaces(); ++i)
+  {
+    const StructuredBlockInterface& iface = m_disc.getBlockInterface(i);
+    const StructuredBlock& blockL = m_disc.getBlock(iface.getBlockIdL());
+    int num_ghost_cells = blockL.getNumGhostCellsPerDirection()[to_int(iface.getNeighborDirectionL())];
+    const auto& indexerL = iface.getAdjBlockCellIndexerL();
+    const auto& indexerR = iface.getAdjBlockCellIndexerR();
+    auto fieldL = getData(iface.getBlockIdL());
+    auto fieldR = getData(iface.getBlockIdR());
+    
+    for (UInt i : iface.getOwnedBoundaryCellsL().getXRange())
+      for (UInt j : iface.getOwnedBoundaryCellsL().getYRange())
+        for (int v=1; v <= num_ghost_cells; ++v)
+        {
+          auto [iprime, jprime] = computeIndices(iface.getNeighborDirectionL(), v, i, j);
+          auto [ineighbor, jneighbor] = indexerL(iprime, jprime);
+
+          for (UInt d=0; d < fieldL.extent(2); ++d)
+          {
+            fieldR(ineighbor, jneighbor, d) = func(fieldR(ineighbor, jneighbor, d),
+                                                   fieldL(iprime, jprime, d));
+          } 
+        }
+
+    //TODO: it would have better temporal locality to merge this
+    //      into the above loops
+    for (UInt i : iface.getOwnedBoundaryCellsR().getXRange())
+      for (UInt j : iface.getOwnedBoundaryCellsR().getYRange())
+        for (int v=1; v <= num_ghost_cells; ++v)
+        {
+          auto [iprime, jprime] = computeIndices(iface.getNeighborDirectionR(), v, i, j);
+          auto [ineighbor, jneighbor] = indexerR(iprime, jprime);
+
+          for (UInt d=0; d < fieldL.extent(2); ++d)
+          {
+            fieldL(ineighbor, jneighbor, d) = func(fieldL(ineighbor, jneighbor, d),
+                                                   fieldR(iprime, jprime, d));
           }      
         }        
   }

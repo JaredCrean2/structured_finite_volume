@@ -5,7 +5,6 @@
 #include "linear_system/sparsity_pattern_dense.h"
 #include "assembler.h"
 #include "bla_wrapper.h"
-//#include <decl/Kokkos_Declare_SERIAL.hpp>
 #include <memory>
 #include <iosfwd>
 
@@ -78,9 +77,6 @@ class LargeMatrixDense final : public LargeMatrix
     Matrix m_matrix;
     Matrix m_matrix_factorization;
     Kokkos::View<lapack_int*, Kokkos::LayoutLeft> m_ipiv;
-    //std::vector<Real> m_matrix;
-    //std::vector<Real> m_matrix_factorization;
-    //std::vector<lapack_int> m_ipiv;
 
     friend std::ostream& operator<<(std::ostream& os, const LargeMatrixDense& mat);
 

@@ -14,29 +14,32 @@ namespace {
 
 using namespace structured_fv;
 
-class AdvectionTester : public ::testing::Test {
-public:
-  AdvectionTester() : spec(1, 1, m_num_bc_ghost_cells) {
-    spec.blocks(0, 0) = mesh::MeshBlockSpec(
-        3, 4, 0, [](Real x, Real y) { return FixedVec<Real, 2>{x, y}; });
-    m_mesh = std::make_shared<mesh::StructuredMesh>(spec);
-    m_disc = std::make_shared<disc::StructuredDisc>(
-        m_mesh, m_num_bc_ghost_cells, m_dofs_per_cell);
-  }
+class AdvectionTester : public ::testing::Test
+{
+  public:
+    AdvectionTester() : 
+      spec(1, 1, m_num_bc_ghost_cells) 
+    {
+      spec.blocks(0, 0) = mesh::MeshBlockSpec(3, 4, 0, 
+                           [](Real x, Real y) { return FixedVec<Real, 2>{x, y}; });
+      m_mesh = std::make_shared<mesh::StructuredMesh>(spec);
+      m_disc = std::make_shared<disc::StructuredDisc>(m_mesh, m_num_bc_ghost_cells, m_dofs_per_cell);
+    }
 
-  void setup(const advection::AdvectionOpts &opts, advection::Fxyt bc_func,
-             advection::Fxyt source_func) {
-    std::vector<advection::Fxyt> bc_funcs{bc_func, bc_func, bc_func, bc_func};
-    m_adv_model = std::make_shared<advection::AdvectionModel>(
-        opts, m_disc, bc_funcs, source_func);
-  }
+    void setup(const advection::AdvectionOpts &opts, advection::Fxyt bc_func,
+               advection::Fxyt source_func)
+    {
+      std::vector<advection::Fxyt> bc_funcs{bc_func, bc_func, bc_func, bc_func};
+      m_adv_model = std::make_shared<advection::AdvectionModel>(
+          opts, m_disc, bc_funcs, source_func);
+    }
 
-  UInt m_dofs_per_cell = 1;
-  int m_num_bc_ghost_cells = 2;
-  mesh::MeshSpec spec;
-  std::shared_ptr<mesh::StructuredMesh> m_mesh;
-  std::shared_ptr<disc::StructuredDisc> m_disc;
-  std::shared_ptr<advection::AdvectionModel> m_adv_model;
+    UInt m_dofs_per_cell = 1;
+    int m_num_bc_ghost_cells = 2;
+    mesh::MeshSpec spec;
+    std::shared_ptr<mesh::StructuredMesh> m_mesh;
+    std::shared_ptr<disc::StructuredDisc> m_disc;
+    std::shared_ptr<advection::AdvectionModel> m_adv_model;
 };
 
 class AdvectionTesterMultiBlock : public test_utils::MultiBlockFixture,
@@ -63,7 +66,8 @@ class AdvectionTesterMultiBlock : public test_utils::MultiBlockFixture,
 };
 } // namespace
 
-TEST_F(AdvectionTester, SourceTerm) {
+TEST_F(AdvectionTester, SourceTerm)
+{
   auto solution = std::make_shared<disc::DiscVector<Real>>(m_disc, "solution");
   auto residual = std::make_shared<disc::DiscVector<Real>>(m_disc, "residual");
   solution->set(0);
@@ -88,7 +92,8 @@ TEST_F(AdvectionTester, SourceTerm) {
     }
 }
 
-TEST_F(AdvectionTester, BoundaryTerm) {
+TEST_F(AdvectionTester, BoundaryTerm)
+{
   auto solution = std::make_shared<disc::DiscVector<Real>>(m_disc, "solution");
   auto residual = std::make_shared<disc::DiscVector<Real>>(m_disc, "residual");
   solution->set(0);
@@ -134,7 +139,8 @@ TEST_F(AdvectionTester, BoundaryTerm) {
 }
 
 
-TEST_F(AdvectionTesterMultiBlock, ConsistencyFirstOrder) {
+TEST_F(AdvectionTesterMultiBlock, ConsistencyFirstOrder)
+{
   Real t = 1.0;
   advection::AdvectionOpts opts;
   opts.adv_velocity = {1, 2};
@@ -154,7 +160,8 @@ TEST_F(AdvectionTesterMultiBlock, ConsistencyFirstOrder) {
   test_residuals_equal(m_residual1, m_residual2);
 }
 
-TEST_F(AdvectionTesterMultiBlock, ConsistencySecondOrder) {
+TEST_F(AdvectionTesterMultiBlock, ConsistencySecondOrder)
+{
   Real t = 1.0;
   advection::AdvectionOpts opts;
   opts.limiter = common::SlopeLimiter::VanLeer;

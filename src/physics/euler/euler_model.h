@@ -43,6 +43,17 @@ class EulerModel : public PhysicsModel
 
     void evaluateRhs(DiscVectorPtr<Real> q, Real t, DiscVectorPtr<Real> residual) override;
 
+    void evaluateJacobian(disc::DiscVectorPtr<Real> q, Real t, disc::DiscVectorPtr<Real> residual, linear_system::AssemblerBasePtr assembler) override
+    {
+      throw std::runtime_error("unimplemented");
+    }
+
+    // computes h = dR/dq * v without forming dR/dq
+    void computeJacVecProduct(disc::DiscVectorPtr<Real> q, Real t, disc::DiscVectorPtr<Real> v, disc::DiscVectorPtr<Real> h) override
+    {
+      throw std::runtime_error("unimplemented");
+    }
+
     const disc::StructuredDiscPtr& getDisc() const override { return m_disc; }
 
 

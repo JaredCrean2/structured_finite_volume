@@ -35,6 +35,10 @@ class StructuredDisc
 {
   public:
     StructuredDisc(std::shared_ptr<mesh::StructuredMesh> mesh, UInt num_ghost_cells, int dofs_per_cell);
+
+    StructuredDisc(const StructuredDisc& other) = delete;
+
+    StructuredDisc& operator=(const StructuredDisc& other) = delete;
             
     UInt getNumBlocks() const { return m_mesh->getNumBlocks(); }
 

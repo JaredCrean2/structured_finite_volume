@@ -216,9 +216,9 @@ void StructuredMesh::createBCGhosts(const MeshSpec& spec)
                                                  NeighborDirection::South,
                                                  NeighborDirection::West};
   FixedVec<Range2D, 4> ranges = {Range2D(0, spec.blocks.extent(0), spec.blocks.extent(1)-1, spec.blocks.extent(1)),
-                                   Range2D(spec.blocks.extent(0)-1, spec.blocks.extent(0), 0, spec.blocks.extent(1)),
-                                   Range2D(0, spec.blocks.extent(0), 0, 1),
-                                   Range2D(0, 1, 0, spec.blocks.extent(1))};
+                                 Range2D(spec.blocks.extent(0)-1, spec.blocks.extent(0), 0, spec.blocks.extent(1)),
+                                 Range2D(0, spec.blocks.extent(0), 0, 1),
+                                 Range2D(0, 1, 0, spec.blocks.extent(1))};
 
   for (int dir=0; dir < 4; ++dir)
   {

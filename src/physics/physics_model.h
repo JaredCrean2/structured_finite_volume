@@ -4,6 +4,7 @@
 #include "disc/disc_block.h"
 #include "disc/disc_vector.h"
 #include "disc/discretization.h"
+#include "linear_system/assembler_base.h"
 #include "disc/elem_field.h"
 
 
@@ -23,6 +24,11 @@ class PhysicsModel
     // dq/dt = R(q, t) + S(x, t)
     // where S(x, t) is the source term
     virtual void evaluateRhs(disc::DiscVectorPtr<Real> q, Real t, disc::DiscVectorPtr<Real> residual) = 0;
+
+    virtual void evaluateJacobian(disc::DiscVectorPtr<Real> q, Real t, disc::DiscVectorPtr<Real> residual, linear_system::AssemblerBasePtr assembler) = 0;
+
+    // computes h = dR/dq * v without forming dR/dq
+    virtual void computeJacVecProduct(disc::DiscVectorPtr<Real> q, Real t, disc::DiscVectorPtr<Real> v, disc::DiscVectorPtr<Real> h) = 0;
 
     virtual Real computeRhsNorm(disc::DiscVectorPtr<Real> residual);
 
@@ -53,6 +59,17 @@ void vecToField(disc::StructuredDiscPtr disc, const disc::DiscVectorPtr<T> vec, 
     field->updateGhostValues();
 }
 
+// updates field for computing jacobian-vector products, where
+// vec is the state the jacobian will be evaluated at
+// and vec_dot is the vector the jacobian will be multiplied by
+void vecToFieldDot(disc::StructuredDiscPtr disc, 
+                   const disc::DiscVectorPtr<Real> vec, 
+                   const disc::DiscVectorPtr<Real> vec_dot,
+                   disc::ElementFieldPtr<Complex> field,
+                   Real h=1e-40);
+
+// copies owned values from the field into corresponding entries in the vector.
+// Does not sum non-owned values
 template <typename T>
 void fieldToVec(disc::StructuredDiscPtr disc, const disc::ElementFieldPtr<T> field, disc::DiscVectorPtr<T> vec)
 {
@@ -69,6 +86,15 @@ void fieldToVec(disc::StructuredDiscPtr disc, const disc::ElementFieldPtr<T> fie
           (*vec)(dof_nums(i, j, k)) = field_data(i, j, k); 
   }  
 }
+
+// given a field with the derivative stored in the complex part of each value,
+// computes the vector form of the jacobian vector product, ie.
+// vec_dot = dR/dq * v
+void fieldToVecDot(disc::StructuredDiscPtr disc,
+                   disc::ElementFieldPtr<Complex> field,
+                   disc::DiscVectorPtr<Real> vec_dot,
+                   Real h = 1e-40,
+                   bool sum_ghosts=false);
 
 }
 

@@ -53,7 +53,7 @@ target_include_directories(advection PUBLIC
                           "${CMAKE_CURRENT_SOURCE_DIR}"
                           "${PROJECT_BINARY_DIR}/include"  # needed for configured header
 )
-target_link_libraries(advection PUBLIC physics physics_common disc utils)
+target_link_libraries(advection PUBLIC physics physics_common disc utils linear_system)
 
 
 ### Euler

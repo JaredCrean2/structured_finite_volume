@@ -8,6 +8,7 @@
 #include "disc/elem_field.h"
 #include "disc/discretization.h"
 #include <View/Kokkos_ViewCtor.hpp>
+#include <cassert>
 
 namespace structured_fv {
 namespace linear_system {
@@ -21,16 +22,18 @@ struct Indices
 };
 
 template <typename LargeMatrixType>
-class Assembler : public AssemblerBase
+class Assembler final : public AssemblerBase
 {
   public:
     explicit Assembler(disc::StructuredDiscPtr disc, LargeMatrixType matrix) :
-      m_disc(disc),
+      m_disc(*disc),
       m_matrix(matrix),
       m_dof_nums()
     {}
 
-    virtual ~Assembler() {}
+    ~Assembler() = default;
+
+    Assembler operator=(const Assembler& other) = delete;
 
     void setAlpha(Real alpha) override { m_alpha = alpha; }
 
@@ -38,29 +41,38 @@ class Assembler : public AssemblerBase
 
     void setBlock(UInt block_id)
     {
-      m_dof_nums = m_disc->getDofNumbering()->getData(block_id);
+      m_dof_nums = m_disc.getDofNumbering()->getData(block_id);
     }
 
-    template <UInt M, UInt N>
-    void assembleValues(const FixedVec<Indices, M>& row_indices, const FixedVec<Indices, N>& col_indices, Matrix<Real, M, N>& jac)
+    template <UInt M, UInt N, UInt K, UInt P>
+    void assembleValues(const FixedVec<Indices, M>& row_indices, const FixedVec<Indices, N>& col_indices, Matrix<Real, K, P>& jac)
     {
-      for (UInt i=0; i < M; ++i)
-        for (UInt j=0; j < N; ++j)
-          jac[i][j] *= m_alpha;
+      static_assert(K % M == 0, "size of jacobian contribution should be num_dof_per_node times number of cells");
+      static_assert(P % M == 0, "size of jacobian contribution should be num_dof_per_node times number of cells");
+      static_assert(K/M == P/N, "number of dofs per node must match for rows and columns");
+      assert(K/M == m_dof_nums.extent(2));
+      assert(P/N == m_dof_nums.extent(2));
+      constexpr UInt num_dof_per_node = K/M;
 
-      FixedVec<GlobalDof, M> row_dofs;
-      FixedVec<GlobalDof, N> col_dofs;
+      for (UInt i=0; i < K; ++i)
+        for (UInt j=0; j < P; ++j)
+          jac(i, j) *= m_alpha;
+
+      FixedVec<GlobalDof, K> row_dofs;
+      FixedVec<GlobalDof, P> col_dofs;
       for (UInt i=0; i < M; ++i)
-        row_dofs[i] = m_dof_nums(row_indices[i].i, row_indices[i].j);
+        for (UInt k=0; k < num_dof_per_node; ++k)
+          row_dofs[i*num_dof_per_node + k] = m_dof_nums(row_indices[i].i, row_indices[i].j, k);
 
       for (UInt j=0; j < N; ++j)
-        col_dofs[j] = m_dof_nums(col_dofs[j].i, col_dofs[j].j);
+        for (UInt k=0; k < num_dof_per_node; ++k)
+          col_dofs[j*num_dof_per_node + k] = m_dof_nums(col_indices[j].i, col_indices[j].j, k);
 
       m_matrix.assembleValues(row_dofs, col_dofs, jac);  
     }
 
   private:
-    disc::StructuredDiscPtr m_disc;
+    disc::StructuredDisc& m_disc;
     LargeMatrixType m_matrix;
     disc::ElementField<GlobalDof>::ConstFieldData m_dof_nums;
     Real m_alpha = 1;

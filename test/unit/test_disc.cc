@@ -285,6 +285,56 @@ TEST_F(DiscTester, ElementFieldUpdator)
   }
 }
 
+TEST_F(DiscTester, ElementFieldGhostReduction)
+{
+  int nvals_per_element = 2;
+  disc::ElementField<int> field(*m_disc, nvals_per_element);
+
+  auto vals = [](UInt block, UInt i, UInt j, UInt k)
+  {
+    return block + 2*i + 3*j + 4*k;
+  };
+
+  for (UInt b=0; b < field.getNumBlocks(); ++b)
+  {
+    auto block = m_disc->getBlock(b);
+    for (UInt i : block.getOwnedAndGhostCells().getXRange())
+      for (UInt j : block.getOwnedAndGhostCells().getYRange())
+        for (int k=0; k < nvals_per_element; ++k)
+          field(b, i, j, k) = vals(b, i, j, k);
+  }
+
+  field.reduceGhostValuesToOwner(std::plus());
+
+  // check regular block getting contributions from BC blocks
+  for (int k=0; k < nvals_per_element; ++k)
+  {
+    int expected_val = vals(1, 6, 5, k) + vals(3, 4, 1, k) +
+                       vals(4, 1, 3, k);
+    EXPECT_EQ(field(1, 6, 5, k), expected_val);
+    EXPECT_EQ(field(3, 4, 1, k), vals(3, 4, 1, k));
+    EXPECT_EQ(field(4, 1, 3, k), vals(4, 1, 3, k));
+  }
+
+  // check regular block getting contribution from other regular block
+  for (int k=0; k < nvals_per_element; ++k)
+  {
+    int expected_val = vals(1, 2, 5, k) + vals(0, 5, 5, k) +
+                       vals(3, 0, 1, k);
+    EXPECT_EQ(field(1, 2, 5, k), expected_val);
+    EXPECT_EQ(field(0, 5, 5, k), vals(0, 5, 5, k));
+    EXPECT_EQ(field(3, 0, 1, k), vals(3, 0, 1, k));
+  }
+
+  // check ghost block getting contribution from regular block
+  for (int k=0; k < nvals_per_element; ++k)
+  {
+    int expected_val = vals(3, 4, 2, k) + vals(1, 6, 6, k);
+    EXPECT_EQ(field(3, 4, 2, k), expected_val);
+    EXPECT_EQ(field(1, 6, 6, k), vals(1, 6, 6, k));
+  }
+}
+
 TEST_F(DiscTester, VertFieldUpdator)
 {
   int nvals_per_element = 2;

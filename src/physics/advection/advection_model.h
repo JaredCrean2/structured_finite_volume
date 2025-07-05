@@ -19,11 +19,22 @@ using disc::StructuredBlockInterface;
 // f(x, y, t)
 using Fxyt = std::function<Real(Real, Real, Real)>;
 
-
 struct AdvectionOpts
 {
   Vec2<Real> adv_velocity{0, 0};
   common::SlopeLimiter limiter = common::SlopeLimiter::FirstOrder;
+};
+
+template <typename T>
+struct Fields
+{
+  Fields(const disc::StructuredDisc& disc) :
+    solution(std::make_shared<disc::ElementField<T>>(disc, 1)),
+    residual(std::make_shared<disc::ElementField<T>>(disc, 1))
+  {}
+  
+  ElementFieldPtr<T> solution;
+  ElementFieldPtr<T> residual;
 };
 
 class AdvectionModel : public PhysicsModel
@@ -37,29 +48,32 @@ class AdvectionModel : public PhysicsModel
     // dq/dt = R(q, t)
     void evaluateRhs(DiscVectorPtr<Real> q, Real t, DiscVectorPtr<Real> residual) override;
 
+    void evaluateJacobian(disc::DiscVectorPtr<Real> q, Real t, disc::DiscVectorPtr<Real> residual, linear_system::AssemblerBasePtr assembler) override;
+
+    // computes h = dR/dq * v without forming dR/dq
+    void computeJacVecProduct(disc::DiscVectorPtr<Real> q, Real t, disc::DiscVectorPtr<Real> v, disc::DiscVectorPtr<Real> h) override;
+
+
     const disc::StructuredDiscPtr& getDisc() const override { return m_disc; }
 
   private:
 
+    template <typename T>
+    void evaluateRhsT(Fields<T> fields, Real t);
+
     Fxyt& getBCFunction(UInt block_id);
 
-    void setBCValues(ElementFieldPtr<Real> solution, Real t);
+    template <typename T>
+    void setBCValues(ElementFieldPtr<T> solution, Real t);
 
-    template <typename Flux, typename SlopeLimiter, typename Tag>
-    void evaluateInterfaceTerms(const ElementFieldPtr<Real>& solution, Real t,
-                                const Flux& flux, const SlopeLimiter& limiter, 
-                                Tag tag, ElementFieldPtr<Real> resdual);
-
-    void evaluateSourceTerm(Real t, ElementFieldPtr<Real> residual);
 
     AdvectionOpts m_opts;
     StructuredDiscPtr m_disc;
-    ElementFieldPtr<Real> m_solution;
-    ElementFieldPtr<Real> m_residual;
+    Fields<Real> m_fields_real;
+    Fields<Complex> m_fields_complex;
     std::vector<Fxyt> m_bc_functions;
     Fxyt m_source_func;
 };
-
 
 }
 }
