@@ -54,6 +54,8 @@ class EulerModel : public PhysicsModel
       throw std::runtime_error("unimplemented");
     }
 
+    std::shared_ptr<linear_system::SparsityPattern> getSparsityPattern() const override;
+
     const disc::StructuredDiscPtr& getDisc() const override { return m_disc; }
 
 

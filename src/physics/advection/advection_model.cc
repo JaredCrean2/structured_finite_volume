@@ -7,6 +7,7 @@
 #include "utils/face_iter_per_direction.h"
 #include "disc/face_field.h"
 #include "utils/neighbor_direction.h"
+#include "linear_system/sparsity_pattern_mesh.h"
 
 #include "interface_term.h"
 #include "interface_term_jac.h"
@@ -78,6 +79,12 @@ void AdvectionModel::computeJacVecProduct(disc::DiscVectorPtr<Real> q, Real t, d
   fieldToVecDot(m_disc, fields.residual, h);
 }
 
+std::shared_ptr<linear_system::SparsityPattern> AdvectionModel::getSparsityPattern() const
+{
+  // currently we write to the matrix entries for a stencil size of 2, even when
+  // using the first order scheme.
+  return std::make_shared<linear_system::SparsityPatternDisc>(m_disc, 2);
+}
 
 Fxyt& AdvectionModel::getBCFunction(UInt block_id)
 {

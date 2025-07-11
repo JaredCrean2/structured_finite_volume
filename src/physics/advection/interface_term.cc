@@ -51,6 +51,22 @@ void evaluateInterfaceTermsImpl(Fields<T> fields, Real t, StructuredDiscPtr disc
 
         res(face_id.cell_i_left, face_id.cell_j_left, 0)   -= cell_inv_volume(face_id.cell_i_left, face_id.cell_j_left, 0) * flux;
         res(face_id.cell_i_right, face_id.cell_j_right, 0) += cell_inv_volume(face_id.cell_i_right, face_id.cell_j_right, 0) * flux;
+/*
+        if (std::isnan(real(res(face_id.cell_i_left, face_id.cell_j_left, 0))) ||
+            std::isnan(real(res(face_id.cell_i_right, face_id.cell_j_right, 0))))
+        {
+          std::cout << "found nan for interface " << face_id << std::endl;
+          std::cout << "resL = " << res(face_id.cell_i_left, face_id.cell_j_left, 0) << std::endl;
+          std::cout << "resR = " << res(face_id.cell_i_right, face_id.cell_j_right, 0) << std::endl;
+          std::cout << "qLm1 = " << qLm1 << std::endl;
+          std::cout << "qL = " << qL << std::endl;
+          std::cout << "qR = " << qR << std::endl;
+          std::cout << "qRp1 = " << qRp1 << std::endl;
+          std::cout << "denL = " << (qR - qL + epsilon) << std::endl;
+          std::cout << "denR = " << (qRp1 - qR + epsilon) << std::endl;
+
+        }
+*/        
       }     
   }
 }

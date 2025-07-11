@@ -1,8 +1,10 @@
 #include "euler_model.h"
 #include <iostream>
 
+#include "physics/common/slope_limiters.h"
 #include "physics/euler/euler_flux.h"
 #include "physics/euler/typedefs.h"
+#include "linear_system/sparsity_pattern_mesh.h"
 #include "interface_term.h"
 
 namespace structured_fv {
@@ -24,6 +26,12 @@ void EulerModel::evaluateRhs(DiscVectorPtr<Real> q, Real t,
   evaluateSourceTerm(t, m_residual);
 
   fieldToVec(m_disc, m_residual, residual);
+}
+
+std::shared_ptr<linear_system::SparsityPattern> EulerModel::getSparsityPattern() const
+{
+  int stencilsize = m_opts.limiter == common::SlopeLimiter::FirstOrder ? 1 : 2;
+  return std::make_shared<linear_system::SparsityPatternDisc>(m_disc, stencilsize);
 }
 
 

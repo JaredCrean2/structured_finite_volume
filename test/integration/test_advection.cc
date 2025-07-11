@@ -1,8 +1,11 @@
 #include "gtest/gtest.h"
+#include "linear_system/large_matrix.h"
+#include "linear_system/large_matrix_factory.h"
 #include "nonlinear_solvers/explicit_timestepper_opts.h"
 #include "physics/advection/advection_model.h"
 #include "nonlinear_solvers/explicit_euler.h"
 #include "nonlinear_solvers/rk2_ssp.h"
+#include "nonlinear_solvers/newton.h"
 #include "mesh/structured_mesh.h"
 #include "physics/common/slope_limiters.h"
 #include "utils/math.h"
@@ -47,31 +50,20 @@ class ConvergenceTester
         time_solver_opts_base.itermax = 9999;
         if (!unsteady || opts.limiter == common::SlopeLimiter::FirstOrder)
         {
+          std::cout << "running explicit Euler" << std::endl;
           nlsolvers::ExplicitEulerOpts time_solver_opts;
           time_solver_opts = time_solver_opts_base;
           nlsolvers::explicitEuler(time_solver_opts, advection_model, sol);
         } else
         {
+          std::cout << "running rk2ssp" << std::endl;
           nlsolvers::RK2SSPOpts time_solver_opts;
           time_solver_opts = time_solver_opts_base;
           nlsolvers::rk2ssp(time_solver_opts, advection_model, sol);
         }
 
-        Real error = 0.0;
-        for (UInt block_id : disc->getRegularBlocksIds())
-        {
-          const disc::StructuredBlock& block = disc->getBlock(block_id);
-          const auto& dof_nums = disc->getDofNumbering()->getData(block_id);
-          const auto& coords = disc->getCoordField()->getData(block_id);
-
-          for (UInt i : block.getOwnedCells().getXRange())
-            for (UInt j : block.getOwnedCells().getYRange())
-            {
-              Vec2<Real> x = disc::computeCellCentroid(coords, i, j);
-              Real u_ex_val = u_ex(x[0], x[1], time_solver_opts_base.t_end);
-              error = std::max(error, std::abs(u_ex_val - (*sol)(dof_nums(i, j, 0))));
-            }
-        }
+        Real error = computeError(disc, sol, time_solver_opts_base.t_end, u_ex);
+        std::cout << "error = " << error << std::endl;
 
         errors.push_back(error);
         ratios.push_back(errors.size() > 1 ? errors[errors.size()-2]/errors[errors.size()-1] : 0);
@@ -84,7 +76,73 @@ class ConvergenceTester
       }
 
       EXPECT_NEAR(ratios.back(), expected_ratio, 0.3);
+    }
 
+
+    template <typename SolEx, typename Src>
+    void runConvergenceStudyNewton(const advection::AdvectionOpts opts, const std::vector<UInt>& ncells,
+                                   SolEx u_ex, Src src_term)
+    {
+      int expected_ratio = opts.limiter == common::SlopeLimiter::FirstOrder ? 2 : 4;
+      std::vector<Real> errors, ratios;
+      for (UInt ncell : ncells)
+      {
+        std::cout << "\nncells = " << ncell << std::endl;
+        UInt num_bc_ghost_cells = 2;
+        UInt dofs_per_cell = 1;
+        mesh::MeshSpec spec(1, 1, num_bc_ghost_cells);
+        spec.blocks(0, 0) = mesh::MeshBlockSpec(ncell, ncell, 0, [](Real x, Real y) { return FixedVec<Real, 2>{x, y}; });
+        auto mesh = std::make_shared<mesh::StructuredMesh>(spec);
+        auto disc = std::make_shared<disc::StructuredDisc>(mesh, num_bc_ghost_cells, dofs_per_cell);
+
+        auto u0 = [&](Real x, Real y) { return FixedVec<Real, 1>{u_ex(x, y, 0)}; };  
+        std::vector<advection::Fxyt> bc_funcs{u_ex, u_ex, u_ex, u_ex};
+
+        auto advection_model = std::make_shared<advection::AdvectionModel>(opts, disc, bc_funcs, src_term);
+        auto sol = std::make_shared<disc::DiscVector<Real>>(disc, "solution");
+        sol->set(u0);
+
+        nlsolvers::NewtonOpts newton_opts;
+        newton_opts.mat_type = linear_system::LargeMatrixType::Dense;
+        newton_opts.mat_opts = std::make_shared<linear_system::LargeMatrixOpts>();
+        nlsolvers::NewtonsMethod newton(newton_opts, advection_model, sol);
+        newton.solve();
+
+        Real error = computeError(disc, sol, 0.0, u_ex);
+        errors.push_back(error);
+        ratios.push_back(errors.size() > 1 ? errors[errors.size()-2]/errors[errors.size()-1] : 0);
+      }
+
+      std::cout << "errors:" << std::endl;
+      for (UInt i=0; i < ncells.size(); ++i)
+      {
+        std::cout << ncells[i] << ": " << errors[i] << ", ratios = " << ratios[i] << std::endl;
+      }
+
+      EXPECT_NEAR(ratios.back(), expected_ratio, 0.3);
+    }    
+
+  private:
+    template <typename SolEx>
+    Real computeError(disc::StructuredDiscPtr disc, disc::DiscVectorPtr<Real> sol, Real t, SolEx u_ex)
+    {
+      Real error = 0.0;
+      for (UInt block_id : disc->getRegularBlocksIds())
+      {
+        const disc::StructuredBlock& block = disc->getBlock(block_id);
+        const auto& dof_nums = disc->getDofNumbering()->getData(block_id);
+        const auto& coords = disc->getCoordField()->getData(block_id);
+
+        for (UInt i : block.getOwnedCells().getXRange())
+          for (UInt j : block.getOwnedCells().getYRange())
+          {
+            Vec2<Real> x = disc::computeCellCentroid(coords, i, j);
+            Real u_ex_val = u_ex(x[0], x[1], t);
+            error = std::max(error, std::abs(u_ex_val - (*sol)(dof_nums(i, j, 0))));
+          }
+      }
+
+      return error;      
     }
 
 };
@@ -243,6 +301,19 @@ TEST_P(Steady, XYSolution)
 
   std::vector<UInt> ncells = {3, 6, 12, 24};
   runConvergenceStudy(opts, ncells, u_ex, src_term);
+}
+
+TEST_P(Steady, XYSolutionNewton)
+{
+  advection::AdvectionOpts opts;
+  opts.limiter = GetParam();
+  opts.adv_velocity = {2, 3};
+
+  auto u_ex = [&](Real x, Real y, Real t) { return std::exp(x+y); };
+  auto src_term = [&](Real x, Real y, Real t) { return opts.adv_velocity[0]*std::exp(x+y) + opts.adv_velocity[1]*std::exp(x+y); };
+
+  std::vector<UInt> ncells = {3, 6, 12, 24};
+  runConvergenceStudyNewton(opts, ncells, u_ex, src_term);
 }
 
 TEST_P(Unsteady, XYSolutionUnsteady)

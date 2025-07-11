@@ -5,6 +5,7 @@
 #include "disc/disc_vector.h"
 #include "disc/discretization.h"
 #include "linear_system/assembler_base.h"
+#include "linear_system/sparsity_pattern.h"
 #include "disc/elem_field.h"
 
 
@@ -31,6 +32,8 @@ class PhysicsModel
     virtual void computeJacVecProduct(disc::DiscVectorPtr<Real> q, Real t, disc::DiscVectorPtr<Real> v, disc::DiscVectorPtr<Real> h) = 0;
 
     virtual Real computeRhsNorm(disc::DiscVectorPtr<Real> residual);
+
+    virtual std::shared_ptr<linear_system::SparsityPattern> getSparsityPattern() const = 0;
 
     virtual const disc::StructuredDiscPtr& getDisc() const = 0;
 

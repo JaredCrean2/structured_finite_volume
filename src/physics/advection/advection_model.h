@@ -53,6 +53,7 @@ class AdvectionModel : public PhysicsModel
     // computes h = dR/dq * v without forming dR/dq
     void computeJacVecProduct(disc::DiscVectorPtr<Real> q, Real t, disc::DiscVectorPtr<Real> v, disc::DiscVectorPtr<Real> h) override;
 
+    std::shared_ptr<linear_system::SparsityPattern> getSparsityPattern() const override;
 
     const disc::StructuredDiscPtr& getDisc() const override { return m_disc; }
 

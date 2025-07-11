@@ -24,7 +24,6 @@ AssemblerPtr<LargeMatrixDense> LargeMatrixDense::getAssembler(disc::StructuredDi
 
 void LargeMatrixDense::zeroMatrix_impl()
 {
-  std::cout << "zeroing matrix" << std::endl;
   Kokkos::deep_copy(m_matrix, 0);
 }
 

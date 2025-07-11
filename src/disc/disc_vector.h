@@ -66,9 +66,9 @@ class DiscVector
       }
     }
 
-    ViewType getData() { return m_data; }
+    ViewType& getData() { return m_data; }
 
-    ConstViewType getData() const { return m_data; }
+    ConstViewType& getData() const { return m_data; }
 
   private:
     const StructuredDisc& m_disc;

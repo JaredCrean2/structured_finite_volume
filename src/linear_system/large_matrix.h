@@ -148,7 +148,7 @@ class LargeMatrix
           dofs_copy.push_back(i);
 
       auto it = std::unique(dofs_copy.begin(), dofs_copy.end());
-      assert(it == dofs_copy.end());
+      assertAlways(it == dofs_copy.end(), "dofs passed to LargeMatrix are not unique");
     }
 
   private:

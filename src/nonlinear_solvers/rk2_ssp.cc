@@ -32,16 +32,24 @@ void rk2ssp(const RK2SSPOpts& opts, PhysicsModelPtr model, disc::DiscVectorPtr<R
         break;
     }
 
+    Real max_q_star = 0.0;
     for (UInt i=0; i < q_star.size(); ++i)
+    {
       q_star(i) = sol(i) + delta_t * residual(i);
+      max_q_star = std::max(max_q_star, std::abs(q_star(i)));
+    }
+    std::cout << "max_q_star = " << max_q_star << std::endl;
 
     model->evaluateRhs(q_star_ptr, t + delta_t, residual_ptr);
 
+    Real max_delta_u = 0.0;
     for (UInt i=0; i < sol.size(); ++i)
     {
       Real q_double_star = q_star(i) + delta_t * residual(i);
       sol(i) = 0.5*(sol(i) + q_double_star);
+      max_delta_u = std::max(2*std::abs(q_double_star), max_delta_u);
     }
+    std::cout << "max_delta_u = " << max_delta_u << std::endl;
 
     t += delta_t;
     iter++;

@@ -362,6 +362,16 @@ inline Real imag(Complex x)
   return x.imag();
 }
 
+inline Real real(Real x)
+{
+  return x;
+}
+
+inline Real real(Complex x)
+{
+  return x.real();
+}
+
 }
 
 
