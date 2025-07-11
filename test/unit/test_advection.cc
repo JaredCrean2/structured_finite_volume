@@ -64,14 +64,26 @@ class AdvectionTesterMultiBlock : public test_utils::MultiBlockFixture,
       m_adv_model1 = std::make_shared<advection::AdvectionModel>(
           opts, m_disc1, bc_funcs, source_func);
 
+      linear_system::LargeMatrixOpts matrix_opts;
+      m_matrix1 = std::make_shared<MatrixType>("A", m_disc1->getNumDofs(), m_disc1->getNumDofs(), matrix_opts);
+      m_assembler1 = std::make_shared<AssemblerType>(m_disc1, *m_matrix1); 
+
       std::vector<advection::Fxyt> bc_funcs2{bc_func, bc_func, bc_func, bc_func,
                                             bc_func, bc_func, bc_func, bc_func};
 
       m_adv_model2 = std::make_shared<advection::AdvectionModel>(
           opts, m_disc2, bc_funcs2, source_func);
+
+      m_matrix2 = std::make_shared<MatrixType>("A2", m_disc2->getNumDofs(), m_disc2->getNumDofs(), matrix_opts);
+      m_assembler2 = std::make_shared<AssemblerType>(m_disc2, *m_matrix2); 
     }
 
+    std::shared_ptr<MatrixType> m_matrix1;
+    std::shared_ptr<AssemblerType> m_assembler1;
     std::shared_ptr<advection::AdvectionModel> m_adv_model1;
+
+    std::shared_ptr<MatrixType> m_matrix2;
+    std::shared_ptr<AssemblerType> m_assembler2;    
     std::shared_ptr<advection::AdvectionModel> m_adv_model2;
 };
 } // namespace
@@ -238,6 +250,8 @@ TEST_F(AdvectionTester, Jacobian)
 {
   Real t = 1.0;
   advection::AdvectionOpts opts;
+  opts.limiter = common::SlopeLimiter::VanAlba;
+
   opts.adv_velocity = {1, 2};
   auto u           = [] (Real x, Real y, Real t) { return 2*x*x + 3*y*y + t; };
   auto u0          = [&] (Real x, Real y) { return FixedVec<Real, 1>{u(x, y, 0)}; };
@@ -255,14 +269,49 @@ TEST_F(AdvectionTester, Jacobian)
   v->set(0);
   m_adv_model->evaluateJacobian(solution, t, residual1, m_assembler);
   for (GlobalDof dof=0; dof < m_disc->getNumDofs(); ++dof)
-    {
-      (*v)(dof) = 1;
-      m_adv_model->computeJacVecProduct(solution, t, v, dRdq_v);
-      (*v)(dof) = 0;
+  {
+    (*v)(dof) = 1;
+    m_adv_model->computeJacVecProduct(solution, t, v, dRdq_v);
+    (*v)(dof) = 0;
 
-      for (GlobalDof dof2=0; dof2 < m_disc->getNumDofs(); ++dof2)
-      {
-        EXPECT_NEAR((*m_matrix)(dof2, dof), (*dRdq_v)(dof2), 1e-6);
-      }
+    for (GlobalDof dof2=0; dof2 < m_disc->getNumDofs(); ++dof2)
+    {
+      EXPECT_NEAR((*m_matrix)(dof2, dof), (*dRdq_v)(dof2), 1e-12);
     }
+  }
+}
+
+TEST_F(AdvectionTesterMultiBlock, Jacobian)
+{
+  Real t = 1.0;
+  advection::AdvectionOpts opts;
+  opts.limiter = common::SlopeLimiter::VanAlba;
+
+  opts.adv_velocity = {1, 2};
+  auto u           = [] (Real x, Real y, Real t) { return 2*x*x + 3*y*y + t; };
+  auto u0          = [&] (Real x, Real y) { return FixedVec<Real, 1>{u(x, y, 0)}; };
+  auto bc_func     = [&](Real x, Real y, Real t) { return u(x, y, t); };
+  auto source_func = [] (Real x, Real y, Real t) { return x*x + y*x + t*t; };
+
+  setup(opts, bc_func, source_func);
+
+  auto solution = std::make_shared<disc::DiscVector<Real>>(m_disc2, "solution");
+  auto v = std::make_shared<disc::DiscVector<Real>>(m_disc2, "v");
+  auto residual1 = std::make_shared<disc::DiscVector<Real>>(m_disc2, "residual1");
+  auto dRdq_v = std::make_shared<disc::DiscVector<Real>>(m_disc2, "dR/dq v");
+
+  solution->set(u0);
+  v->set(0);
+  m_adv_model2->evaluateJacobian(solution, t, residual1, m_assembler2);
+  for (GlobalDof dof=0; dof < m_disc2->getNumDofs(); ++dof)
+  {
+    (*v)(dof) = 1;
+    m_adv_model2->computeJacVecProduct(solution, t, v, dRdq_v);
+    (*v)(dof) = 0;
+
+    for (GlobalDof dof2=0; dof2 < m_disc2->getNumDofs(); ++dof2)
+    {
+      EXPECT_NEAR((*m_matrix2)(dof2, dof), (*dRdq_v)(dof2), 1e-12);
+    }
+  }
 }

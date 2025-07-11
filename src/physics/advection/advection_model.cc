@@ -64,6 +64,9 @@ void AdvectionModel::evaluateJacobian(disc::DiscVectorPtr<Real> q, Real t, disc:
 {
   Fields<Real> fields = m_fields_real;
   vecToField(m_disc, q, fields.solution);
+  setBCValues(fields.solution, t);
+  fields.solution->updateGhostValues();
+  fields.residual->set(0);
   evaluateInterfaceTermJac(m_opts, fields, t, m_disc, assembler);
 }
 

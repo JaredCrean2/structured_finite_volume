@@ -33,12 +33,14 @@ void evaluateInterfaceTermsJacImpl(Fields<Real> fields, Real t, StructuredDiscPt
     
     assembler.setBlock(block_id);
     FaceRangePerDirection faces = block.getOwnedFaces();
+    Range2D owned_cells = block.getOwnedCells();
     for (UInt i : faces.getXRange(dir_tag))
       for (UInt j : faces.getYRange(dir_tag))
       {
         FaceId face_id = faces.getFaceId(dir_tag, i, j);
         const auto [cell_im1_left, cell_jm1_left] = increment(dir_tag, face_id.cell_i_left, face_id.cell_j_left, -1);
         const auto [cell_ip1_right, cell_jp1_right] = increment(dir_tag, face_id.cell_i_right, face_id.cell_j_right, 1);
+
         Real qLm1      = sol(cell_im1_left, cell_jm1_left, 0);
         Real qL        = sol(face_id.cell_i_left, face_id.cell_j_left, 0);
         Real qR        = sol(face_id.cell_i_right, face_id.cell_j_right, 0);
@@ -48,14 +50,13 @@ void evaluateInterfaceTermsJacImpl(Fields<Real> fields, Real t, StructuredDiscPt
         Real rL        = (qL - qLm1)/deltaRL;
         Real rL_dotLm1 = -1/deltaRL;
         Real rL_dotL   = 1/deltaRL + (qL - qLm1)/(deltaRL*deltaRL);
-        Real rL_dotR   = -(qL - qLm1)/deltaRL;
+        Real rL_dotR   = -(qL - qLm1)/(deltaRL*deltaRL);
 
         Real deltaRp1R = qRp1 - qR + epsilon;
         Real rR        = (qR - qL)/deltaRp1R;
         Real rR_dotL   = -1/deltaRp1R;
         Real rR_dotR   = 1/deltaRp1R + (qR - qL)/(deltaRp1R*deltaRp1R);
         Real rR_dotRp1 = -(qR - qL)/(deltaRp1R*deltaRp1R);
-
 
         Real slopeL = (qR - qLm1)/2;
         Real slopeL_dotR = 1.0/2;
@@ -94,32 +95,37 @@ void evaluateInterfaceTermsJacImpl(Fields<Real> fields, Real t, StructuredDiscPt
         Real flux_dotR   = flux_dotqLhalf*qLhalf_dotR + flux_dotqRhalf*qRhalf_dotR;
         Real flux_dotRp1 = flux_dotqRhalf*qRhalf_dotRp1;
 
-
         Real inv_volL = cell_inv_volume(face_id.cell_i_left, face_id.cell_j_left, 0);
         Real inv_volR = cell_inv_volume(face_id.cell_i_right, face_id.cell_j_right, 0);
         res(face_id.cell_i_left, face_id.cell_j_left, 0)   -= inv_volL * flux;
         res(face_id.cell_i_right, face_id.cell_j_right, 0) += inv_volR * flux;
 
-        jac(0, 0) = -inv_volL * flux_dotLm1;
-        jac(0, 1) = -inv_volL * flux_dotL;
-        jac(0, 2) = -inv_volL * flux_dotR;
-        jac(0, 3) = -inv_volL * flux_dotRp1;
-
         row_indices[0] = {face_id.cell_i_left, face_id.cell_j_left};
         for (UInt k=0; k < 4; ++k)
         {
           const auto [cell_i, cell_j] = increment(dir_tag, cell_im1_left, cell_jm1_left, k);
-          col_indices[0] = {cell_i, cell_j}; 
+          col_indices[k] = {cell_i, cell_j};
         }
-        assembler.assembleValues(row_indices, col_indices, jac);
 
+        if (in(owned_cells, row_indices[0].i, row_indices[0].j))
+        {
+          jac(0, 0) = -inv_volL * flux_dotLm1;
+          jac(0, 1) = -inv_volL * flux_dotL;
+          jac(0, 2) = -inv_volL * flux_dotR;
+          jac(0, 3) = -inv_volL * flux_dotRp1;
 
-        jac(0, 0) = inv_volR * flux_dotLm1;
-        jac(0, 1) = inv_volR * flux_dotL;
-        jac(0, 2) = inv_volR * flux_dotR;
-        jac(0, 3) = inv_volR * flux_dotRp1;
+          assembler.assembleValues(row_indices, col_indices, jac);
+        }
+
         row_indices[0] = {face_id.cell_i_right, face_id.cell_j_right};
-        assembler.assembleValues(row_indices, col_indices, jac);
+        if (in(owned_cells, row_indices[0].i, row_indices[0].j))
+        {
+          jac(0, 0) = inv_volR * flux_dotLm1;
+          jac(0, 1) = inv_volR * flux_dotL;
+          jac(0, 2) = inv_volR * flux_dotR;
+          jac(0, 3) = inv_volR * flux_dotRp1;
+          assembler.assembleValues(row_indices, col_indices, jac);
+        }
 
         // Note: this works for dirichlet BCs, but for any kind of characteristic BC
         //       where the ghost cell value is a function of the interior value, that

@@ -9,7 +9,6 @@
 namespace structured_fv {
 namespace advection {
 
-
 template <typename T, typename Flux, typename SlopeLimiter, typename Tag>
 void evaluateInterfaceTermsImpl(Fields<T> fields, Real t, StructuredDiscPtr disc,
                                 const Flux& flux_func, const SlopeLimiter& limiter, 
@@ -33,6 +32,7 @@ void evaluateInterfaceTermsImpl(Fields<T> fields, Real t, StructuredDiscPtr disc
         FaceId face_id = faces.getFaceId(dir_tag, i, j);
         const auto [cell_im1_left, cell_jm1_left] = increment(dir_tag, face_id.cell_i_left, face_id.cell_j_left, -1);
         const auto [cell_ip1_right, cell_jp1_right] = increment(dir_tag, face_id.cell_i_right, face_id.cell_j_right, 1);
+                         
         T qLm1      = sol(cell_im1_left, cell_jm1_left, 0);
         T qL        = sol(face_id.cell_i_left, face_id.cell_j_left, 0);
         T qR        = sol(face_id.cell_i_right, face_id.cell_j_right, 0);

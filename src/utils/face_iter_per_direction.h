@@ -4,11 +4,16 @@
 #include "range.h"
 #include "face_iterator.h"
 #include "neighbor_direction.h"
+#include <iosfwd>
 
 namespace structured_fv {
 
 struct XDirTag {};
 struct YDirTag {};
+
+std::ostream& operator<<(std::ostream& os, const XDirTag& tag);
+
+std::ostream& operator<<(std::ostream& os, const YDirTag& tag);
 
 constexpr NeighborDirection toNeighborDirection(XDirTag)
 {

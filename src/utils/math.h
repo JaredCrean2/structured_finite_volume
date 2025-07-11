@@ -352,6 +352,16 @@ constexpr Int sgn(T val)
   return (T(0) < val) - (val < T(0));
 }
 
+inline Real imag(Real)
+{
+  return 0;
+}
+
+inline Real imag(Complex x)
+{
+  return x.imag();
+}
+
 }
 
 

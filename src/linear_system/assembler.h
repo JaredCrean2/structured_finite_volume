@@ -9,6 +9,7 @@
 #include "disc/discretization.h"
 #include <View/Kokkos_ViewCtor.hpp>
 #include <cassert>
+#include <iosfwd>
 
 namespace structured_fv {
 namespace linear_system {
@@ -20,6 +21,8 @@ struct Indices
   UInt i;
   UInt j;
 };
+
+std::ostream& operator<<(std::ostream& os, const Indices& ind);
 
 template <typename LargeMatrixType>
 class Assembler final : public AssemblerBase
