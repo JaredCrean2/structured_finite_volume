@@ -190,6 +190,16 @@ std::ostream& operator<<(std::ostream& os, const FixedVec<T, N>& arr)
   return os;
 }
 
+template <typename Tout, typename Tin, UInt N>
+FixedVec<Tout, N> copy(const FixedVec<Tin, N>& vin)
+{
+  FixedVec<Tout, N> vout;
+  for (UInt i=0; i < N; ++i)
+    vout[i] = vin[i];
+
+  return vout;
+}
+
 template <typename T>
 using Vec2 = FixedVec<T, 2>;
 

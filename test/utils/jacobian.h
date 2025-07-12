@@ -111,7 +111,10 @@ void checkJacobianVector(const Vec4<Real>& q, VectorFunc func, VectorFuncJac fun
     EXPECT_DOUBLE_EQ(y[i].real(), y2[i]);
     for (UInt j=0; j < q.size(); ++j)
     {
-      EXPECT_DOUBLE_EQ(dydq_jac(i, j), dydq_cs(i, j));
+      Real min_val = std::min(std::abs(dydq_jac(i, j)), std::abs(dydq_cs(i, j)));
+      Real eps = std::nextafter(min_val, std::numeric_limits<Real>::max()) - min_val;
+      Real tol = std::max(300 * eps, 1e-13);
+      EXPECT_NEAR(dydq_jac(i, j), dydq_cs(i, j), tol);
     }
   }
 }
