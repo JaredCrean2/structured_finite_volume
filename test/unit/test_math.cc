@@ -14,6 +14,38 @@ void expect_near(const Vec3<double>& a, const Vec3<double>& b)
 }
 }
 
+
+TEST(Math, ComplexIntOps)
+{
+  Complex a(2, 3);
+  Int b = 4;
+  UInt c = 5;
+  Real br = b;
+  Real cr = c;
+
+  EXPECT_EQ(a + b, a  + br);
+  EXPECT_EQ(b + a, br + a);
+  EXPECT_EQ(a + c, a  + cr);
+  EXPECT_EQ(c + a, cr + a);
+
+
+  EXPECT_EQ(a - b, a  - br);
+  EXPECT_EQ(b - a, br - a);
+  EXPECT_EQ(a - c, a  - cr);
+  EXPECT_EQ(c - a, cr - a);
+
+  EXPECT_EQ(a * b, a  * br);
+  EXPECT_EQ(b * a, br * a);
+  EXPECT_EQ(a * c, a  * cr);
+  EXPECT_EQ(c * a, cr * a);
+
+  EXPECT_EQ(a / b, a  / br);
+  EXPECT_EQ(b / a, br / a);
+  EXPECT_EQ(a / c, a  / cr);
+  EXPECT_EQ(c / a, cr / a);  
+
+}
+
 TEST(Math, ComplexCompare)
 {
   Complex one(1.0, 2.0), two(2.0, 1.0);

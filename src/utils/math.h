@@ -19,6 +19,58 @@ namespace structured_fv {
 
 namespace std {
 
+template <typename T>
+using EnableIfIntegral = std::enable_if_t<std::is_integral_v<T>, bool>;
+
+template <typename IntType, EnableIfIntegral<IntType> = true>
+constexpr structured_fv::Complex operator+(const structured_fv::Complex& a, IntType b)
+{
+  return structured_fv::Complex(a.real() + b, a.imag());
+}
+
+template <typename IntType, EnableIfIntegral<IntType> = true>
+constexpr structured_fv::Complex operator+(IntType b, const structured_fv::Complex& a)
+{
+  return a + b;
+}
+
+template <typename IntType, EnableIfIntegral<IntType> = true>
+constexpr structured_fv::Complex operator-(const structured_fv::Complex& a, IntType b)
+{
+  return structured_fv::Complex(a.real() - b, a.imag());
+}
+
+template <typename IntType, EnableIfIntegral<IntType> = true>
+constexpr structured_fv::Complex operator-(IntType b, const structured_fv::Complex& a)
+{
+  return structured_fv::Complex(b - a.real(), -a.imag());
+}
+
+template <typename IntType, EnableIfIntegral<IntType> = true>
+constexpr structured_fv::Complex operator*(const structured_fv::Complex& a, IntType b)
+{
+  return structured_fv::Complex(b*a.real(), b*a.imag());
+}
+
+template <typename IntType, EnableIfIntegral<IntType> = true>
+constexpr structured_fv::Complex operator*(IntType b, const structured_fv::Complex& a)
+{
+  return a*b;
+}
+
+template <typename IntType, EnableIfIntegral<IntType> = true>
+constexpr structured_fv::Complex operator/(const structured_fv::Complex& a, IntType b)
+{
+  return a/static_cast<structured_fv::Real>(b);
+}
+
+template <typename IntType, EnableIfIntegral<IntType> = true>
+constexpr structured_fv::Complex operator/(IntType b, const structured_fv::Complex& a)
+{
+  return static_cast<structured_fv::Real>(b)/a;
+}
+
+
 // these definitions make Complex numbers work as dual numbers
 constexpr bool operator<(const structured_fv::Complex& lhs, const structured_fv::Complex& rhs)
 {
