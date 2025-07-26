@@ -101,11 +101,16 @@ void evaluateInterfaceTermsJacImpl(Fields<Real> fields, Real t, StructuredDiscPt
         res(face_id.cell_i_right, face_id.cell_j_right, 0) += inv_volR * flux;
 
         row_indices[0] = {face_id.cell_i_left, face_id.cell_j_left};
-        for (UInt k=0; k < 4; ++k)
-        {
-          const auto [cell_i, cell_j] = increment(dir_tag, cell_im1_left, cell_jm1_left, k);
-          col_indices[k] = {cell_i, cell_j};
-        }
+        col_indices    = {{{cell_im1_left, cell_jm1_left},
+                           {face_id.cell_i_left, face_id.cell_j_left},
+                           {face_id.cell_i_right, face_id.cell_j_right},
+                           {cell_ip1_right, cell_jp1_right}}};
+
+        //for (UInt k=0; k < 4; ++k)
+        //{
+        //  const auto [cell_i, cell_j] = increment(dir_tag, cell_im1_left, cell_jm1_left, k);
+        //  col_indices[k] = {cell_i, cell_j};
+        //}
 
         if (in(owned_cells, row_indices[0].i, row_indices[0].j))
         {

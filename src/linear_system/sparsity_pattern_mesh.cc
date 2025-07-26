@@ -26,22 +26,27 @@ void SparsityPatternDisc::computePattern(bool symmetric)
 
   for (UInt block_id : m_disc->getRegularBlocksIds())
   {
+    std::cout << "block = " << block_id << std::endl;
     const disc::StructuredBlock& block = m_disc->getBlock(block_id);
     const auto dof_nums = m_disc->getDofNumbering()->getData(block_id);
     for (UInt i : block.getOwnedCells().getXRange())
       for (UInt j : block.getOwnedCells().getYRange())
         for (UInt k=0; k < m_disc->getNumDofsPerNode(); ++k)
         {
+          std::cout << "i, j, k = " << i << ", " << j << ", " << k << std::endl;
+          std::cout << "stencil size = " << m_stencil_size << std::endl;
           UInt num_connected_dofs = m_disc->getNumDofsPerNode();
           GlobalDof dof_k = dof_nums(i, j, k);
           for (UInt p=0; p < m_stencil_size; ++p)
           {
+            std::cout << "p = " << p << std::endl;
             for (NeighborDirection dir : {NeighborDirection::North, NeighborDirection::East,
                                           NeighborDirection::South, NeighborDirection::West})
             {
               auto [i2, j2] = computeIndices(dir, p+1, i, j);
-              for (UInt k2=0; k2 < m_disc->getNumDofsPerNode(); ++k)
+              for (UInt k2=0; k2 < m_disc->getNumDofsPerNode(); ++k2)
               {
+                std::cout << "k2 = " << k2 << std::endl;
                 if (symmetric && dof_nums(i2, j2, k2) > dof_k)
                 {
                   num_connected_dofs++;

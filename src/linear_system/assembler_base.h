@@ -27,6 +27,9 @@ class AssemblerBase
 
 using AssemblerBasePtr = std::shared_ptr<AssemblerBase>;
 
+template <typename T>
+constexpr bool IsAssembler = std::is_base_of_v<AssemblerBase, T>;
+
 
 } // namespace
 }

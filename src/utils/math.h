@@ -92,6 +92,16 @@ constexpr bool operator>=(const structured_fv::Complex& lhs, const structured_fv
   return lhs.real() >= rhs.real();
 }
 
+constexpr structured_fv::Complex max(const structured_fv::Complex& lhs, const structured_fv::Complex& rhs)
+{
+  return lhs > rhs ? lhs : rhs;
+}
+
+constexpr structured_fv::Complex min(const structured_fv::Complex& lhs, const structured_fv::Complex& rhs)
+{
+  return lhs < rhs ? lhs : rhs;
+}
+
 }
 
 

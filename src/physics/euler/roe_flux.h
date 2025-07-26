@@ -18,32 +18,33 @@ class RoeFlux final : public NumericalFlux
       m_delta(delta)
     {}
     
-    constexpr Vec4<Real> operator()(const Vec4<Real>& qL, const Vec4<Real>& qR, 
-                                    const Vec2<Real>& normal) const
+    template <typename T>
+    constexpr Vec4<T> operator()(const Vec4<T>& qL, const Vec4<T>& qR, 
+                                 const Vec2<Real>& normal) const
     {
-      RoeAvgState<Real> avg_state = compute_roe_avg(qL, qR);
-      Vec4<Real> q_avg = compute_conservative_variables(avg_state, RoeStateTag());
+      RoeAvgState<T> avg_state = compute_roe_avg(qL, qR);
+      Vec4<T> q_avg = compute_conservative_variables(avg_state, RoeStateTag());
 
-      Matrix<Real, 4, 4> R, Rinv;
-      Vec4<Real> lambdas{};
+      Matrix<T, 4, 4> R, Rinv;
+      Vec4<T> lambdas{};
       //TODO: it would be better of we could compute the eigendecomp
       //      directly from the Roe state
       compute_eigen_decomp(q_avg, normal, R, lambdas, Rinv);
 
-      Vec4<Real> tmp{};
+      Vec4<T> tmp{};
       for (UInt i=0; i < 4; ++i)
         for (UInt j=0; j < 4; ++j)
           tmp[i] += Rinv(i, j)*(qR[j] - qL[j]);
 
       for (UInt i=0; i < 4; ++i)
       {
-        Real lambda = std::abs(lambdas[i]);
+        T lambda = smoothAbs(lambdas[i]);
         if (lambda < m_delta)
           lambda = (lambda*lambda + m_delta*m_delta)/(2*m_delta);
         tmp[i] *= lambda;
       }
 
-      Vec4<Real> flux{};
+      Vec4<T> flux{};
       for (UInt i=0; i < 4; ++i)
         for (UInt j=0; j < 4; ++j)
           flux[i] += R(i, j) * tmp[j];
@@ -56,6 +57,14 @@ class RoeFlux final : public NumericalFlux
         
       return flux;
     }
+
+    template <typename T>
+    constexpr Vec4<T> operator()(const Vec4<T>& qL, const Vec4<T>& qR, 
+                                 const Vec2<T>& normal,
+                                 Matrix<T, 4>& flux_dotL, Matrix<T, 4>& flux_dotR) const
+    {
+      throw std::runtime_error("not implemented");
+    }     
 
   private:
     Real m_delta;

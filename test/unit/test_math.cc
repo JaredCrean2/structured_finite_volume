@@ -22,6 +22,7 @@ TEST(Math, ComplexIntOps)
   UInt c = 5;
   Real br = b;
   Real cr = c;
+  Complex d(4, 3);
 
   EXPECT_EQ(a + b, a  + br);
   EXPECT_EQ(b + a, br + a);
@@ -44,6 +45,8 @@ TEST(Math, ComplexIntOps)
   EXPECT_EQ(a / c, a  / cr);
   EXPECT_EQ(c / a, cr / a);  
 
+  EXPECT_EQ(std::min(a, d), a);
+  EXPECT_EQ(std::max(a, d), d);
 }
 
 TEST(Math, ComplexCompare)

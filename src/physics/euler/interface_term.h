@@ -4,8 +4,8 @@
 namespace structured_fv {
 namespace euler {
 
-void evaluateInterfaceTermsEntryPoint(const EulerOpts& opts, const ElementFieldPtr<Real>& solution, Real t, const StructuredDiscPtr disc,
-                                      ElementFieldPtr<Real> residual);
+template <typename T>
+void evaluateInterfaceTerms(const EulerOpts& opts, Fields<T>& fields, Real t, const StructuredDiscPtr disc);
 
 }
 }

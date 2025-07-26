@@ -22,7 +22,7 @@ constexpr bool IsReconstruction = std::is_base_of_v<ReconstructionBase, Reconstr
 // sign = +1 gives the solution at the right end of the cell,
 // sign = -1 gives the solution at the left end of the cell
 template <typename T, typename SlopeLimiter>
-/*constexpr*/ Vec4<T> reconstruct(const SlopeLimiter& limiter, const Vec4<T>& q_im1,
+constexpr Vec4<T> reconstruct(const SlopeLimiter& limiter, const Vec4<T>& q_im1,
                               const Vec4<T>& q_i,
                               const Vec4<T>& q_ip1, Int sign)
 {

@@ -16,6 +16,19 @@ using ScalarVectorPair = structured_fv::euler::ScalarVectorPair<Real>;
 using VectorMatrixPair = structured_fv::euler::VectorMatrixPair<Real>;
 using MatrixArray3Pair = std::pair<Matrix<Real, 4>, Array3<Real, 4>>;
 
+inline Real get_tol(Real v1, Real v2, int num_ulp)
+{
+  Real min_val = std::min(std::abs(v1), std::abs(v2));
+  Real eps = std::nextafter(min_val, std::numeric_limits<Real>::max()) - min_val;
+  Real tol = std::max(num_ulp * eps, 1e-13);
+
+  return tol;
+}
+
+#define EXPECT_DOUBLE_EQ_CUSTOM(v1, v2, num_ulp)  \
+{                                                 \
+  EXPECT_NEAR(v1, v2, test_utils::get_tol(v1, v2, num_ulp));  \
+}                                                 \
 
 inline Vec4<Complex> make_complex(const Vec4<Real>& q)
 {
@@ -111,10 +124,12 @@ void checkJacobianVector(const Vec4<Real>& q, VectorFunc func, VectorFuncJac fun
     EXPECT_DOUBLE_EQ(y[i].real(), y2[i]);
     for (UInt j=0; j < q.size(); ++j)
     {
-      Real min_val = std::min(std::abs(dydq_jac(i, j)), std::abs(dydq_cs(i, j)));
-      Real eps = std::nextafter(min_val, std::numeric_limits<Real>::max()) - min_val;
-      Real tol = std::max(300 * eps, 1e-13);
-      EXPECT_NEAR(dydq_jac(i, j), dydq_cs(i, j), tol);
+      //Real min_val = std::min(std::abs(dydq_jac(i, j)), std::abs(dydq_cs(i, j)));
+      //Real eps = std::nextafter(min_val, std::numeric_limits<Real>::max()) - min_val;
+      //Real tol = std::max(300 * eps, 1e-13);
+      //EXPECT_NEAR(dydq_jac(i, j), dydq_cs(i, j), tol);
+      EXPECT_DOUBLE_EQ_CUSTOM(dydq_jac(i, j), dydq_cs(i, j), 300);
+
     }
   }
 }
@@ -150,10 +165,12 @@ void checkJacobianMatrix(const Vec4<Real>& q, MatrixFunc func, MatrixFuncJac fun
       EXPECT_DOUBLE_EQ(y(i, j).real(), y2(i, j));
       for (UInt k=0; k < q.size(); ++k)
       {
-        Real min_val = std::min(std::abs(dydq_jac(i, j, k)), std::abs(dydq_cs(i, j, k)));
-        Real eps = std::nextafter(min_val, std::numeric_limits<Real>::max()) - min_val;
-        Real tol = std::max(8 * eps, 1e-13);
-        EXPECT_NEAR(dydq_jac(i, j, k), dydq_cs(i, j, k), tol);
+        //Real min_val = std::min(std::abs(dydq_jac(i, j, k)), std::abs(dydq_cs(i, j, k)));
+        //Real eps = std::nextafter(min_val, std::numeric_limits<Real>::max()) - min_val;
+        //Real tol = std::max(8 * eps, 1e-13);
+        //EXPECT_NEAR(dydq_jac(i, j, k), dydq_cs(i, j, k), tol);
+        EXPECT_DOUBLE_EQ_CUSTOM(dydq_jac(i, j, k), dydq_cs(i, j, k), 300);
+
       }
     }
 }

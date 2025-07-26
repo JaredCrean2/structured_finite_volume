@@ -6,26 +6,52 @@
 #include "physics/euler/typedefs.h"
 #include "linear_system/sparsity_pattern_mesh.h"
 #include "interface_term.h"
+#include "interface_term_jac.h"
 
 namespace structured_fv {
 namespace euler {
 
-
 void EulerModel::evaluateRhs(DiscVectorPtr<Real> q, Real t, 
                              DiscVectorPtr<Real> residual)
 {
-  vecToField(m_disc, q, m_solution);
-  setBCValues(m_solution, t);
-  m_solution->updateGhostValues();
-  checkPositivity(m_solution);
-  std::cout << "max wave speed = " << computeMaxWaveSpeed(m_solution) << std::endl;
-  m_residual->set(0);
+  Fields<Real>& fields = m_fields_real;
+  vecToField(m_disc, q, fields.solution);
+  evaluateRhsT(fields, t);
+  fieldToVec(m_disc, fields.residual, residual);
+}
 
-  evaluateInterfaceTermsEntryPoint(m_opts, m_solution, t, m_disc, m_residual);
+void EulerModel::evaluateJacobian(disc::DiscVectorPtr<Real> q, Real t, disc::DiscVectorPtr<Real> residual,
+                                  linear_system::AssemblerBasePtr assembler)
+{
+  Fields<Real> fields = m_fields_real;
+  vecToField(m_disc, q, fields.solution);
+  setBCValues(fields.solution, t);
+  fields.solution->updateGhostValues();
+  fields.residual->set(0);
+  evaluateInterfaceTermsJac(m_opts, fields, t, m_disc, assembler);
+}
 
-  evaluateSourceTerm(t, m_residual);
+void EulerModel::computeJacVecProduct(disc::DiscVectorPtr<Real> q, Real t, disc::DiscVectorPtr<Real> v,
+                                      disc::DiscVectorPtr<Real> h)
+{
+  Fields<Complex> fields = m_fields_complex;
+  vecToFieldDot(m_disc, q, v, fields.solution);
+  evaluateRhsT(fields, t);
+  fieldToVecDot(m_disc, fields.residual, h);
+}
 
-  fieldToVec(m_disc, m_residual, residual);
+template <typename T>
+void EulerModel::evaluateRhsT(Fields<T>& fields, Real t)
+{
+  setBCValues(fields.solution, t);
+  fields.solution->updateGhostValues();
+  checkPositivity(fields.solution);
+  //std::cout << "max wave speed = " << computeMaxWaveSpeed(fields.solution) << std::endl;
+  fields.residual->set(0);
+
+  evaluateInterfaceTerms(m_opts, fields, t, m_disc);
+
+  evaluateSourceTerm(t, fields);
 }
 
 std::shared_ptr<linear_system::SparsityPattern> EulerModel::getSparsityPattern() const
@@ -41,7 +67,8 @@ Fxyt& EulerModel::getBCFunction(UInt block_id)
   return m_bc_functions[block_id - m_disc->getNumRegularBlocks()];
 }
 
-void EulerModel::setBCValues(ElementFieldPtr<Real> solution, Real t)
+template <typename T>
+void EulerModel::setBCValues(ElementFieldPtr<T> solution, Real t)
 {
   // if we have an analyical solution that extends beyond the domain,
   // putting exact values in the ghost BC cells works.
@@ -67,13 +94,14 @@ void EulerModel::setBCValues(ElementFieldPtr<Real> solution, Real t)
 }
 
 
-void EulerModel::evaluateSourceTerm(Real t, ElementFieldPtr<Real> residual)
+template <typename T>
+void EulerModel::evaluateSourceTerm(Real t, Fields<T>& fields)
 {
   for (UInt block_id : m_disc->getRegularBlocksIds())
   {
     const StructuredBlock& block = m_disc->getBlock(block_id);
     const auto& vert_coords = m_disc->getCoordField()->getData(block_id);
-    auto& res = residual->getData(block_id);
+    auto& res = fields.residual->getData(block_id);
 
     for (UInt i : block.getOwnedCells().getXRange())
       for (UInt j : block.getOwnedCells().getYRange())
@@ -86,7 +114,8 @@ void EulerModel::evaluateSourceTerm(Real t, ElementFieldPtr<Real> residual)
   }
 }
 
-void EulerModel::checkPositivity(const ElementFieldPtr<Real>& solution)
+template <typename T>
+void EulerModel::checkPositivity(const ElementFieldPtr<T>& solution)
 {
   std::stringstream ss;
   for (UInt block_id : m_disc->getRegularBlocksIds())
@@ -120,17 +149,14 @@ void EulerModel::checkPositivity(const ElementFieldPtr<Real>& solution)
              << ", T = " << compute_temperature(q) << std::endl;
           throw std::runtime_error(ss.str());          
         }
-
       }
-
   }
-
 }
 
-
-Real EulerModel::computeMaxWaveSpeed(ElementFieldPtr<Real> solution)
+template <typename T>
+T EulerModel::computeMaxWaveSpeed(ElementFieldPtr<T> solution)
 {
-  Real max_wave_speed = 0.0;
+  T max_wave_speed = 0.0;
   for (UInt block_id : m_disc->getRegularBlocksIds())
   {
     const StructuredBlock& block = m_disc->getBlock(block_id);
@@ -139,9 +165,9 @@ Real EulerModel::computeMaxWaveSpeed(ElementFieldPtr<Real> solution)
     for (UInt i : block.getOwnedCells().getXRange())
       for (UInt j : block.getOwnedCells().getYRange())
       {
-        Vec4<Real> q = getValues(sol, i, j);
-        Real Umag = std::sqrt(q[1]*q[1] + q[2]*q[2])/q[0];
-        Real a = compute_sos(q);
+        Vec4<T> q = getValues(sol, i, j);
+        T Umag = std::sqrt(q[1]*q[1] + q[2]*q[2])/q[0];
+        T a = compute_sos(q);
         /*
         if (Umag + a > max_wave_speed)
         {

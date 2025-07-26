@@ -11,29 +11,30 @@ namespace euler {
 class HLLEFlux final : public NumericalFlux
 {
   public:
-    constexpr Vec4<Real> operator()(const Vec4<Real>& qL, const Vec4<Real>& qR, 
-                                    const Vec2<Real>& normal) const
+    template <typename T>
+    constexpr Vec4<T> operator()(const Vec4<T>& qL, const Vec4<T>& qR, 
+                                 const Vec2<Real>& normal) const
     {
-      Real n_mag = std::sqrt(dot(normal, normal));
-      Real aL = compute_sos(qL);
-      Real aR = compute_sos(qR);
+      T n_mag = std::sqrt(dot(normal, normal));
+      T aL = compute_sos(qL);
+      T aR = compute_sos(qR);
 
-      RoeAvgState<Real> avg_state = compute_roe_avg(qL, qR);
-      Real aAvg = compute_sos(avg_state);
+      RoeAvgState<T> avg_state = compute_roe_avg(qL, qR);
+      T aAvg = compute_sos(avg_state);
 
-      Real unL = compute_un(qL, normal);
-      Real unR = compute_un(qR, normal);
-      Real unAvg = compute_un(avg_state, normal);
+      T unL = compute_un(qL, normal);
+      T unR = compute_un(qR, normal);
+      T unAvg = compute_un(avg_state, normal);
 
-      Real s1 = std::min(unL - aL*n_mag, unAvg - aAvg*n_mag);
-      Real s2 = std::max(unR + aR*n_mag, unAvg + aAvg*n_mag);
+      T s1 = std::min(unL - aL*n_mag, unAvg - aAvg*n_mag);
+      T s2 = std::max(unR + aR*n_mag, unAvg + aAvg*n_mag);
 
-      Vec4<Real> fL = compute_euler_flux(qL, normal);
-      Vec4<Real> fR = compute_euler_flux(qR, normal);
+      Vec4<T> fL = compute_euler_flux(qL, normal);
+      Vec4<T> fR = compute_euler_flux(qR, normal);
 
       if (s1 < 0 && s2 > 0)
       {
-        Vec4<Real> flux{};
+        Vec4<T> flux{};
         for (UInt i=0; i < 4; ++i)
           flux[i] = (s2*fL[i] - s1*fR[i] + s1*s2*(qR[i] - qL[i]))/(s2 - s1);
         return flux;
@@ -45,7 +46,14 @@ class HLLEFlux final : public NumericalFlux
         return fR;
       }
     }
-    
+
+    template <typename T>
+    constexpr Vec4<T> operator()(const Vec4<T>& qL, const Vec4<T>& qR, 
+                                 const Vec2<Real>& normal,
+                                 Matrix<T, 4>& flux_dotL, Matrix<T, 4>& flux_dotR) const
+    {
+      throw std::runtime_error("not implemented");
+    }  
 };
 
 }

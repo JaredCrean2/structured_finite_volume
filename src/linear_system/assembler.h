@@ -61,15 +61,35 @@ class Assembler final : public AssemblerBase
         for (UInt j=0; j < P; ++j)
           jac(i, j) *= m_alpha;
 
+      //std::cout << "\nrow indices = ";
+      //for (Indices idx : row_indices)
+      //  std::cout << idx << ", ";
+      //std::cout << std::endl;
+
+      //std::cout << "col indices = ";
+      //for (Indices idx : col_indices)
+      //  std::cout << idx << ", ";
+      //std::cout << std::endl;
+
       FixedVec<GlobalDof, K> row_dofs;
       FixedVec<GlobalDof, P> col_dofs;
+      //std::cout << "row dofs = ";
       for (UInt i=0; i < M; ++i)
         for (UInt k=0; k < num_dof_per_node; ++k)
+        {
           row_dofs[i*num_dof_per_node + k] = m_dof_nums(row_indices[i].i, row_indices[i].j, k);
+          //std::cout << row_dofs[i*num_dof_per_node + k] << ", ";
+        }
+      //std::cout << std::endl;
 
+      //std::cout << "col dofs = ";
       for (UInt j=0; j < N; ++j)
         for (UInt k=0; k < num_dof_per_node; ++k)
+        {
           col_dofs[j*num_dof_per_node + k] = m_dof_nums(col_indices[j].i, col_indices[j].j, k);
+          //std::cout << col_dofs[j*num_dof_per_node + k] << ", ";
+        }
+      //std::cout << std::endl;
 
       m_matrix.assembleValues(row_dofs, col_dofs, jac);  
     }
