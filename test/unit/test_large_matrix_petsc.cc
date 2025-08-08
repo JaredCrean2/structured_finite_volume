@@ -101,6 +101,39 @@ TEST(LargeMatrixPetsc, GeneralSolve)
     EXPECT_NEAR(x[i], x_ex[i], 1e-13);
 }
 
+TEST(LargeMatrixPetsc, GeneralSolveCopy)
+{
+  int comm_rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
+
+  auto opts = get_options();
+  auto sparsity_pattern = std::make_shared<SparsityPatternTest>(3);
+  linear_system::LargeMatrixPetsc mat_orig("A", opts, sparsity_pattern);
+  linear_system::LargeMatrixPetsc mat = mat_orig;
+
+  EXPECT_EQ(mat.getMLocal(), 3);
+  EXPECT_EQ(mat.getNLocal(), 3);
+
+  FixedVec<GlobalDof, 3> dofs{0 + 3*comm_rank, 1 + 3*comm_rank, 2 + 3*comm_rank};
+  Mat3 jac({1, 2, 3,
+            4, 5, 6,
+            8, 8, 9});
+  linear_system::VectorType x("x", 3);
+  linear_system::VectorType b("b", 3);
+  b(0) = 3;
+  b(1) = 6;
+  b(2) = 9;
+  Vec3<Real> x_ex {0, 0, 1};
+
+  mat.assembleValues(dofs, dofs, jac);
+  mat.finishMatrixAssembly();
+  mat.factor();
+  mat.solve(b, x);
+
+  for (int i=0; i < 3; ++i)
+    EXPECT_NEAR(x[i], x_ex[i], 1e-13);
+}
+
 
 TEST(LargeMatrixPetsc, AssembleValuesAdditive)
 {

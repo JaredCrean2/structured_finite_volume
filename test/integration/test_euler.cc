@@ -1,4 +1,5 @@
 #include "gtest/gtest.h"
+#include "linear_system/large_matrix_factory.h"
 #include "physics/common/slope_limiters.h"
 #include "physics/euler/euler_flux.h"
 #include "physics/euler/euler_model.h"
@@ -50,12 +51,13 @@ void runConvergenceStudy(const euler::EulerOpts opts, const std::vector<UInt>& n
     {
       std::cout << "\nsolving with newton" << std::endl;
       nlsolvers::NewtonOpts newton_opts;
-      newton_opts.mat_type = linear_system::LargeMatrixType::Dense; //linear_system::LargeMatrixType::Petsc;
-      //auto mat_opts = std::make_shared<linear_system::LargeMatrixOptsPetsc>();
-      //mat_opts->petsc_opts["ksp_atol"] = "1e-15";
-      //mat_opts->petsc_opts["ksp_rtol"] = "1e-50";
-      //mat_opts->petsc_opts["ksp_monitor"] = "";
-      //newton_opts.mat_opts = mat_opts;
+      newton_opts.mat_type = linear_system::LargeMatrixType::Petsc;
+      auto mat_opts = std::make_shared<linear_system::LargeMatrixOptsPetsc>();
+      mat_opts->petsc_opts["ksp_atol"] = "1e-15";
+      mat_opts->petsc_opts["ksp_rtol"] = "1e-50";
+      mat_opts->petsc_opts["ksp_monitor"] = "";
+      mat_opts->petsc_opts["on_error_abort"] = "";
+      newton_opts.mat_opts = mat_opts;
       newton_opts.mat_opts = std::make_shared<linear_system::LargeMatrixOptsPetsc>();     
       nlsolvers::NewtonsMethod newton(newton_opts, euler_model, sol);
       newton.solve();

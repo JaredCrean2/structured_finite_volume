@@ -44,7 +44,7 @@ class LargeMatrixPetsc : public LargeMatrix
 
     void printToStdout()
     {
-      MatView(m_A, PETSC_VIEWER_STDOUT_WORLD);
+      MatView(*m_A, PETSC_VIEWER_STDOUT_WORLD);
     }  
 
     LargeMatrixPetsc(std::shared_ptr<SparsityPattern> sparsity_pattern);
@@ -57,7 +57,7 @@ class LargeMatrixPetsc : public LargeMatrix
                         const Matrix<Real, M, N>& jac)
     {
       checkDofsForAssembly(dofs_rows, dofs_cols);
-      MatSetValues(m_A, dofs_rows.size(), dofs_rows.data(), dofs_cols.size(), dofs_cols.data(), jac.getData(), ADD_VALUES);
+      MatSetValues(*m_A, dofs_rows.size(), dofs_rows.data(), dofs_cols.size(), dofs_cols.data(), jac.getData(), ADD_VALUES);
     }
 
     AssemblerPtr<LargeMatrixPetsc> getAssembler(disc::StructuredDiscPtr disc) const;
@@ -66,7 +66,7 @@ class LargeMatrixPetsc : public LargeMatrix
 
     void zeroMatrix_impl() override
     {
-      MatZeroEntries(m_A);
+      MatZeroEntries(*m_A);
       m_new_matrix_values = true;
     }
 
@@ -93,11 +93,18 @@ class LargeMatrixPetsc : public LargeMatrix
     void copyVec(const Vec vec_in, VectorType& vec_out, bool set_ghosts);
 
     LargeMatrixOptsPetsc m_opts;
-    Vec m_x = nullptr;
-    Vec m_b = nullptr;
-    Mat m_A = nullptr;
-    KSP m_ksp = nullptr;
-    PC m_pc = nullptr;
+    Vec _m_x = nullptr;
+    Vec _m_b = nullptr;
+    Mat _m_A = nullptr;
+    KSP _m_ksp = nullptr;
+    PC _m_pc = nullptr;
+
+    std::shared_ptr<Vec> m_x = nullptr;
+    std::shared_ptr<Vec> m_b = nullptr;
+    std::shared_ptr<Mat> m_A = nullptr;
+    std::shared_ptr<KSP> m_ksp = nullptr;
+    std::shared_ptr<PC>  m_pc = nullptr;
+
     bool m_new_matrix_values = true;
     //std::vector<PetscInt> m_owned_dof_to_local;
     //std::vector<PetscInt> m_ghost_dofs_to_local;

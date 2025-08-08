@@ -35,6 +35,7 @@ void NewtonsMethod::solve()
     m_mat->zeroMatrix();
     m_model->evaluateJacobian(m_sol, 0.0, m_rhs, m_assembler);
 
+    m_mat->finishMatrixAssembly();
     m_mat->factor();
     m_mat->solve(m_rhs->getData(), m_delta_u->getData());
     updateSolution(m_delta_u, m_sol);
