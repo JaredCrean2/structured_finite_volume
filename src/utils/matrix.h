@@ -25,14 +25,26 @@ class Matrix
       m_data(vals)
     {}
 
+    constexpr Matrix(const T& val) :
+      m_data{val}
+    {}
+
     constexpr Matrix() :
       m_data{}
     {}
 
-    Matrix<T, M, N>& operator=(const FixedVec<T, M*N>& other)
+    constexpr Matrix<T, M, N>& operator=(const FixedVec<T, M*N>& other)
     {
       for (UInt i=0; i < M*N; ++i)
         m_data[i] = other[i];
+
+      return *this;
+    }
+
+    constexpr Matrix<T, M, N>& operator=(const T& val)
+    {
+      for (UInt i=0; i < M*N; ++i)
+        m_data[i] = val;
 
       return *this;
     }
@@ -90,6 +102,20 @@ constexpr FixedVec<T, M> operator*(const Matrix<T, M, N>& mat, const FixedVec<T,
   for (UInt i=0; i < M; ++i)
     for (UInt j=0; j < N; ++j)
       b[i] += mat(i, j) * x[j];
+
+  return b;
+}
+
+template <typename T, UInt M, UInt N, UInt N2, UInt K>
+constexpr Matrix<T, M, K> operator*(const Matrix<T, M, N>& mat, const Matrix<T, N2, K>& x)
+{
+  static_assert(N == N2, "matrix dimensions must agree");
+
+  Matrix<T, M, K> b;
+  for (UInt i=0; i < M; ++i)
+    for (UInt j=0; j < N; ++j)
+      for (UInt k=0; k < K; ++k)
+        b(i, k) += mat(i, j) * x(j, k);
 
   return b;
 }

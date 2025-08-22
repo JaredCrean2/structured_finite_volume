@@ -42,6 +42,14 @@ TEST(Matrix, ValueConstructor)
       EXPECT_EQ(mat_const(i, j), val++);
 }
 
+TEST(Matrix, ScalarConstructor)
+{
+  Matrix<Int, 3, 4> mat(42);
+  for (UInt i=0; i < 3; ++i)
+    for (UInt j=0; j < 4; ++j)
+      EXPECT_EQ(mat(i, j), 42);
+}
+
 TEST(Matrix, AssignmentOperator)
 {
   Matrix<Int, 3, 4> mat;
@@ -53,6 +61,15 @@ TEST(Matrix, AssignmentOperator)
   for (UInt i=0; i < 3; ++i)
     for (UInt j=0; j < 4; ++j)
       EXPECT_EQ(mat(i, j), val++);
+}
+
+TEST(Matrix, ScalarAssignment)
+{
+  Matrix<Int, 3, 4> mat;
+  mat = 42;
+  for (UInt i=0; i < 3; ++i)
+    for (UInt j=0; j < 4; ++j)
+      EXPECT_EQ(mat(i, j), 42);
 }
 
 TEST(Matrix, DefaultTemplateArgument)
@@ -104,4 +121,26 @@ TEST(Matrix, RowMajor)
   EXPECT_EQ(&(mat(0, 1)), data+1);
   EXPECT_EQ(&(mat(1, 0)), data+2);
   EXPECT_EQ(&(mat(1, 1)), data+3);
+}
+
+TEST(Matrix, MatMat)
+{
+  Matrix<Int, 3, 2> mat({1, 2, 3, 4, 5, 6});
+  Matrix<Int, 2, 4> x({2, 3, 4, 5, 6, 7, 8, 9});
+  Matrix<Int, 3, 4> b = mat * x;
+
+  EXPECT_EQ(b(0, 0), 14);
+  EXPECT_EQ(b(0, 1), 17);
+  EXPECT_EQ(b(0, 2), 20);
+  EXPECT_EQ(b(0, 3), 23);
+
+  EXPECT_EQ(b(1, 0), 30);
+  EXPECT_EQ(b(1, 1), 37);
+  EXPECT_EQ(b(1, 2), 44);
+  EXPECT_EQ(b(1, 3), 51);
+
+  EXPECT_EQ(b(2, 0), 46);
+  EXPECT_EQ(b(2, 1), 57);
+  EXPECT_EQ(b(2, 2), 68);
+  EXPECT_EQ(b(2, 3), 79);  
 }

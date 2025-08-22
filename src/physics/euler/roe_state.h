@@ -4,11 +4,13 @@
 #include "euler_flux.h"
 #include "typedefs.h"
 #include "utils/project_defs.h"
+#include <iostream>
 
 namespace structured_fv {
 namespace euler {
 
-template <typename T> struct RoeAvgState {
+template <typename T>
+struct RoeAvgState {
   T rho = 0;
   T u = 0;
   T v = 0;
@@ -16,7 +18,16 @@ template <typename T> struct RoeAvgState {
 };
 
 template <typename T>
-constexpr RoeAvgState<T> compute_roe_avg(const Vec4<T> &qL, const Vec4<T> &qR) {
+std::ostream& operator<<(std::ostream& os, const RoeAvgState<T>& state)
+{
+  os << "rho = " << state.rho << ", u = " << state.u << ", v = " << state.v << ", H = " << state.H;
+  return os;
+}
+
+
+template <typename T>
+constexpr RoeAvgState<T> compute_roe_avg(const Vec4<T> &qL, const Vec4<T> &qR)
+{
   T sqrt_rho_l = std::sqrt(qL[0]);
   T sqrt_rho_r = std::sqrt(qR[0]);
   T pL = compute_pressure(qL);
@@ -34,7 +45,8 @@ constexpr RoeAvgState<T> compute_roe_avg(const Vec4<T> &qL, const Vec4<T> &qR) {
 template <typename T>
 constexpr RoeAvgState<T>
 compute_roe_avg_jac(const Vec4<T> &qL, const Vec4<T> &qR,
-                    Matrix<T, 4> &roe_avg_dotL, Matrix<T, 4> &roe_avg_dotR) {
+                    Matrix<T, 4> &roe_avg_dotL, Matrix<T, 4> &roe_avg_dotR)
+{
   T sqrt_rho_l = std::sqrt(qL[0]);
   T sqrt_rho_r = std::sqrt(qR[0]);
   T sqrt_rho_l_dot = 1.0 / (2 * sqrt_rho_l);
@@ -111,24 +123,29 @@ compute_roe_avg_jac(const Vec4<T> &qL, const Vec4<T> &qR,
   return avg_state;                 
 }
 
-template <typename T> constexpr T compute_sos2(const RoeAvgState<T> &state) {
+template <typename T> constexpr T compute_sos2(const RoeAvgState<T> &state)
+{
   T ke = 0.5 * (state.u * state.u + state.v * state.v);
   return Gamma_m1 * (state.H - ke);
 }
 
 template <typename T>
-constexpr ScalarVectorPair<T> compute_sos2_jac(const RoeAvgState<T> &state) {
+constexpr ScalarVectorPair<T> compute_sos2_jac(const RoeAvgState<T> &state)
+{
   T ke = 0.5 * (state.u * state.u + state.v * state.v);
   return {Gamma_m1 * (state.H - ke),
           {0, -Gamma_m1 * state.u, -Gamma_m1 * state.v, Gamma_m1}};
 }
 
-template <typename T> constexpr T compute_sos(const RoeAvgState<T> &state) {
+template <typename T> 
+constexpr T compute_sos(const RoeAvgState<T> &state)
+{
   return std::sqrt(compute_sos2(state));
 }
 
 template <typename T>
-constexpr ScalarVectorPair<T> compute_sos_jac(const RoeAvgState<T> &state) {
+constexpr ScalarVectorPair<T> compute_sos_jac(const RoeAvgState<T> &state)
+{
   auto [sos2, sos2_jac] = compute_sos2_jac(state);
   T sos = std::sqrt(sos2);
 
@@ -139,13 +156,15 @@ constexpr ScalarVectorPair<T> compute_sos_jac(const RoeAvgState<T> &state) {
 }
 
 template <typename T>
-constexpr T compute_pressure(const RoeAvgState<T> &avg_state) {
+constexpr T compute_pressure(const RoeAvgState<T> &avg_state)
+{
   return avg_state.rho * compute_sos2(avg_state) / Gamma;
 }
 
 template <typename T>
 constexpr ScalarVectorPair<T>
-compute_pressure_jac(const RoeAvgState<T> &avg_state) {
+compute_pressure_jac(const RoeAvgState<T> &avg_state)
+{
   auto [sos2, sos2_dot] = compute_sos2_jac(avg_state);
 
   for (UInt i = 0; i < 4; ++i)
@@ -157,13 +176,15 @@ compute_pressure_jac(const RoeAvgState<T> &avg_state) {
 
 template <typename T>
 constexpr T compute_un(const RoeAvgState<T> &avg_state,
-                       const Vec2<Real> &normal) {
+                       const Vec2<Real> &normal)
+{
   return (avg_state.u * normal[0] + avg_state.v * normal[1]);
 }
 
 template <typename T>
 constexpr ScalarVectorPair<T> compute_un_jac(const RoeAvgState<T> &avg_state,
-                                             const Vec2<Real> &normal) {
+                                             const Vec2<Real> &normal)
+{
   return {(avg_state.u * normal[0] + avg_state.v * normal[1]),
           {0, normal[0], normal[1], 0}};
 }
@@ -172,7 +193,8 @@ struct RoeStateTag {};
 
 template <typename T>
 constexpr Vec4<T>
-compute_conservative_variables(const RoeAvgState<T> &avg_state, RoeStateTag) {
+compute_conservative_variables(const RoeAvgState<T> &avg_state, RoeStateTag)
+{
   T pressure = compute_pressure(avg_state);
   T E = avg_state.H * avg_state.rho - pressure;
   return {avg_state.rho, avg_state.rho * avg_state.u,
@@ -191,9 +213,10 @@ compute_conservative_variables_jac(const RoeAvgState<T> &avg_state,
 
   Vec4<T> q = {avg_state.rho, avg_state.rho * avg_state.u,
                avg_state.rho * avg_state.v, E};
-  Matrix<T, 4> q_dot({1, 0, 0, 0, avg_state.u, avg_state.rho, 0, 0, avg_state.v,
-                      0, avg_state.rho, 0, E_dot[0], E_dot[1], E_dot[2],
-                      E_dot[3]});
+  Matrix<T, 4> q_dot({1, 0, 0, 0,
+                      avg_state.u, avg_state.rho, 0, 0,
+                      avg_state.v, 0, avg_state.rho, 0,
+                      E_dot[0], E_dot[1], E_dot[2], E_dot[3]});
   return {q, q_dot};
 }
 

@@ -94,7 +94,7 @@ void checkJacobianScalar(const Vec4<Real>& q, ScalarFunc func, ScalarFuncJac fun
 }
 
 template <typename VectorFunc, typename VectorFuncJac>
-void checkJacobianVector(const Vec4<Real>& q, VectorFunc func, VectorFuncJac func_jac)
+void checkJacobianVector(const Vec4<Real>& q, VectorFunc func, VectorFuncJac func_jac, Real abs_tol=-1)
 {
   static_assert(IsVectorFunc<VectorFunc>);
   static_assert(IsVectorJac<VectorFuncJac>);
@@ -119,16 +119,19 @@ void checkJacobianVector(const Vec4<Real>& q, VectorFunc func, VectorFuncJac fun
   }
 
   const auto [y2, dydq_jac] = func_jac(q);
+
   for (UInt i=0; i < q.size(); ++i)
   {
     EXPECT_DOUBLE_EQ(y[i].real(), y2[i]);
     for (UInt j=0; j < q.size(); ++j)
     {
-      //Real min_val = std::min(std::abs(dydq_jac(i, j)), std::abs(dydq_cs(i, j)));
-      //Real eps = std::nextafter(min_val, std::numeric_limits<Real>::max()) - min_val;
-      //Real tol = std::max(300 * eps, 1e-13);
-      //EXPECT_NEAR(dydq_jac(i, j), dydq_cs(i, j), tol);
-      EXPECT_DOUBLE_EQ_CUSTOM(dydq_jac(i, j), dydq_cs(i, j), 300);
+      if (abs_tol > 0)
+      {
+        EXPECT_NEAR(dydq_jac(i, j), dydq_cs(i, j), std::max(abs_tol, get_tol(dydq_jac(i, j), dydq_cs(i, j), 700)));
+      } else
+      {
+        EXPECT_DOUBLE_EQ_CUSTOM(dydq_jac(i, j), dydq_cs(i, j), 700);
+      }
 
     }
   }

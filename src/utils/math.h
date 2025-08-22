@@ -5,6 +5,21 @@
 #include "project_defs.h"
 #include "vec.h"
 
+// a useful little macro for printing variables to stdout
+// Example: PRINTVAR(foo) expands to
+// std::cout << "foo " << " = " << foo << std::endl;
+#define PRINTVAR(name) \
+{                                                      \
+  std::cout << #name << " = " << name << std::endl;    \
+}                                                      \
+
+// prints the literal text to stdout
+#define PRINTCONST(str) \
+{                                  \
+  std::cout << str << std::endl;   \
+}                                  \
+
+
 namespace structured_fv {
 /*
   template <typename T>
@@ -90,16 +105,6 @@ constexpr bool operator>(const structured_fv::Complex& lhs, const structured_fv:
 constexpr bool operator>=(const structured_fv::Complex& lhs, const structured_fv::Complex& rhs)
 {
   return lhs.real() >= rhs.real();
-}
-
-constexpr structured_fv::Complex max(const structured_fv::Complex& lhs, const structured_fv::Complex& rhs)
-{
-  return lhs > rhs ? lhs : rhs;
-}
-
-constexpr structured_fv::Complex min(const structured_fv::Complex& lhs, const structured_fv::Complex& rhs)
-{
-  return lhs < rhs ? lhs : rhs;
 }
 
 }
@@ -432,6 +437,11 @@ inline Real real(Real x)
 inline Real real(Complex x)
 {
   return x.real();
+}
+
+constexpr UInt del(UInt i,  UInt j)
+{
+  return i == j;
 }
 
 }

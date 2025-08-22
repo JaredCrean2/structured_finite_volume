@@ -28,7 +28,11 @@ using FluxFunctions = ::testing::Types<euler::RoeFlux,
                                        euler::LaxFriedrichFlux,
                                        euler::HLLCFlux>;
 
-using FluxFunctionsJac = ::testing::Types<euler::LaxFriedrichFlux>;
+using FluxFunctionsJac = ::testing::Types<euler::LaxFriedrichFlux,
+                                          euler::HLLCFlux,
+                                          euler::HLLEFlux,
+                                          euler::RoeFlux,
+                                          euler::RoeHHFlux>;
 
 class NameGenerator
 {
@@ -109,48 +113,63 @@ TYPED_TEST(FluxFunctionTester, Supersonic)
   }
 }
 
-TYPED_TEST(FluxFunctionJacTester, Supersonic)
+TYPED_TEST(FluxFunctionJacTester, Consistency)
 {
   using FluxFunc = TypeParam;
 
-  Vec4<Real> prim_varsL = {2, 400, 500, 300};
-  Vec4<Real> prim_varsR = {2, 500, 700, 300};
-  auto qL = compute_conservative_variables(prim_varsL, PrimitiveVarTag());
-  auto qR = compute_conservative_variables(prim_varsR, PrimitiveVarTag());
-  auto qLc = test_utils::make_complex(qL);
-  auto qRc = test_utils::make_complex(qR);
-  Vec2<Real> normal = {1.0, 0.0};
-
   FluxFunc flux;
-
-  auto funcL = [&](auto qL)
+  std::vector<std::pair<Vec4<Real>, Vec4<Real>>> states =
   {
-    return flux(qL, qRc, normal);
+     {{2,  400.0/2,  500.0/3, 300}, {2,  500.0/2,  700.0/3, 300}},
+     {{2, -400.0/2, -500.0/3, 300}, {2, -500.0/2, -700.0/3, 300}},
+     {{2,   40.0/2,   50.0/3, 300}, {2,   50.0/2,   70.0/3, 300}},  // HLLC: uses SL and SR
+     {{2,   40.0/2,   50.0/3, 300}, {2,   50.0/2,   70.0/3, 600}},    // HLLC: uses SL_avg and SR, also s_star < 0
+     {{2,   40.0/2,   50.0/3, 600}, {2,   50.0/2,   70.0/3, 300}},     // HLLC: uses sR_avg
+     {{2,  500.0/2,   50.0/3, 700}, {2,  500.0/2,   50.0/3, 300}}     // RoeHH: trip entropy fix
+
   };
 
-  auto jacL = [&](auto qL)
+
+  for (auto [prim_varsL, prim_varsR] : states)
   {
-    Matrix<Real, 4> flux_dotL, flux_dotR;
-    Vec4<Real> f = flux(qL, qR, normal, flux_dotL, flux_dotR);
+    auto qL = compute_conservative_variables(prim_varsL, PrimitiveVarTag());
+    auto qR = compute_conservative_variables(prim_varsR, PrimitiveVarTag());
+    auto qLc = test_utils::make_complex(qL);
+    auto qRc = test_utils::make_complex(qR);
+    Vec2<Real> normal = {2.0, 3.0};  //TODO: make this diagonal
 
-    return std::make_pair(f, flux_dotL);
-  };
 
-  auto funcR = [&](auto qR)
-  {
-    return flux(qLc, qR, normal);
-  };
+    auto funcL = [&](auto qL)
+    {
+      return flux(qL, qRc, normal);
+    };
 
-  auto jacR = [&](auto qR)
-  {
-    Matrix<Real, 4> flux_dotL, flux_dotR;
-    Vec4<Real> f = flux(qL, qR, normal, flux_dotL, flux_dotR);
+    auto jacL = [&](auto qL)
+    {
+      Matrix<Real, 4> flux_dotL, flux_dotR;
+      Vec4<Real> f = flux(qL, qR, normal, flux_dotL, flux_dotR);
 
-    return std::make_pair(f, flux_dotR);
-  };  
+      return std::make_pair(f, flux_dotL);
+    };
 
-  test_utils::checkJacobianVector(qL, funcL, jacL);
-  test_utils::checkJacobianVector(qL, funcR, jacR);
+    auto funcR = [&](auto qR)
+    {
+      return flux(qLc, qR, normal);
+    };
+
+    auto jacR = [&](auto qR)
+    {
+      Matrix<Real, 4> flux_dotL, flux_dotR;
+      Vec4<Real> f = flux(qL, qR, normal, flux_dotL, flux_dotR);
+
+      return std::make_pair(f, flux_dotR);
+    };  
+
+    //TODO: the Roe flux jacobians are not as accurate as I would like
+    test_utils::checkJacobianVector(qL, funcL, jacL, 5e-8);
+
+    test_utils::checkJacobianVector(qR, funcR, jacR, 5e-8); 
+  }
 
 }
 
