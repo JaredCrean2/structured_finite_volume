@@ -35,7 +35,7 @@ void evaluateInterfaceTermImpl(Fields<T>& fields, Real t,
 
     FaceRangePerDirection faces = block.getOwnedFaces();
     for (UInt i : faces.getXRange(dir_tag))
-      for (UInt j : faces.getYRange(dir_tag))
+      for (UInt j : faces.getYRange(dir_tag))  
       {
         FaceId face_id = faces.getFaceId(dir_tag, i, j);
         Vec4<T> flux;

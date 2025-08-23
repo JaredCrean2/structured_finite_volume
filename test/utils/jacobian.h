@@ -120,11 +120,16 @@ void checkJacobianVector(const Vec4<Real>& q, VectorFunc func, VectorFuncJac fun
 
   const auto [y2, dydq_jac] = func_jac(q);
 
+  std::cout << "dydq_cs = \n" << dydq_cs << std::endl;
+  std::cout << "dydq_jac = \n" << dydq_jac << std::endl;
   for (UInt i=0; i < q.size(); ++i)
   {
     EXPECT_DOUBLE_EQ(y[i].real(), y2[i]);
     for (UInt j=0; j < q.size(); ++j)
     {
+      std::cout << "i, j = " << i << ", " << j << std::endl;
+      std::cout << "dydq_cs = " << dydq_cs(i, j) << ", dydq_jac = " << dydq_jac(i, j) << std::endl;
+      std::cout << "diff = " << dydq_cs(i, j) - dydq_jac(i, j) << std::endl;
       if (abs_tol > 0)
       {
         EXPECT_NEAR(dydq_jac(i, j), dydq_cs(i, j), std::max(abs_tol, get_tol(dydq_jac(i, j), dydq_cs(i, j), 700)));
@@ -172,7 +177,8 @@ void checkJacobianMatrix(const Vec4<Real>& q, MatrixFunc func, MatrixFuncJac fun
         //Real eps = std::nextafter(min_val, std::numeric_limits<Real>::max()) - min_val;
         //Real tol = std::max(8 * eps, 1e-13);
         //EXPECT_NEAR(dydq_jac(i, j, k), dydq_cs(i, j, k), tol);
-        EXPECT_DOUBLE_EQ_CUSTOM(dydq_jac(i, j, k), dydq_cs(i, j, k), 300);
+        std::cout << "dydq_cs = " << dydq_cs(i, j, k) << ", dydq_jac = " << dydq_jac(i, j, k) << ", diff = " << dydq_cs(i, j, k) - dydq_jac(i, j, k) << std::endl;
+        EXPECT_DOUBLE_EQ_CUSTOM(dydq_jac(i, j, k), dydq_cs(i, j, k), 3);
 
       }
     }

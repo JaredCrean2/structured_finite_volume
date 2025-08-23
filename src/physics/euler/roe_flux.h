@@ -38,7 +38,6 @@ class RoeFlux final : public NumericalFlux
 
       for (UInt i=0; i < 4; ++i)
       {
-        std::cout << "tmp = " << tmp[i] << std::endl;
         T lambda = smoothAbs(lambdas[i]);
         if (lambda < m_delta)
           lambda = (lambda*lambda + m_delta*m_delta)/(2*m_delta);

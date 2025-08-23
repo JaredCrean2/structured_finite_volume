@@ -125,18 +125,21 @@ TYPED_TEST(FluxFunctionJacTester, Consistency)
      {{2,   40.0/2,   50.0/3, 300}, {2,   50.0/2,   70.0/3, 300}},  // HLLC: uses SL and SR
      {{2,   40.0/2,   50.0/3, 300}, {2,   50.0/2,   70.0/3, 600}},    // HLLC: uses SL_avg and SR, also s_star < 0
      {{2,   40.0/2,   50.0/3, 600}, {2,   50.0/2,   70.0/3, 300}},     // HLLC: uses sR_avg
-     {{2,  500.0/2,   50.0/3, 700}, {2,  500.0/2,   50.0/3, 300}}     // RoeHH: trip entropy fix
-
+     {{2,  500.0/2,   50.0/3, 700}, {2,  500.0/2,   50.0/3, 300}},     // RoeHH: trip entropy fix
+     {{2,   40.0/2,   50.0/3, 300}, {2,   40.0/2,   50.0/3, 300}},
+     {{2,   40.0/2,   50.0/3, 300}, {2,   40,       10.0/3, 300}},    // LLF: max wave speed is same on both sides of interface
   };
 
 
   for (auto [prim_varsL, prim_varsR] : states)
   {
+    std::cout << "\nprim_varsL = " << prim_varsL << std::endl;
+    std::cout << "prim_varsR = " << prim_varsR << std::endl;
     auto qL = compute_conservative_variables(prim_varsL, PrimitiveVarTag());
     auto qR = compute_conservative_variables(prim_varsR, PrimitiveVarTag());
     auto qLc = test_utils::make_complex(qL);
     auto qRc = test_utils::make_complex(qR);
-    Vec2<Real> normal = {2.0, 3.0};  //TODO: make this diagonal
+    Vec2<Real> normal = {2.0, 3.0};
 
 
     auto funcL = [&](auto qL)
@@ -170,7 +173,6 @@ TYPED_TEST(FluxFunctionJacTester, Consistency)
 
     test_utils::checkJacobianVector(qR, funcR, jacR, 5e-8); 
   }
-
 }
 
 TYPED_TEST(FluxFunctionTester, Symmetry)
@@ -186,5 +188,74 @@ TYPED_TEST(FluxFunctionTester, Symmetry)
   auto flux2 = flux(qR, qL, -normal);
   for (int i=0; i < 4; ++i)
     EXPECT_NEAR(flux1[i], -flux2[i], 1e-8);
+}
+
+TEST(EulerFlux, EigenJacobian)
+{
+  std::vector<Vec4<Real>> states =
+  {
+     {2,  400.0/2,  500.0/3, 300}, {2,  500.0/2,  700.0/3, 300},
+     {2, -400.0/2, -500.0/3, 300}, {2, -500.0/2, -700.0/3, 300},
+     {2,   40.0/2,   50.0/3, 300}, {2,   50.0/2,   70.0/3, 300},  // HLLC: uses SL and SR
+     {2,   40.0/2,   50.0/3, 300}, {2,   50.0/2,   70.0/3, 600},    // HLLC: uses SL_avg and SR, also s_star < 0
+     {2,   40.0/2,   50.0/3, 600}, {2,   50.0/2,   70.0/3, 300},     // HLLC: uses sR_avg
+     {2,  500.0/2,   50.0/3, 700}, {2,  500.0/2,   50.0/3, 300}     // RoeHH: trip entropy fix
+  };
+
+
+  for (auto prim_vars : states)
+  {
+    auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
+    Vec2<Real> normal = {2.0, 3.0};
+
+
+    auto funcR = [&](const Vec4<Complex>& q)
+    {
+      //using T = typename decltype(qL)::value_type;
+      using T = Complex;
+      Matrix<T, 4> R, Rinv;
+      Vec4<T> lambda;
+      compute_eigen_decomp(q, normal, R, lambda, Rinv);
+
+      return R;
+    };
+
+    auto jacR = [&](auto qL)
+    {
+      Matrix<Real, 4> R, Rinv;
+      Vec4<Real> lambda;      
+      Array3<Real, 4, 4, 4> R_dot, Rinv_dot;
+      Matrix<Real, 4> lambda_dot;
+      compute_eigen_decomp_jac(q, normal, R, R_dot, lambda, lambda_dot, Rinv, Rinv_dot);
+
+      return std::make_pair(R, R_dot);
+    };
+
+    auto funcRinv = [&](const Vec4<Complex>& q)
+    {
+      //using T = typename decltype(qL)::value_type;
+      using T = Complex;
+      Matrix<T, 4> R, Rinv;
+      Vec4<T> lambda;
+      compute_eigen_decomp(q, normal, R, lambda, Rinv);
+
+      return Rinv;
+    };
+
+    auto jacRinv = [&](auto qL)
+    {
+      Matrix<Real, 4> R, Rinv;
+      Vec4<Real> lambda;      
+      Array3<Real, 4, 4, 4> R_dot, Rinv_dot;
+      Matrix<Real, 4> lambda_dot;
+      compute_eigen_decomp_jac(q, normal, R, R_dot, lambda, lambda_dot, Rinv, Rinv_dot);
+
+      return std::make_pair(Rinv, Rinv_dot);
+    };    
+
+    test_utils::checkJacobianMatrix(q, funcR, jacR);
+    test_utils::checkJacobianMatrix(q, funcRinv, jacRinv);
+
+  }
 }
 

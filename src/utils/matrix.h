@@ -25,9 +25,11 @@ class Matrix
       m_data(vals)
     {}
 
-    constexpr Matrix(const T& val) :
-      m_data{val}
-    {}
+    constexpr Matrix(const T& val)
+    {
+      for (UInt i=0; i < M*N; ++i)
+        m_data[i] = val;
+    }
 
     constexpr Matrix() :
       m_data{}

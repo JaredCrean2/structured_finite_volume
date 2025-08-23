@@ -26,7 +26,7 @@ class LaxFriedrichFlux final : public NumericalFlux
 
       Vec4<T> flux{0, 0, 0, 0};
       for (UInt i=0; i < 4; ++i)
-        flux[i] = 0.5*(fL[i] + fR[i]) - 0.5*lambda_max*(qR[i] - qL[i]);
+        flux[i] = 0.5*(fL[i] + fR[i]) - 0.5*lambda_max*(qR[i] - qL[i]);   
 
       return flux;
     }
@@ -54,11 +54,10 @@ class LaxFriedrichFlux final : public NumericalFlux
       Vec4<T> lambda_maxR_dot = abs_unR_dotR + aR_dot * n_mag;
 
       T lambda_max = std::max(lambda_maxL, lambda_maxR);
-      Int is_left = lambda_maxL > lambda_maxR;
+      Int is_left = lambda_maxL >= lambda_maxR;
       Int is_right = 1 - is_left;
       Vec4<T> lambda_max_dotL = is_left * lambda_maxL_dot;
       Vec4<T> lambda_max_dotR = is_right * lambda_maxR_dot;
-
 
       auto [fL, fL_dotL] = compute_euler_flux_jac(qL, normal);
       auto [fR, fR_dotR] = compute_euler_flux_jac(qR, normal);
