@@ -168,10 +168,9 @@ TYPED_TEST(FluxFunctionJacTester, Consistency)
       return std::make_pair(f, flux_dotR);
     };  
 
-    //TODO: the Roe flux jacobians are not as accurate as I would like
-    test_utils::checkJacobianVector(qL, funcL, jacL, 5e-8);
+    test_utils::checkJacobianVector(qL, funcL, jacL);
 
-    test_utils::checkJacobianVector(qR, funcR, jacR, 5e-8); 
+    test_utils::checkJacobianVector(qR, funcR, jacR); 
   }
 }
 

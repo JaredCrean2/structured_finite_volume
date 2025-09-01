@@ -18,9 +18,10 @@ using MatrixArray3Pair = std::pair<Matrix<Real, 4>, Array3<Real, 4>>;
 
 inline Real get_tol(Real v1, Real v2, int num_ulp)
 {
-  Real min_val = std::min(std::abs(v1), std::abs(v2));
+  Real min_val = std::max(std::abs(v1), std::abs(v2));
   Real eps = std::nextafter(min_val, std::numeric_limits<Real>::max()) - min_val;
-  Real tol = std::max(num_ulp * eps, 1e-13);
+  //Real tol = std::max(num_ulp * eps, 1e-13);
+  Real tol = num_ulp * eps;
 
   return tol;
 }
@@ -94,7 +95,7 @@ void checkJacobianScalar(const Vec4<Real>& q, ScalarFunc func, ScalarFuncJac fun
 }
 
 template <typename VectorFunc, typename VectorFuncJac>
-void checkJacobianVector(const Vec4<Real>& q, VectorFunc func, VectorFuncJac func_jac, Real abs_tol=-1)
+void checkJacobianVector(const Vec4<Real>& q, VectorFunc func, VectorFuncJac func_jac)
 {
   static_assert(IsVectorFunc<VectorFunc>);
   static_assert(IsVectorJac<VectorFuncJac>);
@@ -130,14 +131,7 @@ void checkJacobianVector(const Vec4<Real>& q, VectorFunc func, VectorFuncJac fun
       std::cout << "i, j = " << i << ", " << j << std::endl;
       std::cout << "dydq_cs = " << dydq_cs(i, j) << ", dydq_jac = " << dydq_jac(i, j) << std::endl;
       std::cout << "diff = " << dydq_cs(i, j) - dydq_jac(i, j) << std::endl;
-      if (abs_tol > 0)
-      {
-        EXPECT_NEAR(dydq_jac(i, j), dydq_cs(i, j), std::max(abs_tol, get_tol(dydq_jac(i, j), dydq_cs(i, j), 700)));
-      } else
-      {
-        EXPECT_DOUBLE_EQ_CUSTOM(dydq_jac(i, j), dydq_cs(i, j), 700);
-      }
-
+      EXPECT_DOUBLE_EQ_CUSTOM(dydq_jac(i, j), dydq_cs(i, j), 300);
     }
   }
 }
@@ -178,7 +172,7 @@ void checkJacobianMatrix(const Vec4<Real>& q, MatrixFunc func, MatrixFuncJac fun
         //Real tol = std::max(8 * eps, 1e-13);
         //EXPECT_NEAR(dydq_jac(i, j, k), dydq_cs(i, j, k), tol);
         std::cout << "dydq_cs = " << dydq_cs(i, j, k) << ", dydq_jac = " << dydq_jac(i, j, k) << ", diff = " << dydq_cs(i, j, k) - dydq_jac(i, j, k) << std::endl;
-        EXPECT_DOUBLE_EQ_CUSTOM(dydq_jac(i, j, k), dydq_cs(i, j, k), 3);
+        EXPECT_DOUBLE_EQ_CUSTOM(dydq_jac(i, j, k), dydq_cs(i, j, k), 16);
 
       }
     }

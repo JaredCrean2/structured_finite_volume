@@ -40,7 +40,6 @@ class HLLCFlux final : public NumericalFlux
         return compute_euler_flux(qR, normal);
       } else
       {
-        PRINTCONST("case 3");
         T pL = compute_pressure(qL);
         T pR = compute_pressure(qR);
         T deltaSL = sL - unL;
@@ -194,7 +193,7 @@ class HLLCFlux final : public NumericalFlux
           pressure_term_dotL += sL_dotL*(pL*n_mag2 + qL[0]*(sL - unL)*(s_star - unL));
           pressure_term_dotL /= n_mag;
 
-          Vec4<T> pressure_term_dotR = sL*(qL[0]*sL_dotR*(s_star - unL) + qL[0]*(sL - unL)*(s_star_dotR)) +
+          Vec4<T> pressure_term_dotR = sL*(qL[0]*sL_dotR*(s_star - unL) + qL[0]*(sL - unL)*s_star_dotR) +
                                        sL_dotR*(pL*n_mag2 + qL[0]*(sL - unL)*(s_star - unL));
           pressure_term_dotR /= n_mag;
 

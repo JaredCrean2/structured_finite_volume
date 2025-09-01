@@ -40,7 +40,10 @@ class RoeFlux final : public NumericalFlux
       {
         T lambda = smoothAbs(lambdas[i]);
         if (lambda < m_delta)
+        {
+          std::cout << "applying entropy fix to wave " << i << std::endl;
           lambda = (lambda*lambda + m_delta*m_delta)/(2*m_delta);
+        }
         tmp[i] *= lambda;
       }
 
