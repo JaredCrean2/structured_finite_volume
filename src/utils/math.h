@@ -21,6 +21,31 @@
 
 
 namespace structured_fv {
+
+// bring some functions into this namespace so they can be overloaded
+using std::exp;
+using std::exp2;
+using std::expm1;
+using std::log;
+using std::log10;
+using std::log2;
+using std::log1p;
+using std::pow;
+using std::sqrt;
+using std::cbrt;
+using std::hypot;
+
+using std::sin;
+using std::cos;
+using std::tan;
+using std::asin;
+using std::acos;
+using std::atan;
+
+
+
+struct NoInit
+{};
 /*
   template <typename T>
   using Vec3 = FixedVec<T, 3>;
@@ -112,214 +137,7 @@ constexpr bool operator>=(const structured_fv::Complex& lhs, const structured_fv
 
 namespace structured_fv {
 
-template <typename T,  UInt N>
-constexpr FixedVec<T, N> operator+(const FixedVec<T, N>& a, const FixedVec<T, N>& b)
-{
-  FixedVec<T, N> c;
-  for (int i=0; i < N; ++i)
-    c[i] = a[i] + b[i];
 
-  return c;
-}
-
-template <typename T,  UInt N, typename T2>
-constexpr FixedVec<T, N> operator+(const FixedVec<T, N>& a, const T2& b)
-{
-  FixedVec<T, N> c;
-  for (int i=0; i < N; ++i)
-    c[i] = a[i] + b;
-
-  return c;
-}
-
-template <typename T,  UInt N, typename T2>
-constexpr FixedVec<T, N> operator+(const T2& a, const FixedVec<T, N>& b)
-{
-  return b + a;
-}
-
-template <typename T,  UInt N, typename T2>
-constexpr FixedVec<T, N>& operator+=(FixedVec<T, N>& a, const FixedVec<T2, N>& b)
-{
-  for (int i=0; i < N; ++i)
-    a[i] += b[i];
-
-  return a;
-}
-
-template <typename T,  UInt N, typename T2>
-constexpr FixedVec<T, N>& operator+=(FixedVec<T, N>& a, const T2& b)
-{
-  for (int i=0; i < N; ++i)
-    a[i] += b;
-
-  return a;
-}
-
-template <typename T,  UInt N>
-constexpr FixedVec<T, N> operator-(const FixedVec<T, N>& a, const FixedVec<T, N>& b)
-{
-  FixedVec<T, N> c;
-  for (int i=0; i < N; ++i)
-    c[i] = a[i] - b[i];
-
-  return c;
-}
-
-template <typename T,  UInt N, typename T2>
-constexpr FixedVec<T, N> operator-(const FixedVec<T, N>& a, const T2& b)
-{
-  FixedVec<T, N> c;
-  for (int i=0; i < N; ++i)
-    c[i] = a[i] - b;
-
-  return c;
-}
-
-template <typename T,  UInt N, typename T2>
-constexpr FixedVec<T, N> operator-(const T2& a, const FixedVec<T, N>& b)
-{
-  FixedVec<T, N> c;
-  for (int i=0; i < N; ++i)
-    c[i] = a - b[i];
-
-  return c;
-}
-
-template <typename T,  UInt N>
-constexpr FixedVec<T, N> operator-(const FixedVec<T, N>& a)
-{
-  FixedVec<T, N> b;
-  for (int i=0; i < N; ++i)
-    b[i] = -a[i];
-
-  return b;
-}
-
-template <typename T,  UInt N, typename T2>
-constexpr FixedVec<T, N>& operator-=(FixedVec<T, N>& a, const FixedVec<T2, N>& b)
-{
-  for (int i=0; i < N; ++i)
-    a[i] -= b[i];
-
-  return a;
-}
-
-template <typename T,  UInt N, typename T2>
-constexpr FixedVec<T, N>& operator-=(FixedVec<T, N>& a, const T2& b)
-{
-  for (int i=0; i < N; ++i)
-    a[i] -= b;
-
-  return a;
-}
-
-template <typename T,  UInt N>
-constexpr FixedVec<T, N> operator*(const FixedVec<T, N>& a, const FixedVec<T, N>& b)
-{
-  FixedVec<T, N> c;
-  for (int i=0; i < N; ++i)
-    c[i] = a[i] * b[i];
-
-  return c;
-}
-
-template <typename T,  UInt N, typename T2>
-constexpr FixedVec<T, N> operator*(const FixedVec<T, N>& a, const T2& b)
-{
-  FixedVec<T, N> c;
-  for (int i=0; i < N; ++i)
-    c[i] = a[i] * b;
-
-  return c;
-}
-
-template <typename T,  UInt N, typename T2>
-constexpr FixedVec<T, N> operator*(const T2& b, const FixedVec<T, N>& a)
-{
-  FixedVec<T, N> c;
-  for (int i=0; i < N; ++i)
-    c[i] = b * a[i];
-
-  return c;
-}
-
-template <typename T,  UInt N, typename T2>
-constexpr FixedVec<T, N>& operator*=(FixedVec<T, N>& a, const FixedVec<T2, N>& b)
-{
-  for (int i=0; i < N; ++i)
-    a[i] *= b[i];
-
-  return a;
-}
-
-template <typename T,  UInt N, typename T2>
-constexpr FixedVec<T, N>& operator*=(FixedVec<T, N>& a, const T2& b)
-{
-  for (int i=0; i < N; ++i)
-    a[i] *= b;
-
-  return a;
-}
-
-template <typename T,  UInt N>
-constexpr FixedVec<T, N> operator/(const FixedVec<T, N>& a, const FixedVec<T, N>& b)
-{
-  FixedVec<T, N> c;
-  for (int i=0; i < N; ++i)
-    c[i] = a[i] / b[i];
-
-  return c;
-}
-
-
-template <typename T,  UInt N, typename T2>
-constexpr FixedVec<T, N> operator/(const FixedVec<T, N>& a, const T2& b)
-{
-  FixedVec<T, N> c;
-  for (int i=0; i < N; ++i)
-    c[i] = a[i] / b;
-
-  return c;
-}
-
-template <typename T,  UInt N, typename T2>
-constexpr FixedVec<T, N> operator/(const T2& a, const FixedVec<T, N>& b)
-{
-  FixedVec<T, N> c;
-  for (int i=0; i < N; ++i)
-    c[i] = a / b[i];
-
-  return c;
-}
-
-template <typename T,  UInt N, typename T2>
-constexpr FixedVec<T, N>& operator/=(FixedVec<T, N>& a, const FixedVec<T2, N>& b)
-{
-  for (int i=0; i < N; ++i)
-    a[i] /= b[i];
-
-  return a;
-}
-
-template <typename T,  UInt N, typename T2>
-constexpr FixedVec<T, N>& operator/=(FixedVec<T, N>& a, const T2& b)
-{
-  for (int i=0; i < N; ++i)
-    a[i] /= b;
-
-  return a;
-}
-
-template <typename T,  UInt N>
-constexpr T dot(const FixedVec<T, N>& a, const FixedVec<T, N>& b)
-{
-  T val = 0;
-  for (int i=0; i < N; ++i)
-    val += a[i] * b[i];
-
-  return val;
-}
 
 /*
 template <typename T,  UInt N>
@@ -336,27 +154,7 @@ std::ostream& operator<<(std::ostream& os, const FixedVec<T, N>& a)
 }
 */
 
-template <typename T>
-constexpr Vec3<T> cross(const Vec3<T>& a, const Vec3<T>& b)
-{
-  T c1 =   a[1] * b[2] - a[2] * b[1];
-  T c2 = -(a[0] * b[2] - a[2] * b[0]);
-  T c3 =   a[0] * b[1] - a[1] * b[0];
 
-
-  return {c1, c2, c3};
-}
-
-
-template <typename T, typename T2, UInt N>
-constexpr FixedVec<T, N> convert(const FixedVec<T2, N>& arr)
-{
-  FixedVec<T, N> arr2{};
-  for (UInt i=0; i < N; ++i)
-    arr2[i] = arr[i];
-
-  return arr2;
-}
 
 constexpr Real degreesToRadians(Real degrees)
 {

@@ -2,9 +2,19 @@
 #include "utils/vec.h"
 
 namespace {
-using Vec3 = structured_fv::FixedVec<int, 3>;
+using namespace structured_fv;
 
-void expect_eq(const Vec3& arr1, const Vec3& arr2)
+using Vec3i = structured_fv::FixedVec<int, 3>;
+using Vec3L = structured_fv::FixedVec<long, 3>;
+
+void expect_eq(const Vec3i& arr1, const Vec3i& arr2)
+{
+  EXPECT_EQ(arr1[0], arr2[0]);
+  EXPECT_EQ(arr1[1], arr2[1]);
+  EXPECT_EQ(arr1[2], arr2[2]);  
+}
+
+void expect_eq_double(const Vec3<double>& arr1, const Vec3<double>& arr2)
 {
   EXPECT_EQ(arr1[0], arr2[0]);
   EXPECT_EQ(arr1[1], arr2[1]);
@@ -15,48 +25,48 @@ void expect_eq(const Vec3& arr1, const Vec3& arr2)
 
 TEST(Vec, Constructor)
 {
-  Vec3 v1{1, 2, 3};
+  Vec3i v1{1, 2, 3};
   EXPECT_EQ(v1[0], 1);
   EXPECT_EQ(v1[1], 2);
   EXPECT_EQ(v1[2], 3);  
 
-  Vec3 v2 = {1, 2, 3};
+  Vec3i v2 = {1, 2, 3};
   expect_eq(v2, {1, 2, 3});
 
-  Vec3 v3(v2);
+  Vec3i v3(v2);
   expect_eq(v3, {1, 2, 3});
 
-  Vec3 v4(std::move(v2));
+  Vec3i v4(std::move(v2));
   expect_eq(v4, {1, 2, 3});
 }
 
 
 TEST(Vec, Assignment)
 {
-  Vec3 v1{1, 2, 3};
+  Vec3i v1{1, 2, 3};
 
-  Vec3 v2 = v1;
+  Vec3i v2 = v1;
   expect_eq(v2, {1, 2, 3});
 
-  Vec3 v3 = std::move(v1);
+  Vec3i v3 = std::move(v1);
   expect_eq(v3, {1, 2, 3});
 }
 
 TEST(Vec, ConstAssignment)
 {
-  Vec3 v1{1, 2, 3};
-  const Vec3& v2_const = v1;
+  Vec3i v1{1, 2, 3};
+  const Vec3i& v2_const = v1;
 
-  Vec3 v2 = v2_const;
+  Vec3i v2 = v2_const;
   expect_eq(v2, {1, 2, 3});
 
-  Vec3 v3 = std::move(v2_const);
+  Vec3i v3 = std::move(v2_const);
   expect_eq(v3, {1, 2, 3});
 }
 
 TEST(Vec, Indexing)
 {
-  Vec3 v1{1, 2, 3};
+  Vec3i v1{1, 2, 3};
   expect_eq(v1, {1, 2, 3});
 
   v1[1] = 4;
@@ -70,10 +80,10 @@ TEST(Vec, Indexing)
 
 TEST(Vec, ConstIndexing)
 {
-  Vec3 v1{1, 2, 3};
+  Vec3i v1{1, 2, 3};
   expect_eq(v1, {1, 2, 3});
 
-  const Vec3& v2_const = v1;
+  const Vec3i& v2_const = v1;
   EXPECT_EQ(v2_const[1], 2);
   EXPECT_EQ(v2_const.at(1), 2);
   EXPECT_ANY_THROW(v2_const.at(3));
@@ -81,8 +91,8 @@ TEST(Vec, ConstIndexing)
 
 TEST(Vec, Front)
 {
-  Vec3 v1{1, 2, 3};
-  const Vec3& v2_const = v1;
+  Vec3i v1{1, 2, 3};
+  const Vec3i& v2_const = v1;
 
   EXPECT_EQ(v1.front(), 1);
   EXPECT_EQ(v2_const.front(), 1);
@@ -94,8 +104,8 @@ TEST(Vec, Front)
 
 TEST(Vec, Back)
 {
-  Vec3 v1{1, 2, 3};
-  const Vec3& v2_const = v1;
+  Vec3i v1{1, 2, 3};
+  const Vec3i& v2_const = v1;
 
   EXPECT_EQ(v1.back(), 3);
   EXPECT_EQ(v2_const.back(), 3);
@@ -107,8 +117,8 @@ TEST(Vec, Back)
 
 TEST(Vec, Data)
 {
-  Vec3 v1{1, 2, 3};
-  const Vec3& v2_const = v1;
+  Vec3i v1{1, 2, 3};
+  const Vec3i& v2_const = v1;
 
   EXPECT_EQ(v1.data(), &(v1[0]));
   EXPECT_EQ(v2_const.data(), &(v2_const[0]));
@@ -118,8 +128,8 @@ TEST(Vec, Iterators)
 {
   std::vector<int> copy1, copy2, copy3;
 
-  Vec3 v1{1, 2, 3};
-  const Vec3& v2_const = v1;
+  Vec3i v1{1, 2, 3};
+  const Vec3i& v2_const = v1;
   for (auto val : v1)
     copy1.push_back(val);
 
@@ -142,7 +152,7 @@ TEST(Vec, Iterators)
 
 TEST(Vec, Empty)
 {
-  Vec3 v1{1, 2, 3};
+  Vec3i v1{1, 2, 3};
 
   EXPECT_FALSE(v1.empty());
   structured_fv::FixedVec<int, 0> v2{};
@@ -151,21 +161,160 @@ TEST(Vec, Empty)
 
 TEST(Vec, Size)
 {
-  Vec3 v1{1, 2, 3};
+  Vec3i v1{1, 2, 3};
   EXPECT_EQ(v1.size(), 3U);
   EXPECT_EQ(v1.max_size(), 3U);
 }
 
 TEST(Vec, Fill)
 {
-  Vec3 v1{1, 2, 3};
+  Vec3i v1{1, 2, 3};
   v1.fill(4);
   expect_eq(v1, {4, 4, 4});
 }
 
+TEST(Math, ArrayPlusArray)
+{
+  Vec3<double> a = {1, 2, 3};
+  Vec3<double> b = {4, 5, 6};
+  expect_eq_double(a+b, {5, 7, 9});
+}
+
+TEST(Math, ArrayPlusEqualArray)
+{
+  Vec3<double> a = {1, 2, 3};
+  Vec3<int> b = {4, 5, 6};
+  a += b;
+  expect_eq_double(a, {5, 7, 9});
+}
+
+TEST(Math, ArrayPlusScalar)
+{
+  Vec3<double> a = {1, 2, 3};
+  expect_eq_double(a + 2, {3, 4, 5});
+  expect_eq_double(2 + a, {3, 4, 5});
+}
+
+TEST(Math, ArrayPlusEqualScalar)
+{
+  Vec3<double> a = {1, 2, 3};
+  a += 2;
+  expect_eq_double(a, {3, 4, 5});
+}
+
+TEST(Math, ArrayMinusArray)
+{
+  Vec3<double> a = {1, 2, 3};
+  Vec3<double> b = {2, 5, 7};
+  expect_eq_double(a-b, {-1, -3, -4});
+}
+
+TEST(Math, ArrayMinusEqualArray)
+{
+  Vec3<double> a = {1, 2, 3};
+  Vec3<double> b = {2, 5, 7};
+  a -= b;
+  expect_eq_double(a, {-1, -3, -4});
+}
+
+TEST(Math, ArrayMinusScalar)
+{
+  Vec3<double> a = {1, 2, 3};
+  expect_eq_double(a - 2, {-1, 0, 1});
+  expect_eq_double(2 - a, {1, 0, -1});
+}
+
+TEST(Math, ArrayUnaryMinus)
+{
+  Vec3<double> a = {1, 2, 3};
+  Vec3<double> b = -a;
+  expect_eq_double(b, {-1, -2, -3});
+}
+
+TEST(Math, ArrayMinusEqualScalar)
+{
+  Vec3<double> a = {1, 2, 3};
+  a -= 2;
+  expect_eq_double(a, {-1, 0, 1});
+}
+
+TEST(Math, ArrayMultiplyArray)
+{
+  Vec3<double> a = {1, 2, 3};
+  Vec3<double> b = {4, 5, 6};
+  expect_eq_double(a*b, {4, 10, 18});
+}
+
+TEST(Math, ArrayMultiplyEqualArray)
+{
+  Vec3<double> a = {1, 2, 3};
+  Vec3<double> b = {4, 5, 6};
+  a *= b;
+  expect_eq_double(a, {4, 10, 18});
+}
+
+TEST(Math, ArrayMultiplyScalar)
+{
+  Vec3<double> a = {1, 2, 3};
+  expect_eq_double(a * 2, {2, 4, 6});
+  expect_eq_double(2 * a, {2, 4, 6});
+}
+
+TEST(Math, ArrayMultiplyEqualScalar)
+{
+  Vec3<double> a = {1, 2, 3};
+  a *= 2;
+  expect_eq_double(a, {2, 4, 6});
+}
+
+TEST(Math, ArrayDivideArray)
+{
+  Vec3<double> a = {1, 2, 3};
+  Vec3<double> b = {4, 5, 6};
+  expect_eq_double(a/b, {1.0/4, 2.0/5, 3.0/6});
+}
+
+TEST(Math, ArrayDivideEqualArray)
+{
+  Vec3<double> a = {1, 2, 3};
+  Vec3<double> b = {4, 5, 6};
+  a /= b;
+  expect_eq_double(a, {1.0/4, 2.0/5, 3.0/6});
+}
+
+TEST(Math, ArrayDivideScalar)
+{
+  Vec3<double> a = {1, 2, 3};
+  expect_eq_double(a / 2, {1.0/2, 1, 3.0/2});
+  expect_eq_double(2 / a, {2, 1, 2.0/3});
+}
+
+TEST(Math, ArrayDivideEqualScalar)
+{
+  Vec3<double> a = {1, 2, 3};
+  a /= 2;
+  expect_eq_double(a, {1.0/2, 1, 3.0/2});
+}
+
+TEST(Math, DotProduct)
+{
+  Vec3<double> a = {1, 2, 3};
+  Vec3<double> b = {4, 5, 6};
+  EXPECT_NEAR(dot(a, b), 4 + 10 + 18, 1e-13);
+}
+
+TEST(Math, CrossProduct)
+{
+  Vec3<double> a = {1, 2, 3};
+  Vec3<double> b = {4, 5, 6};
+  expect_eq_double(cross(a, b), {-3, 6, -3});
+}
+
+
+
 TEST(Vec, Swap)
 {
-  Vec3 v1{1, 2, 3}, v2{4, 5, 6};
+  Vec3i v1{1, 2, 3}, v2{4, 5, 6};
   auto it1 = v1.begin();
   auto it2 = v2.begin();
   EXPECT_EQ(*it1, 1);
@@ -181,7 +330,7 @@ TEST(Vec, Swap)
 
 TEST(Vec, Equality)
 {
-  Vec3 v1{1, 2, 3}, v2{4, 5, 6}, v3{1, 2, 3};
+  Vec3i v1{1, 2, 3}, v2{4, 5, 6}, v3{1, 2, 3};
   EXPECT_FALSE(v1 == v2);
   EXPECT_TRUE(v1 == v3);
 
@@ -191,7 +340,7 @@ TEST(Vec, Equality)
 
 TEST(Vec, LessThan)
 {
-  Vec3 v1{1, 2, 3}, v2{0, 1, 2}, v3{1, 2, 3}, v4{2, 3, 4};
+  Vec3i v1{1, 2, 3}, v2{0, 1, 2}, v3{1, 2, 3}, v4{2, 3, 4};
   EXPECT_FALSE(v1 < v2);
   EXPECT_FALSE(v1 < v3);
   EXPECT_TRUE(v1 < v4);
@@ -199,7 +348,7 @@ TEST(Vec, LessThan)
 
 TEST(Vec, LessThanOrEqul)
 {
-  Vec3 v1{1, 2, 3}, v2{0, 1, 2}, v3{1, 2, 3}, v4{2, 3, 4};
+  Vec3i v1{1, 2, 3}, v2{0, 1, 2}, v3{1, 2, 3}, v4{2, 3, 4};
   EXPECT_FALSE(v1 < v2);
   EXPECT_TRUE(v1 <= v3);
   EXPECT_TRUE(v1 < v4);
@@ -207,7 +356,7 @@ TEST(Vec, LessThanOrEqul)
 
 TEST(Vec, GreaterThan)
 {
-  Vec3 v1{1, 2, 3}, v2{0, 1, 2}, v3{1, 2, 3}, v4{2, 3, 4};
+  Vec3i v1{1, 2, 3}, v2{0, 1, 2}, v3{1, 2, 3}, v4{2, 3, 4};
   EXPECT_TRUE(v1 > v2);
   EXPECT_FALSE(v1 > v3);
   EXPECT_FALSE(v1 > v4);
@@ -215,7 +364,7 @@ TEST(Vec, GreaterThan)
 
 TEST(Vec, GreaterThanOrEqual)
 {
-  Vec3 v1{1, 2, 3}, v2{0, 1, 2}, v3{1, 2, 3}, v4{2, 3, 4};
+  Vec3i v1{1, 2, 3}, v2{0, 1, 2}, v3{1, 2, 3}, v4{2, 3, 4};
   EXPECT_TRUE(v1 >= v2);
   EXPECT_TRUE(v1 >= v3);
   EXPECT_FALSE(v1 >= v4);
@@ -223,8 +372,8 @@ TEST(Vec, GreaterThanOrEqual)
 
 TEST(Vec, Get)
 {
-  Vec3 v1{1, 2, 3};
-  const Vec3& v2_const = v1;
+  Vec3i v1{1, 2, 3};
+  const Vec3i& v2_const = v1;
 
   EXPECT_EQ(structured_fv::get<0>(v1), 1);
   EXPECT_EQ(structured_fv::get<1>(v1), 2);
@@ -242,7 +391,7 @@ TEST(Vec, Get)
 TEST(Vec, OutputOperator)
 {
   std::stringstream ss;
-  Vec3 v1{1, 2, 3};
+  Vec3i v1{1, 2, 3};
   ss << v1;
   EXPECT_EQ(ss.str(), "1, 2, 3");
 }
