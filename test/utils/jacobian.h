@@ -6,6 +6,7 @@
 #include "utils/matrix.h"
 #include "utils/project_defs.h"
 #include "utils/vec.h"
+#include "utils/dual_number.h"
 #include <limits>
 
 namespace test_utils {
@@ -15,6 +16,7 @@ using namespace structured_fv;
 using ScalarVectorPair = structured_fv::euler::ScalarVectorPair<Real>;
 using VectorMatrixPair = structured_fv::euler::VectorMatrixPair<Real>;
 using MatrixArray3Pair = std::pair<Matrix<Real, 4>, Array3<Real, 4>>;
+using Dual1 = Dual<Real, 1>;
 
 inline Real get_tol(Real v1, Real v2, int num_ulp)
 {
@@ -31,29 +33,24 @@ inline Real get_tol(Real v1, Real v2, int num_ulp)
   EXPECT_NEAR(v1, v2, test_utils::get_tol(v1, v2, num_ulp));  \
 }                                                 \
 
-inline Vec4<Complex> make_complex(const Vec4<Real>& q)
+
+inline Vec4<Dual1> make_dual(const Vec4<Real>& q)
 {
-  Vec4<Complex> qc;
+  Vec4<Dual1> qc;
   for (UInt i=0; i < q.size(); ++i)
     qc[i] = q[i];
 
   return qc;
 }
 
-inline void zero_complex(Vec4<Complex>& qc)
-{
-  for (UInt i=0; i < qc.size(); ++i)
-    qc[i].imag(0);
-}
+template <typename Func>
+constexpr bool IsScalarFunc = std::is_invocable_r_v<Dual1, Func, Vec4<Dual1>>;
 
 template <typename Func>
-constexpr bool IsScalarFunc = std::is_invocable_r_v<Complex, Func, Vec4<Complex>>;
+constexpr bool IsVectorFunc = std::is_invocable_r_v<Vec4<Dual1>, Func, Vec4<Dual1>>;
 
 template <typename Func>
-constexpr bool IsVectorFunc = std::is_invocable_r_v<Vec4<Complex>, Func, Vec4<Complex>>;
-
-template <typename Func>
-constexpr bool IsMatrixFunc = std::is_invocable_r_v<Matrix<Complex, 4>, Func, Vec4<Complex>>;
+constexpr bool IsMatrixFunc = std::is_invocable_r_v<Matrix<Dual1, 4>, Func, Vec4<Dual1>>;
 
 template <typename Func>
 constexpr bool IsScalarJac = std::is_invocable_r_v<ScalarVectorPair, Func, Vec4<Real>>;
@@ -64,7 +61,7 @@ constexpr bool IsVectorJac = std::is_invocable_r_v<VectorMatrixPair, Func, Vec4<
 template <typename Func>
 constexpr bool IsMatrixJac = std::is_invocable_r_v<MatrixArray3Pair, Func, Vec4<Real>>;
 
-// Scalar func must be y = f(q), where y is a scalar.  Must be callable with complex
+// Scalar func must be y = f(q), where y is a scalar.  Must be callable with Dual1
 // numbers (only).
 // func_jac must be a function y, dy/dq = func_jac(q, q_dot) that returns both the value and the jacobian
 // of the function wrt q, with each entry scaled by the corresponding entry fo q_dot.  Must be callable with real numbers only
@@ -73,25 +70,23 @@ void checkJacobianScalar(const Vec4<Real>& q, ScalarFunc func, ScalarFuncJac fun
 {
   static_assert(IsScalarFunc<ScalarFunc>);
   static_assert(IsScalarJac<ScalarFuncJac>);
-  Vec4<Complex> qc = make_complex(q);
-  Real h = 1e-80;
-  Complex pert(0, h);
 
-  Complex y = func(qc);
+  Vec4<Dual1> qc = make_dual(q);
 
-  Vec4<Real> dydq_cs;
+  Real y = func(qc).get_value();
+
+  Vec4<Real> dydq_dual;
   for (UInt i=0; i < q.size(); ++i)
   {
-    qc[i] += pert;
-    Complex yc = func(qc);
-    dydq_cs[i] = yc.imag()/h;
-    qc[i] -= pert;
+    qc[i](0) = 1;
+    dydq_dual[i] = func(qc).get_deriv(0);
+    qc[i](0) = 0;
   }
 
   const auto [y2, dydq_jac] = func_jac(q);
-  EXPECT_NEAR(y.real(), y2, 1e-13);
-  for (UInt i=0; i < dydq_cs.size(); ++i)
-    EXPECT_DOUBLE_EQ(dydq_jac[i], dydq_cs[i]);
+  EXPECT_NEAR(y, y2, 1e-13);
+  for (UInt i=0; i < dydq_dual.size(); ++i)
+    EXPECT_DOUBLE_EQ(dydq_jac[i], dydq_dual[i]);
 }
 
 template <typename VectorFunc, typename VectorFuncJac>
@@ -100,23 +95,21 @@ void checkJacobianVector(const Vec4<Real>& q, VectorFunc func, VectorFuncJac fun
   static_assert(IsVectorFunc<VectorFunc>);
   static_assert(IsVectorJac<VectorFuncJac>);
 
-  Vec4<Complex> qc = make_complex(q);
-  Real h = 1e-80;
-  Complex pert(0, h);
+  Vec4<Dual1> qc = make_dual(q);
 
-  Vec4<Complex> y = func(qc);
+  Vec4<Dual1> y = func(qc);
 
   Matrix<Real, 4> dydq_cs;
   for (UInt k=0; k < q.size(); ++k)
   {
-    qc[k] += pert;
-    Vec4<Complex> yc = func(qc);
+    qc[k](0) = 1;
+    Vec4<Dual1> yc = func(qc);
     for (UInt i=0; i < q.size(); ++i)
     {
-      dydq_cs(i, k) = yc[i].imag()/h;
+      dydq_cs(i, k) = yc[i].get_deriv(0);
     }
 
-    qc[k] -= pert;
+    qc[k](0) = 0;
   }
 
   const auto [y2, dydq_jac] = func_jac(q);
@@ -125,7 +118,7 @@ void checkJacobianVector(const Vec4<Real>& q, VectorFunc func, VectorFuncJac fun
   std::cout << "dydq_jac = \n" << dydq_jac << std::endl;
   for (UInt i=0; i < q.size(); ++i)
   {
-    EXPECT_DOUBLE_EQ(y[i].real(), y2[i]);
+    EXPECT_DOUBLE_EQ(y[i].get_value(), y2[i]);
     for (UInt j=0; j < q.size(); ++j)
     {
       std::cout << "i, j = " << i << ", " << j << std::endl;
@@ -133,7 +126,7 @@ void checkJacobianVector(const Vec4<Real>& q, VectorFunc func, VectorFuncJac fun
       std::cout << "diff = " << dydq_cs(i, j) - dydq_jac(i, j) << std::endl;
       EXPECT_DOUBLE_EQ_CUSTOM(dydq_jac(i, j), dydq_cs(i, j), 300);
     }
-  }
+  }  
 }
 
 template <typename MatrixFunc, typename MatrixFuncJac>
@@ -142,29 +135,27 @@ void checkJacobianMatrix(const Vec4<Real>& q, MatrixFunc func, MatrixFuncJac fun
   static_assert(IsMatrixFunc<MatrixFunc>);
   static_assert(IsMatrixJac<MatrixFuncJac>);
 
-  Vec4<Complex> qc = make_complex(q);
-  Real h = 1e-80;
-  Complex pert(0, h);
+  Vec4<Dual1> qc = make_dual(q);
 
-  Matrix<Complex, 4> y = func(qc);
+  Matrix<Dual1, 4> y = func(qc);
 
   Array3<Real, 4> dydq_cs;
   for (UInt k=0; k < q.size(); ++k)
   {
-    qc[k] += pert;
-    Matrix<Complex, 4> yc = func(qc);
+    qc[k](0) = 1;
+    Matrix<Dual1, 4> yc = func(qc);
     for (UInt i=0; i < q.size(); ++i)
       for (UInt j=0; j < q.size(); ++j)
-        dydq_cs(i, j, k) = yc(i, j).imag()/h;
+        dydq_cs(i, j, k) = yc(i, j).get_deriv(0);
 
-    qc[k] -= pert;
+    qc[k](0) = 0;
   }
 
   const auto [y2, dydq_jac] = func_jac(q);
   for (UInt i=0; i < q.size(); ++i)
     for (UInt j=0; j < q.size(); ++j)
     {
-      EXPECT_DOUBLE_EQ(y(i, j).real(), y2(i, j));
+      EXPECT_DOUBLE_EQ(y(i, j).get_value(), y2(i, j));
       for (UInt k=0; k < q.size(); ++k)
       {
         //Real min_val = std::min(std::abs(dydq_jac(i, j, k)), std::abs(dydq_cs(i, j, k)));
@@ -175,7 +166,7 @@ void checkJacobianMatrix(const Vec4<Real>& q, MatrixFunc func, MatrixFuncJac fun
         EXPECT_DOUBLE_EQ_CUSTOM(dydq_jac(i, j, k), dydq_cs(i, j, k), 16);
 
       }
-    }
+    }    
 }
 
 }

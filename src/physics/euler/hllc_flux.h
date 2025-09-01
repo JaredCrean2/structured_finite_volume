@@ -18,7 +18,7 @@ class HLLCFlux final : public NumericalFlux
                                  const Vec2<Real>& normal) const
     {
       T n_mag2 = dot(normal, normal);
-      T n_mag = std::sqrt(n_mag2);
+      T n_mag = sqrt(n_mag2);
       T aL = compute_sos(qL);
       T aR = compute_sos(qR);
 
@@ -73,7 +73,7 @@ class HLLCFlux final : public NumericalFlux
                                  Matrix<T, 4>& flux_dotL, Matrix<T, 4>& flux_dotR) const
     {
       Real n_mag2 = dot(normal, normal);
-      Real n_mag = std::sqrt(n_mag2);
+      Real n_mag = sqrt(n_mag2);
       auto [aL, aL_dotL] = compute_sos_jac(qL);
       auto [aR, aR_dotR] = compute_sos_jac(qR);
 

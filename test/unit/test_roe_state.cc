@@ -41,9 +41,9 @@ TEST(RoeAvgState, SpeedOfSound2Jac)
   auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
   RoeAvgState<Real> state = compute_roe_avg(q, q);
 
-  auto func = [](const Vec4<Complex>& roe_avg)
+  auto func = [](const Vec4<Dual<Real, 1>>& roe_avg)
   {
-    return compute_sos2(RoeAvgState<Complex>{roe_avg[0], roe_avg[1], roe_avg[2], roe_avg[3]});
+    return compute_sos2(RoeAvgState<Dual<Real, 1>>{roe_avg[0], roe_avg[1], roe_avg[2], roe_avg[3]});
   };
 
   auto jac = [](const Vec4<Real>& roe_avg)
@@ -69,9 +69,9 @@ TEST(RoeAvgState, SpeedOfSoundJac)
   auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
   RoeAvgState<Real> state = compute_roe_avg(q, q);
 
-  auto func = [](const Vec4<Complex>& roe_avg)
+  auto func = [](const Vec4<Dual<Real, 1>>& roe_avg)
   {
-    return compute_sos(RoeAvgState<Complex>{roe_avg[0], roe_avg[1], roe_avg[2], roe_avg[3]});
+    return compute_sos(RoeAvgState<Dual<Real, 1>>{roe_avg[0], roe_avg[1], roe_avg[2], roe_avg[3]});
   };
 
   auto jac = [](const Vec4<Real>& roe_avg)
@@ -97,9 +97,9 @@ TEST(RoeAvgState, PressureJac)
   auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
   RoeAvgState<Real> state = compute_roe_avg(q, q);
 
-  auto func = [](const Vec4<Complex>& roe_avg)
+  auto func = [](const Vec4<Dual<Real, 1>>& roe_avg)
   {
-    return compute_pressure(RoeAvgState<Complex>{roe_avg[0], roe_avg[1], roe_avg[2], roe_avg[3]});
+    return compute_pressure(RoeAvgState<Dual<Real, 1>>{roe_avg[0], roe_avg[1], roe_avg[2], roe_avg[3]});
   };
 
   auto jac = [](const Vec4<Real>& roe_avg)
@@ -123,9 +123,9 @@ TEST(RoeAvgState, ComputeUn)
   RoeAvgState<Real> state = compute_roe_avg(q, q);
   Vec2<Real> normal = {2, 3};
 
-  auto func = [&](const Vec4<Complex>& roe_avg)
+  auto func = [&](const Vec4<Dual<Real, 1>>& roe_avg)
   {
-    return compute_un(RoeAvgState<Complex>{roe_avg[0], roe_avg[1], roe_avg[2], roe_avg[3]}, normal);
+    return compute_un(RoeAvgState<Dual<Real, 1>>{roe_avg[0], roe_avg[1], roe_avg[2], roe_avg[3]}, normal);
   };
 
   auto jac = [&](const Vec4<Real>& roe_avg)
@@ -155,9 +155,9 @@ TEST(RoeAvgState, ComputeConservativeVarsJac)
   auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
   RoeAvgState<Real> state = compute_roe_avg(q, q);
 
-  auto func = [&](const Vec4<Complex>& roe_avg)
+  auto func = [&](const Vec4<Dual<Real, 1>>& roe_avg)
   {
-    return compute_conservative_variables(RoeAvgState<Complex>{roe_avg[0], roe_avg[1], roe_avg[2], roe_avg[3]}, RoeStateTag{});
+    return compute_conservative_variables(RoeAvgState<Dual<Real, 1>>{roe_avg[0], roe_avg[1], roe_avg[2], roe_avg[3]}, RoeStateTag{});
   };
 
   auto jac = [&](const Vec4<Real>& roe_avg)
@@ -190,13 +190,13 @@ TEST(RoeAvgState, DifferentStateJac)
   Vec4<Real> prim_varsR = {16, 8, 10, 1.0/Cv};
   auto qL = compute_conservative_variables(prim_varsL, PrimitiveVarTag());
   auto qR = compute_conservative_variables(prim_varsR, PrimitiveVarTag());
-  Vec4<Complex> qLc = test_utils::make_complex(qL);
-  Vec4<Complex> qRc = test_utils::make_complex(qR);
+  Vec4<Dual<Real, 1>> qLc = test_utils::make_dual(qL);
+  Vec4<Dual<Real, 1>> qRc = test_utils::make_dual(qR);
 
   auto funcL = [&](auto qL)
   {
-    RoeAvgState<Complex> roe_avg = compute_roe_avg(qL, qRc);
-    return Vec4<Complex>{roe_avg.rho, roe_avg.u, roe_avg.v, roe_avg.H};
+    RoeAvgState<Dual<Real, 1>> roe_avg = compute_roe_avg(qL, qRc);
+    return Vec4<Dual<Real, 1>>{roe_avg.rho, roe_avg.u, roe_avg.v, roe_avg.H};
   };
 
   auto jacL = [&](auto qL)
@@ -209,8 +209,8 @@ TEST(RoeAvgState, DifferentStateJac)
 
   auto funcR = [&](auto qR)
   {
-    RoeAvgState<Complex> roe_avg = compute_roe_avg(qLc, qR);
-    return Vec4<Complex>{roe_avg.rho, roe_avg.u, roe_avg.v, roe_avg.H};
+    RoeAvgState<Dual<Real, 1>> roe_avg = compute_roe_avg(qLc, qR);
+    return Vec4<Dual<Real, 1>>{roe_avg.rho, roe_avg.u, roe_avg.v, roe_avg.H};
   };
 
   auto jacR = [&](auto qR)

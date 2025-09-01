@@ -28,13 +28,13 @@ std::ostream& operator<<(std::ostream& os, const RoeAvgState<T>& state)
 template <typename T>
 constexpr RoeAvgState<T> compute_roe_avg(const Vec4<T> &qL, const Vec4<T> &qR)
 {
-  T sqrt_rho_l = std::sqrt(qL[0]);
-  T sqrt_rho_r = std::sqrt(qR[0]);
+  T sqrt_rho_l = sqrt(qL[0]);
+  T sqrt_rho_r = sqrt(qR[0]);
   T pL = compute_pressure(qL);
   T pR = compute_pressure(qR);
   T rho_sum = sqrt_rho_l + sqrt_rho_r;
 
-  T rho_avg = std::sqrt(qL[0] * qR[0]);
+  T rho_avg = sqrt(qL[0] * qR[0]);
   T u_avg = (qL[1] / sqrt_rho_l + qR[1] / sqrt_rho_r) / rho_sum;
   T v_avg = (qL[2] / sqrt_rho_l + qR[2] / sqrt_rho_r) / rho_sum;
   T H_avg = ((qL[3] + pL) / sqrt_rho_l + (qR[3] + pR) / sqrt_rho_r) / rho_sum;
@@ -47,8 +47,8 @@ constexpr RoeAvgState<T>
 compute_roe_avg_jac(const Vec4<T> &qL, const Vec4<T> &qR,
                     Matrix<T, 4> &roe_avg_dotL, Matrix<T, 4> &roe_avg_dotR)
 {
-  T sqrt_rho_l = std::sqrt(qL[0]);
-  T sqrt_rho_r = std::sqrt(qR[0]);
+  T sqrt_rho_l = sqrt(qL[0]);
+  T sqrt_rho_r = sqrt(qR[0]);
   T sqrt_rho_l_dot = 1.0 / (2 * sqrt_rho_l);
   T sqrt_rho_r_dot = 1.0 / (2 * sqrt_rho_r);
 
@@ -58,7 +58,7 @@ compute_roe_avg_jac(const Vec4<T> &qL, const Vec4<T> &qR,
   T rho_sum_dotL0 = sqrt_rho_l_dot;
   T rho_sum_dotR0 = sqrt_rho_r_dot;
 
-  T rho_avg = std::sqrt(qL[0] * qR[0]);
+  T rho_avg = sqrt(qL[0] * qR[0]);
   T rho_avg_dotL0 = qR[0] / (2 * rho_avg);
   T rho_avg_dotR0 = qL[0] / (2 * rho_avg);
 
@@ -140,14 +140,14 @@ constexpr ScalarVectorPair<T> compute_sos2_jac(const RoeAvgState<T> &state)
 template <typename T> 
 constexpr T compute_sos(const RoeAvgState<T> &state)
 {
-  return std::sqrt(compute_sos2(state));
+  return sqrt(compute_sos2(state));
 }
 
 template <typename T>
 constexpr ScalarVectorPair<T> compute_sos_jac(const RoeAvgState<T> &state)
 {
   auto [sos2, sos2_jac] = compute_sos2_jac(state);
-  T sos = std::sqrt(sos2);
+  T sos = sqrt(sos2);
 
   for (UInt i = 0; i < 4; ++i)
     sos2_jac[i] /= 2 * sos;

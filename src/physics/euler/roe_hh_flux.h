@@ -47,7 +47,7 @@ class RoeHHFlux final : public NumericalFlux
         if (i == 0 || i == 3)
         {
           Int sgn = i == 0 ? -1 : 1;
-          T n_mag = std::sqrt(dot(normal, normal));
+          T n_mag = sqrt(dot(normal, normal));
           lambda_kL += sgn*n_mag*compute_sos(q_kL);
           lambda_kR += sgn*n_mag*compute_sos(q_kR);
         }
@@ -185,7 +185,7 @@ class RoeHHFlux final : public NumericalFlux
         if (i == 0 || i == 3)
         {
           Int sgn = i == 0 ? -1 : 1;
-          T n_mag = std::sqrt(dot(normal, normal));
+          T n_mag = sqrt(dot(normal, normal));
           auto [aL, aL_dot] = compute_sos_jac(q_kL);
           auto [aR, aR_dot] = compute_sos_jac(q_kR);
           lambda_kL += sgn*n_mag*aL;

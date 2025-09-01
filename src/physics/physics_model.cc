@@ -27,7 +27,7 @@ Real PhysicsModel::computeRhsNorm(disc::DiscVectorPtr<Real> residual)
       }
   }
 
-  return std::sqrt(residual_norm);
+  return sqrt(residual_norm);
 }
 
 void vecToFieldDot(disc::StructuredDiscPtr disc, 

@@ -83,14 +83,14 @@ constexpr ScalarVectorPair<T> compute_sos2_jac(const Vec4<T>& sol)
 template <typename T>
 constexpr T compute_sos(const Vec4<T>& sol)
 {
-  return std::sqrt(compute_sos2(sol));
+  return sqrt(compute_sos2(sol));
 }
 
 template <typename T>
 constexpr ScalarVectorPair<T> compute_sos_jac(const Vec4<T>& sol)
 {
   auto [sos2, sos2_jac] = compute_sos2_jac(sol);
-  T sos = std::sqrt(sos2);
+  T sos = sqrt(sos2);
   T fac = 1.0/(2*sos);
   for (UInt i=0; i < sol.size(); ++i)
      sos2_jac[i] *= fac;
@@ -222,13 +222,13 @@ template <typename T>
 constexpr void compute_eigen_decomp(const Vec4<T>& sol, const Vec2<Real>& normal,
                                     Matrix<T, 4>& R, Vec4<T>& lambda, Matrix<T, 4>& Rinv)
 {  
-  Real n_mag = std::sqrt(dot(normal, normal));
+  Real n_mag = sqrt(dot(normal, normal));
   Vec3<Real> n_unit{normal[0]/n_mag, normal[1]/n_mag, 0};
   T u = sol[1]/sol[0];
   T v = sol[2]/sol[0];
   T U_squared_half = (u*u + v*v)/2.0;  //TODO: define op(Complex, int)
   T sos2 = compute_sos2(sol);
-  T sos = std::sqrt(sos2);
+  T sos = sqrt(sos2);
   T H = U_squared_half + sos2/Gamma_m1;
   T Un = compute_un(sol, normal);
 
@@ -290,7 +290,7 @@ constexpr void compute_eigen_decomp_jac(const Vec4<T>& sol, const Vec2<Real>& no
                                         Vec4<T>& lambda, Matrix<T, 4>& lambda_jac,
                                         Matrix<T, 4>& Rinv, Array3<T, 4>& Rinv_jac)
 {  
-  Real n_mag = std::sqrt(dot(normal, normal));
+  Real n_mag = sqrt(dot(normal, normal));
   Vec3<Real> n_unit{normal[0]/n_mag, normal[1]/n_mag, 0};
   T u = sol[1]/sol[0];
   Vec4<T> u_dot{-sol[1]/(sol[0]*sol[0]), 1.0/sol[0], 0, 0};
@@ -304,7 +304,7 @@ constexpr void compute_eigen_decomp_jac(const Vec4<T>& sol, const Vec2<Real>& no
   //T sos2 = compute_sos2(sol);
   auto [sos2, sos2_dot] = compute_sos2_jac(sol);
 
-  T sos = std::sqrt(sos2);
+  T sos = sqrt(sos2);
   Vec4<T> sos_dot = sos2_dot / (2*sos);
 
   T H = U_squared_half + sos2/Gamma_m1;
@@ -531,7 +531,7 @@ class Rotator
   public:
     constexpr Rotator(const Vec2<Real>& normal) :
       m_normal(normal),
-      m_x_normal{std::sqrt(normal[0]*normal[0] + normal[1]*normal[1]), 0}
+      m_x_normal{sqrt(normal[0]*normal[0] + normal[1]*normal[1]), 0}
     {}
 
     constexpr Vec4<Real> rotateForward(const Vec4<Real>& sol) const

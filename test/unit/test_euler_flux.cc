@@ -22,21 +22,21 @@ TEST(EulerFlux, PressureJac)
   //TODO: make velocity nonzero
   Vec4<Real> prim_vars = {1.225, 5, 10, 288.16};
   auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
-  test_utils::checkJacobianScalar(q, &compute_pressure<Complex>, &compute_pressure_jac<Real>);
+  test_utils::checkJacobianScalar(q, &compute_pressure<Dual<Real, 1>>, &compute_pressure_jac<Real>);
 }
 
 TEST(EulerFlux, Sos2Jac)
 {
   Vec4<Real> prim_vars = {1.225, 5, 10, 288.16};
   auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
-  test_utils::checkJacobianScalar(q, &compute_sos2<Complex>, &compute_sos2_jac<Real>);
+  test_utils::checkJacobianScalar(q, &compute_sos2<Dual<Real, 1>>, &compute_sos2_jac<Real>);
 }
 
 TEST(EulerFlux, SosJac)
 {
   Vec4<Real> prim_vars = {1.225, 5, 10, 288.16};
   auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
-  test_utils::checkJacobianScalar(q, &compute_sos<Complex>, &compute_sos_jac<Real>);
+  test_utils::checkJacobianScalar(q, &compute_sos<Dual<Real, 1>>, &compute_sos_jac<Real>);
 }
 
 TEST(EulerFlux, NormalMomenutmJac)
@@ -53,7 +53,7 @@ TEST(EulerFlux, ComputeTemperatureJac)
 {
   Vec4<Real> prim_vars = {1.225, 5, 10, 288.16};
   auto q = compute_conservative_variables(prim_vars, PrimitiveVarTag());
-  test_utils::checkJacobianScalar(q, &compute_temperature<Complex>, &compute_temperature_jac<Real>);
+  test_utils::checkJacobianScalar(q, &compute_temperature<Dual<Real, 1>>, &compute_temperature_jac<Real>);
 }
 
 TEST(EulerFlux, PrimitiveVariables)
@@ -190,8 +190,8 @@ TEST(EulerFlux, EigenDecompRightEigenVectorsJac)
 
   auto func = [](auto q)
   {
-    Matrix<Complex, 4, 4> R, Rinv;
-    Vec4<Complex> lambda;
+    Matrix<Dual<Real, 1>, 4, 4> R, Rinv;
+    Vec4<Dual<Real, 1>> lambda;
     euler::compute_eigen_decomp(q, {3, 4}, R, lambda, Rinv);
     return R;
   };
@@ -244,8 +244,8 @@ TEST(EulerFlux, EigenDecompLeftEigenVectorsJac)
 
   auto func = [](auto q)
   {
-    Matrix<Complex, 4, 4> R, Rinv;
-    Vec4<Complex> lambda;
+    Matrix<Dual<Real, 1>, 4, 4> R, Rinv;
+    Vec4<Dual<Real, 1>> lambda;
     euler::compute_eigen_decomp(q, {3, 4}, R, lambda, Rinv);
     return Rinv;
   };
@@ -312,8 +312,8 @@ TEST(EulerFlux, EigenDecompLeftEigenvaluesJac)
 
   auto func = [](auto q)
   {
-    Matrix<Complex, 4, 4> R, Rinv;
-    Vec4<Complex> lambda;
+    Matrix<Dual<Real, 1>, 4, 4> R, Rinv;
+    Vec4<Dual<Real, 1>> lambda;
     euler::compute_eigen_decomp(q, {3, 4}, R, lambda, Rinv);
     return lambda;
   };

@@ -14,7 +14,7 @@ class LaxFriedrichFlux final : public NumericalFlux
     constexpr Vec4<T> operator()(const Vec4<T>& qL, const Vec4<T>& qR, 
                                  const Vec2<Real>& normal) const
     {
-      Real n_mag = std::sqrt(dot(normal, normal));
+      Real n_mag = sqrt(dot(normal, normal));
       T aL = compute_sos(qL);
       T aR = compute_sos(qR);
       T unL = compute_un(qL, normal);
@@ -36,7 +36,7 @@ class LaxFriedrichFlux final : public NumericalFlux
                                  const Vec2<Real>& normal,
                                  Matrix<T, 4>& flux_dotL, Matrix<T, 4>& flux_dotR) const
     {
-      Real n_mag = std::sqrt(dot(normal, normal));
+      Real n_mag = sqrt(dot(normal, normal));
       auto [aL, aL_dot] = compute_sos_jac(qL);
       auto [aR, aR_dot] = compute_sos_jac(qR);
       auto [unL, unL_dot] = compute_un_jac(qL, normal);

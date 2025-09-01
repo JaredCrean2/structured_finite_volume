@@ -15,7 +15,7 @@ class HLLEFlux final : public NumericalFlux
     constexpr Vec4<T> operator()(const Vec4<T>& qL, const Vec4<T>& qR, 
                                  const Vec2<Real>& normal) const
     {
-      T n_mag = std::sqrt(dot(normal, normal));
+      T n_mag = sqrt(dot(normal, normal));
       T aL = compute_sos(qL);
       T aR = compute_sos(qR);
 
@@ -54,7 +54,7 @@ class HLLEFlux final : public NumericalFlux
                                  Matrix<T, 4>& flux_dotL, Matrix<T, 4>& flux_dotR) const
     {
       Real n_mag2 = dot(normal, normal);
-      Real n_mag = std::sqrt(n_mag2);
+      Real n_mag = sqrt(n_mag2);
       auto [aL, aL_dotL] = compute_sos_jac(qL);
       auto [aR, aR_dotR] = compute_sos_jac(qR);
 

@@ -137,8 +137,8 @@ TYPED_TEST(FluxFunctionJacTester, Consistency)
     std::cout << "prim_varsR = " << prim_varsR << std::endl;
     auto qL = compute_conservative_variables(prim_varsL, PrimitiveVarTag());
     auto qR = compute_conservative_variables(prim_varsR, PrimitiveVarTag());
-    auto qLc = test_utils::make_complex(qL);
-    auto qRc = test_utils::make_complex(qR);
+    auto qLc = test_utils::make_dual(qL);
+    auto qRc = test_utils::make_dual(qR);
     Vec2<Real> normal = {2.0, 3.0};
 
 
@@ -208,10 +208,10 @@ TEST(EulerFlux, EigenJacobian)
     Vec2<Real> normal = {2.0, 3.0};
 
 
-    auto funcR = [&](const Vec4<Complex>& q)
+    auto funcR = [&](const Vec4<Dual<Real, 1>>& q)
     {
       //using T = typename decltype(qL)::value_type;
-      using T = Complex;
+      using T = Dual<Real, 1>;
       Matrix<T, 4> R, Rinv;
       Vec4<T> lambda;
       compute_eigen_decomp(q, normal, R, lambda, Rinv);
@@ -230,10 +230,10 @@ TEST(EulerFlux, EigenJacobian)
       return std::make_pair(R, R_dot);
     };
 
-    auto funcRinv = [&](const Vec4<Complex>& q)
+    auto funcRinv = [&](const Vec4<Dual<Real, 1>>& q)
     {
       //using T = typename decltype(qL)::value_type;
-      using T = Complex;
+      using T = Dual<Real, 1>;
       Matrix<T, 4> R, Rinv;
       Vec4<T> lambda;
       compute_eigen_decomp(q, normal, R, lambda, Rinv);

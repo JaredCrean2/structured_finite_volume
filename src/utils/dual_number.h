@@ -55,7 +55,7 @@ class Dual
 
     constexpr T& operator()(UInt i) { return get_deriv(i); }
 
-    constexpr Dual operator-()
+    constexpr Dual operator-() const
     {
       Dual<T, N> b(NoInit{});
       for (UInt i=0; i < N; ++i)
