@@ -2,10 +2,14 @@
 #include "disc/disc_vector.h"
 #include "mesh/adjacent_block_indexer.h"
 #include "physics/physics_model.h"
+#include "physics/common/vec_field.h"
 
 using namespace structured_fv;
 
 namespace {
+
+using Dual1 = Dual<Real, 1>;
+
 class PhysicsModelTester : public ::testing::Test
 {
   public:
@@ -52,7 +56,7 @@ TEST_F(PhysicsModelTester, VecToField)
   }
 
 
-  vecToField(m_disc, vec, field);
+  common::vecToField(m_disc, vec, field);
 
   for (UInt block_id : m_disc->getRegularBlocksIds())
   {
@@ -122,7 +126,7 @@ TEST_F(PhysicsModelTester, VecToFieldDot)
   auto vec = std::make_shared<disc::DiscVector<Real>>(m_disc, "vec");
   auto vec_dot = std::make_shared<disc::DiscVector<Real>>(m_disc, "vec_dot");
 
-  auto field = std::make_shared<disc::ElementField<Complex>>(*m_disc, m_dofs_per_cell);
+  auto field = std::make_shared<disc::ElementField<Dual1>>(*m_disc, m_dofs_per_cell);
   auto func_real = [](Real x, Real y, UInt v) { return x + 2*y + v; };
   auto func_imag = [](Real x, Real y, UInt v) { return 2*(x + 2*y + v); };
 
@@ -145,7 +149,7 @@ TEST_F(PhysicsModelTester, VecToFieldDot)
   }
 
 
-  vecToFieldDot(m_disc, vec, vec_dot, field, h);
+  common::vecToFieldDot(m_disc, vec, vec_dot, field);
 
   for (UInt block_id : m_disc->getRegularBlocksIds())
   {
@@ -158,7 +162,7 @@ TEST_F(PhysicsModelTester, VecToFieldDot)
         for (UInt k=0; k < m_dofs_per_cell; ++k)
         {
           const auto [x, y] = disc::computeCellCentroid(coords, i, j);
-          EXPECT_EQ(field_vals(i, j, k), Complex(func_real(x, y, k), h*func_imag(x, y, k)));
+          EXPECT_EQ(field_vals(i, j, k), Dual1(func_real(x, y, k), {func_imag(x, y, k)}));
         }
   }
 
@@ -184,8 +188,8 @@ TEST_F(PhysicsModelTester, VecToFieldDot)
 
         for (UInt v=0; v < m_dofs_per_cell; ++v)
         {
-          EXPECT_EQ(field_valsL(iprime, jprime, v), Complex(func_real(x, y, v), h*func_imag(x, y, v)));
-          EXPECT_EQ(field_valsR(ineighbor, jneighbor, v), Complex(func_real(x, y, v), h*func_imag(x, y, v)));
+          EXPECT_EQ(field_valsL(iprime, jprime, v), Dual1(func_real(x, y, v), {func_imag(x, y, v)}));
+          EXPECT_EQ(field_valsR(ineighbor, jneighbor, v), Dual1(func_real(x, y, v), {func_imag(x, y, v)}));
         }
       }
 
@@ -203,8 +207,8 @@ TEST_F(PhysicsModelTester, VecToFieldDot)
 
         for (UInt v=0; v < m_dofs_per_cell; ++v)
         {
-          EXPECT_EQ(field_valsR(iprime, jprime, v), Complex(func_real(x, y, v), h*func_imag(x, y, v)));
-          EXPECT_EQ(field_valsL(ineighbor, jneighbor, v), Complex(func_real(x, y, v), h*func_imag(x, y, v)));
+          EXPECT_EQ(field_valsR(iprime, jprime, v), Dual1(func_real(x, y, v), {func_imag(x, y, v)}));
+          EXPECT_EQ(field_valsL(ineighbor, jneighbor, v), Dual1(func_real(x, y, v), {func_imag(x, y, v)}));
         }
       }
 }
@@ -234,7 +238,7 @@ TEST_F(PhysicsModelTester, FieldToVec)
   }
 
 
-  fieldToVec(m_disc, field, vec);
+  common::fieldToVec(m_disc, field, vec);
 
   for (UInt block_id : m_disc->getRegularBlocksIds())
   {
@@ -257,7 +261,7 @@ TEST_F(PhysicsModelTester, FieldToVecDot)
   Real h = 1e-40;
   auto vec = std::make_shared<disc::DiscVector<Real>>(m_disc, "vec");
   auto vec_dot = std::make_shared<disc::DiscVector<Real>>(m_disc, "vec_dot");
-  auto field = std::make_shared<disc::ElementField<Complex>>(*m_disc, m_dofs_per_cell);
+  auto field = std::make_shared<disc::ElementField<Dual1>>(*m_disc, m_dofs_per_cell);
   auto func_real =  [](Real x, Real y, UInt v) { return x + 2*y + v; };
   auto func_imag =  [](Real x, Real y, UInt v) { return 2*(x + 2*y + v); };
 
@@ -275,12 +279,12 @@ TEST_F(PhysicsModelTester, FieldToVecDot)
         for (UInt k=0; k < m_dofs_per_cell; ++k)
         {
           const auto [x, y] = disc::computeCellCentroid(coords, i, j);
-          field_vals(i, j, k) =  Complex(func_real(x, y, k), h*func_imag(x, y, k));
+          field_vals(i, j, k) =  Dual1(func_real(x, y, k), {func_imag(x, y, k)});
         }
   }
 
 
-  fieldToVecDot(m_disc, field, vec_dot, h);
+  common::fieldToVecDot(m_disc, field, vec_dot, h);
 
   for (UInt block_id : m_disc->getRegularBlocksIds())
   {

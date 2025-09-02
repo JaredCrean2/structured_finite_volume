@@ -186,7 +186,7 @@ void evaluateInterfaceTerms(const EulerOpts& opts, Fields<T>& fields, Real t, co
 
 // ETI
 template void evaluateInterfaceTerms<Real>(const EulerOpts& opts, Fields<Real>& fields, Real t, StructuredDiscPtr disc);
-template void evaluateInterfaceTerms<Complex>(const EulerOpts& opts, Fields<Complex>& fields, Real t, StructuredDiscPtr disc);
+template void evaluateInterfaceTerms<Dual1>(const EulerOpts& opts, Fields<Dual1>& fields, Real t, StructuredDiscPtr disc);
 
 
 }

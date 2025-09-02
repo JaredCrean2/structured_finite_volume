@@ -2,6 +2,7 @@
 #include "disc/discretization.h"
 #include "utils/face_iter_per_direction.h"
 #include "physics/common/slope_limiters.h"
+#include "physics/common/vec_field.h"
 #include "utils/math.h"
 #include "disc/elem_field.h"
 #include "utils/face_iter_per_direction.h"
@@ -25,7 +26,7 @@ AdvectionModel::AdvectionModel(const AdvectionOpts& opts, StructuredDiscPtr disc
   m_opts(opts),
   m_disc(disc),
   m_fields_real(*disc),
-  m_fields_complex(*disc),
+  m_fields_dual(*disc),
   m_bc_functions(bc_functions),
   m_source_func(source_func)
 {
@@ -43,9 +44,9 @@ void AdvectionModel::evaluateRhs(DiscVectorPtr<Real> q, Real t,
                                  DiscVectorPtr<Real> residual)
 {
   Fields<Real> fields = m_fields_real;
-  vecToField(m_disc, q, fields.solution);
+  common::vecToField(m_disc, q, fields.solution);
   evaluateRhsT(fields, t);
-  fieldToVec(m_disc, fields.residual, residual);
+  common::fieldToVec(m_disc, fields.residual, residual);
 }
 
 // evaluate the right hand side of the equation:
@@ -64,7 +65,7 @@ void AdvectionModel::evaluateRhsT(Fields<T> fields, Real t)
 void AdvectionModel::evaluateJacobian(disc::DiscVectorPtr<Real> q, Real t, disc::DiscVectorPtr<Real> residual, linear_system::AssemblerBasePtr assembler)
 {
   Fields<Real> fields = m_fields_real;
-  vecToField(m_disc, q, fields.solution);
+  common::vecToField(m_disc, q, fields.solution);
   setBCValues(fields.solution, t);
   fields.solution->updateGhostValues();
   fields.residual->set(0);
@@ -73,10 +74,10 @@ void AdvectionModel::evaluateJacobian(disc::DiscVectorPtr<Real> q, Real t, disc:
 
 void AdvectionModel::computeJacVecProduct(disc::DiscVectorPtr<Real> q, Real t, disc::DiscVectorPtr<Real> v, disc::DiscVectorPtr<Real> h)
 {
-  Fields<Complex> fields = m_fields_complex;
-  vecToFieldDot(m_disc, q, v, fields.solution);
+  Fields<Dual1> fields = m_fields_dual;
+  common::vecToFieldDot(m_disc, q, v, fields.solution);
   evaluateRhsT(fields, t);
-  fieldToVecDot(m_disc, fields.residual, h);
+  common::fieldToVecDot(m_disc, fields.residual, h);
 }
 
 std::shared_ptr<linear_system::SparsityPattern> AdvectionModel::getSparsityPattern() const

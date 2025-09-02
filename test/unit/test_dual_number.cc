@@ -654,6 +654,20 @@ TEST(DualNumber, ComparisonOperators)
   EXPECT_TRUE( val >= val3);
 }
 
+TEST(DualNumber, EqualityOperators)
+{
+  RealDual2 val1(2, {2, 3});
+  RealDual2 val2(2, {3, 4});
+
+  structured_fv::DualStrictlyEqual pred;
+
+  EXPECT_EQ(val1, val2);
+  EXPECT_FALSE(pred(val1, val2));
+
+  EXPECT_FALSE(val1 != val2);
+}
+
+
 TYPED_TEST(DualNumberBinaryFunctionTester, DualDual)
 {
   using T = TypeParam;

@@ -6,6 +6,7 @@
 #include "physics/physics_model.h"
 #include "disc/discretization.h"
 #include "utils/math.h"
+#include "utils/dual_number.h"
 
 namespace structured_fv {
 namespace advection {
@@ -15,6 +16,8 @@ using disc::StructuredDiscPtr;
 using disc::DiscVectorPtr;
 using disc::StructuredBlock;
 using disc::StructuredBlockInterface;
+
+using Dual1 = Dual<Real, 1>;
 
 // f(x, y, t)
 using Fxyt = std::function<Real(Real, Real, Real)>;
@@ -71,7 +74,7 @@ class AdvectionModel : public PhysicsModel
     AdvectionOpts m_opts;
     StructuredDiscPtr m_disc;
     Fields<Real> m_fields_real;
-    Fields<Complex> m_fields_complex;
+    Fields<Dual1> m_fields_dual;
     std::vector<Fxyt> m_bc_functions;
     Fxyt m_source_func;
 };

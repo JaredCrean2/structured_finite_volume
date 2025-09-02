@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "physics/common/slope_limiters.h"
+#include "physics/common/vec_field.h"
 #include "physics/euler/euler_flux.h"
 #include "physics/euler/typedefs.h"
 #include "linear_system/sparsity_pattern_mesh.h"
@@ -15,16 +16,16 @@ void EulerModel::evaluateRhs(DiscVectorPtr<Real> q, Real t,
                              DiscVectorPtr<Real> residual)
 {
   Fields<Real>& fields = m_fields_real;
-  vecToField(m_disc, q, fields.solution);
+  common::vecToField(m_disc, q, fields.solution);
   evaluateRhsT(fields, t);
-  fieldToVec(m_disc, fields.residual, residual);
+  common::fieldToVec(m_disc, fields.residual, residual);
 }
 
 void EulerModel::evaluateJacobian(disc::DiscVectorPtr<Real> q, Real t, disc::DiscVectorPtr<Real> residual,
                                   linear_system::AssemblerBasePtr assembler)
 {
   Fields<Real> fields = m_fields_real;
-  vecToField(m_disc, q, fields.solution);
+  common::vecToField(m_disc, q, fields.solution);
   setBCValues(fields.solution, t);
   fields.solution->updateGhostValues();
   fields.residual->set(0);
@@ -34,10 +35,10 @@ void EulerModel::evaluateJacobian(disc::DiscVectorPtr<Real> q, Real t, disc::Dis
 void EulerModel::computeJacVecProduct(disc::DiscVectorPtr<Real> q, Real t, disc::DiscVectorPtr<Real> v,
                                       disc::DiscVectorPtr<Real> h)
 {
-  Fields<Complex> fields = m_fields_complex;
-  vecToFieldDot(m_disc, q, v, fields.solution);
+  Fields<Dual1> fields = m_fields_dual;
+  common::vecToFieldDot(m_disc, q, v, fields.solution);
   evaluateRhsT(fields, t);
-  fieldToVecDot(m_disc, fields.residual, h);
+  common::fieldToVecDot(m_disc, fields.residual, h);
 }
 
 template <typename T>

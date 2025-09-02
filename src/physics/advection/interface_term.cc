@@ -114,7 +114,7 @@ void evaluateInterfaceTerm(const AdvectionOpts& opts, Fields<T> fields, Real t, 
 
 // ETI
 template void evaluateInterfaceTerm<Real>(const AdvectionOpts& opts, Fields<Real> fields, Real t, StructuredDiscPtr disc);
-template void evaluateInterfaceTerm<Complex>(const AdvectionOpts& opts, Fields<Complex> fields, Real t, StructuredDiscPtr disc);
+template void evaluateInterfaceTerm<Dual1>(const AdvectionOpts& opts, Fields<Dual1> fields, Real t, StructuredDiscPtr disc);
 
 }
 }

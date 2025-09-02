@@ -42,7 +42,7 @@ class EulerModel : public PhysicsModel
       m_opts(opts),
       m_disc(disc),
       m_fields_real(*disc),
-      m_fields_complex(*disc),
+      m_fields_dual(*disc),
       m_bc_functions(bc_functions),
       m_source_func(source_func)
       //m_solution(std::make_shared<disc::ElementField<Real>>(*disc, DofsPerCell)),
@@ -90,7 +90,7 @@ class EulerModel : public PhysicsModel
     EulerOpts m_opts;
     StructuredDiscPtr m_disc;
     Fields<Real> m_fields_real;
-    Fields<Complex> m_fields_complex;    
+    Fields<Dual1> m_fields_dual;    
     std::vector<Fxyt> m_bc_functions;
     Fxyt m_source_func;
 

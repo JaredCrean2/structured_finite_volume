@@ -5,6 +5,7 @@
 #include "disc/discretization.h"
 #include "utils/math.h"
 #include "utils/matrix.h"
+#include "utils/dual_number.h"
 
 namespace structured_fv {
 namespace euler {
@@ -16,6 +17,8 @@ using disc::StructuredBlock;
 using disc::StructuredBlockInterface;
 
 constexpr UInt DofsPerCell = 4;
+
+using Dual1 = Dual<Real, 1>;
 
 template <typename T>
 using ScalarVectorPair = std::pair<T, Vec4<T>>;

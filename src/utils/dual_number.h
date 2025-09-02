@@ -1,3 +1,6 @@
+#ifndef STRUCTURED_FINITE_VOLUME_UTILS_DUAL_NUMBER_H
+#define STRUCTURED_FINITE_VOLUME_UTILS_DUAL_NUMBER_H
+
 #include "vec.h"
 #include "project_defs.h"
 #include "math.h"
@@ -411,6 +414,12 @@ T real(const Dual<T, N>& a)
   return a();
 }
 
+template <typename T>
+inline Real imag(const Dual<T, 1>& x)
+{
+  return x(0);
+}
+
 // non-member operations where at least one of the operands is a Dual
 template <typename T1, typename T2, impl::EnableIfEitherIsDual<T1, T2> = true>
 constexpr auto operator+(const T1& a, const T2& b)
@@ -519,6 +528,40 @@ constexpr auto operator>=(const T1& a, const T2& b)
   return real(a) >= real(b);
 }
 
+template <typename T1, typename T2, impl::EnableIfEitherIsDual<T1, T2> = true>
+constexpr auto operator==(const T1& a, const T2& b)
+{
+  return real(a) == real(b);
+}
+
+template <typename T1, typename T2, impl::EnableIfEitherIsDual<T1, T2> = true>
+constexpr auto operator!=(const T1& a, const T2& b)
+{
+  return !(a == b);
+}
+
+// implements a stricter form of equality checking when both number are duals.
+// Check that both the primal value and all the derivatives are equal
+struct DualStrictlyEqual
+{
+  template <typename T1, typename T2, impl::EnableIfEitherIsDual<T1, T2> = true>
+  constexpr auto operator()(const T1& a, const T2& b)
+  {
+    return real(a) == real(b);
+  }
+
+  template <typename T1, typename T2, UInt N>
+  constexpr auto operator()(const Dual<T1, N>& a, const Dual<T2, N>& b)
+  {
+    bool val =  real(a) == real(b);
+
+    for (UInt i=0; i < N; ++i)
+      val = val && a(i) == b(i);
+
+    return val;
+  }  
+};
+
 
 //TODO: make these nonmembers
 template <typename T, UInt N>
@@ -612,12 +655,6 @@ Dual<T, N> atan(const Dual<T, N>& a)
 }
 
 
-template <typename T>
-inline Real imag(const Dual<T, 1>& x)
-{
-  return x(0);
-}
-
 template <typename T, UInt N>
 std::ostream& operator<<(std::ostream& os, const Dual<T, N>& x)
 {
@@ -626,3 +663,5 @@ std::ostream& operator<<(std::ostream& os, const Dual<T, N>& x)
 }
 
 }
+
+#endif
