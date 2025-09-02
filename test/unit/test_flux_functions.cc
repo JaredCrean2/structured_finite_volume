@@ -171,6 +171,7 @@ TYPED_TEST(FluxFunctionJacTester, Consistency)
   }
 }
 
+
 TYPED_TEST(FluxFunctionTester, Symmetry)
 {
   using FluxFunc = TypeParam;

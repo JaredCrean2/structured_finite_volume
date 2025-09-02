@@ -122,7 +122,6 @@ TEST_F(PhysicsModelTester, VecToField)
 
 TEST_F(PhysicsModelTester, VecToFieldDot)
 {
-  Real h = 1e-40;
   auto vec = std::make_shared<disc::DiscVector<Real>>(m_disc, "vec");
   auto vec_dot = std::make_shared<disc::DiscVector<Real>>(m_disc, "vec_dot");
 
