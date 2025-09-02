@@ -47,6 +47,10 @@ class Dual
 
     constexpr T& get_deriv(UInt i) { return m_dx[i]; }
 
+    constexpr const FixedVec<T, N>& get_derivs() const { return m_dx; }
+
+    constexpr FixedVec<T, N>& get_derivs() { return m_dx; }    
+
     constexpr const T& operator()() const { return get_value(); }
 
     constexpr T& operator()() { return get_value(); }
@@ -141,10 +145,10 @@ class Dual
     {
       Dual<T, N> b(NoInit{});
       T sqrt_v = std::sqrt(m_val);
-      T deriv_fac = 1.0/(2*sqrt_v);
+      T deriv_fac = 2*sqrt_v;
       b.m_val = sqrt_v;
       for (UInt i=0; i < N; ++i)
-        b.m_dx[i] = deriv_fac*m_dx[i];
+        b.m_dx[i] = m_dx[i]/deriv_fac;
 
       return b;
     }
@@ -606,4 +610,19 @@ Dual<T, N> atan(const Dual<T, N>& a)
 {
   return a.atan();
 }
+
+
+template <typename T>
+inline Real imag(const Dual<T, 1>& x)
+{
+  return x(0);
+}
+
+template <typename T, UInt N>
+std::ostream& operator<<(std::ostream& os, const Dual<T, N>& x)
+{
+  os << x() << ", (" << x.get_derivs() << ")";
+  return os;
+}
+
 }

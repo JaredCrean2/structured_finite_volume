@@ -73,9 +73,9 @@ constexpr ScalarVectorPair<T> compute_sos2_jac(const Vec4<T>& sol)
   auto [p, p_jac] = compute_pressure_jac(sol);
   T sos2 =  Gamma * p/sol[0];
 
-  p_jac[0] = Gamma * (p_jac[0]/sol[0] - p/(sol[0]*sol[0]));  
+  p_jac[0] = Gamma * p_jac[0]/sol[0] - Gamma* p/(sol[0]*sol[0]);  
   for (UInt i=1; i < sol.size(); ++i)
-    p_jac[i] = Gamma * (p_jac[i]/sol[0]);
+    p_jac[i] = Gamma * p_jac[i]/sol[0];
 
   return {sos2, p_jac};
 }
@@ -221,7 +221,7 @@ compute_euler_flux_jac(const Vec4<T>& sol, const Vec2<Real>& normal)
 template <typename T>
 constexpr void compute_eigen_decomp(const Vec4<T>& sol, const Vec2<Real>& normal,
                                     Matrix<T, 4>& R, Vec4<T>& lambda, Matrix<T, 4>& Rinv)
-{  
+{
   Real n_mag = sqrt(dot(normal, normal));
   Vec3<Real> n_unit{normal[0]/n_mag, normal[1]/n_mag, 0};
   T u = sol[1]/sol[0];
@@ -267,7 +267,7 @@ constexpr void compute_eigen_decomp(const Vec4<T>& sol, const Vec2<Real>& normal
   Rinv(0, 3) = Gamma_m1/(2.0*sos2);  
 
   Rinv(1, 0) =  1.0 - 0.5*Gamma_m1*M2;
-  Rinv(1, 1) =  Gamma_m1*u/sos2;
+  Rinv(1, 1) =  Gamma_m1*u/sos2; 
   Rinv(1, 2) =  Gamma_m1*v/sos2;
   Rinv(1, 3) = -Gamma_m1/sos2;
 
@@ -410,9 +410,9 @@ constexpr void compute_eigen_decomp_jac(const Vec4<T>& sol, const Vec2<Real>& no
   for (UInt k=0; k < 4; ++k)
   {
     Rinv_jac(1, 0, k) = -0.5*Gamma_m1*M2_dot[k];
-    Rinv_jac(1, 1, k) = Gamma_m1*(u_dot[k]/sos2 - u*sos2_dot[k]/(sos2*sos2));
-    Rinv_jac(1, 2, k) = Gamma_m1*(v_dot[k]/sos2 - v*sos2_dot[k]/(sos2*sos2));
-    Rinv_jac(1, 3, k) = Gamma_m1*sos2_dot[k]/(sos2*sos2);
+    Rinv_jac(1, 1, k) = (Gamma_m1*u_dot[k])/sos2 - (Gamma_m1*u/(sos2*sos2))*sos2_dot[k];
+    Rinv_jac(1, 2, k) = (Gamma_m1*v_dot[k])/sos2 - (Gamma_m1*v/(sos2*sos2))*sos2_dot[k];
+    Rinv_jac(1, 3, k) = (Gamma_m1/(sos2*sos2))*sos2_dot[k];
   }
 
   Rinv(2, 0) =  (v*n_unit[0] - u*n_unit[1])/sol[0];
@@ -438,13 +438,13 @@ constexpr void compute_eigen_decomp_jac(const Vec4<T>& sol, const Vec2<Real>& no
 
   for (UInt k=0; k < 4; ++k)
   {
-    Rinv_jac(3, 0, k) = (Gamma_m1/4)*M2_dot[k] - (Un_dot[k]/(2*sos*n_mag) - Un*sos_dot[k]/(2*sos2*n_mag));
+    Rinv_jac(3, 0, k) = (Gamma_m1/4)*M2_dot[k] - (Un_dot[k]/(2*sos*n_mag) - (Un/(2*sos2*n_mag))*sos_dot[k]);
 
     T t1 = n_unit[0] - Gamma_m1*u/sos;
-    T t1_dot = -Gamma_m1*(u_dot[k]/sos - u*sos_dot[k]/sos2);
+    T t1_dot = -Gamma_m1*u_dot[k]/sos + (Gamma_m1*u*sos_dot[k]/sos2);
 
     T t2 = n_unit[1] - Gamma_m1*v/sos;
-    T t2_dot = -Gamma_m1*(v_dot[k]/sos - v*sos_dot[k]/sos2);
+    T t2_dot = -Gamma_m1*v_dot[k]/sos + Gamma_m1*v*sos_dot[k]/sos2;
 
     Rinv_jac(3, 1, k) = t1_dot/(2*sos) - t1*sos_dot[k]/(2*sos2);
     Rinv_jac(3, 2, k) = t2_dot/(2*sos) - t2*sos_dot[k]/(2*sos2);

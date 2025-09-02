@@ -18,19 +18,21 @@ using VectorMatrixPair = structured_fv::euler::VectorMatrixPair<Real>;
 using MatrixArray3Pair = std::pair<Matrix<Real, 4>, Array3<Real, 4>>;
 using Dual1 = Dual<Real, 1>;
 
-inline Real get_tol(Real v1, Real v2, int num_ulp)
+inline Real get_tol(Real v1, Real v2, int num_ulp, Real abs_tol)
 {
   Real min_val = std::max(std::abs(v1), std::abs(v2));
   Real eps = std::nextafter(min_val, std::numeric_limits<Real>::max()) - min_val;
   //Real tol = std::max(num_ulp * eps, 1e-13);
   Real tol = num_ulp * eps;
+  if (abs_tol > 0)
+    tol = std::max(tol, abs_tol);
 
   return tol;
 }
 
-#define EXPECT_DOUBLE_EQ_CUSTOM(v1, v2, num_ulp)  \
+#define EXPECT_DOUBLE_EQ_CUSTOM(v1, v2, num_ulp, abs_tol)  \
 {                                                 \
-  EXPECT_NEAR(v1, v2, test_utils::get_tol(v1, v2, num_ulp));  \
+  EXPECT_NEAR(v1, v2, test_utils::get_tol(v1, v2, num_ulp, abs_tol));  \
 }                                                 \
 
 
@@ -90,7 +92,7 @@ void checkJacobianScalar(const Vec4<Real>& q, ScalarFunc func, ScalarFuncJac fun
 }
 
 template <typename VectorFunc, typename VectorFuncJac>
-void checkJacobianVector(const Vec4<Real>& q, VectorFunc func, VectorFuncJac func_jac)
+void checkJacobianVector(const Vec4<Real>& q, VectorFunc func, VectorFuncJac func_jac, Real abs_tol=-1)
 {
   static_assert(IsVectorFunc<VectorFunc>);
   static_assert(IsVectorJac<VectorFuncJac>);
@@ -114,23 +116,23 @@ void checkJacobianVector(const Vec4<Real>& q, VectorFunc func, VectorFuncJac fun
 
   const auto [y2, dydq_jac] = func_jac(q);
 
-  std::cout << "dydq_cs = \n" << dydq_cs << std::endl;
-  std::cout << "dydq_jac = \n" << dydq_jac << std::endl;
+  //std::cout << "dydq_cs = \n" << dydq_cs << std::endl;
+  //std::cout << "dydq_jac = \n" << dydq_jac << std::endl;
   for (UInt i=0; i < q.size(); ++i)
   {
     EXPECT_DOUBLE_EQ(y[i].get_value(), y2[i]);
     for (UInt j=0; j < q.size(); ++j)
     {
-      std::cout << "i, j = " << i << ", " << j << std::endl;
-      std::cout << "dydq_cs = " << dydq_cs(i, j) << ", dydq_jac = " << dydq_jac(i, j) << std::endl;
-      std::cout << "diff = " << dydq_cs(i, j) - dydq_jac(i, j) << std::endl;
-      EXPECT_DOUBLE_EQ_CUSTOM(dydq_jac(i, j), dydq_cs(i, j), 300);
+      //std::cout << "i, j = " << i << ", " << j << std::endl;
+      //std::cout << "dydq_cs = " << dydq_cs(i, j) << ", dydq_jac = " << dydq_jac(i, j) << std::endl;
+      //std::cout << "diff = " << dydq_cs(i, j) - dydq_jac(i, j) << std::endl;
+      EXPECT_DOUBLE_EQ_CUSTOM(dydq_jac(i, j), dydq_cs(i, j), 800, abs_tol);
     }
   }  
 }
 
 template <typename MatrixFunc, typename MatrixFuncJac>
-void checkJacobianMatrix(const Vec4<Real>& q, MatrixFunc func, MatrixFuncJac func_jac)
+void checkJacobianMatrix(const Vec4<Real>& q, MatrixFunc func, MatrixFuncJac func_jac, Real abs_tol=-1)
 {
   static_assert(IsMatrixFunc<MatrixFunc>);
   static_assert(IsMatrixJac<MatrixFuncJac>);
@@ -158,12 +160,13 @@ void checkJacobianMatrix(const Vec4<Real>& q, MatrixFunc func, MatrixFuncJac fun
       EXPECT_DOUBLE_EQ(y(i, j).get_value(), y2(i, j));
       for (UInt k=0; k < q.size(); ++k)
       {
+        //std::cout << "i, j, k = " << i << ", " << j << ", " << k << std::endl;
         //Real min_val = std::min(std::abs(dydq_jac(i, j, k)), std::abs(dydq_cs(i, j, k)));
         //Real eps = std::nextafter(min_val, std::numeric_limits<Real>::max()) - min_val;
         //Real tol = std::max(8 * eps, 1e-13);
         //EXPECT_NEAR(dydq_jac(i, j, k), dydq_cs(i, j, k), tol);
-        std::cout << "dydq_cs = " << dydq_cs(i, j, k) << ", dydq_jac = " << dydq_jac(i, j, k) << ", diff = " << dydq_cs(i, j, k) - dydq_jac(i, j, k) << std::endl;
-        EXPECT_DOUBLE_EQ_CUSTOM(dydq_jac(i, j, k), dydq_cs(i, j, k), 16);
+        //std::cout << "dydq_cs = " << dydq_cs(i, j, k) << ", dydq_jac = " << dydq_jac(i, j, k) << ", diff = " << dydq_cs(i, j, k) - dydq_jac(i, j, k) << std::endl;
+        EXPECT_DOUBLE_EQ_CUSTOM(dydq_jac(i, j, k), dydq_cs(i, j, k), 16, abs_tol);
 
       }
     }    

@@ -240,7 +240,6 @@ class ReconstructionPrimitive final : public ReconstructionBase
                                                  prim_i,   prim_i_dot,
                                                  prim_ip1, prim_ip1_dot, sign);
 
-      
       // overwrite prim_jacs with d(prim_endpoint)/dq
       for (UInt i=0; i < 4; ++i)
         for (UInt j=0; j < 4; ++j)

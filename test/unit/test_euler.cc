@@ -236,7 +236,7 @@ TEST_F(EulerTester, JacobianFirstOrder)
 
     for (GlobalDof dof2=0; dof2 < m_disc->getNumDofs(); ++dof2)
     {
-      EXPECT_DOUBLE_EQ_CUSTOM((*m_matrix)(dof2, dof), (*dRdq_v)(dof2), 300);
+      EXPECT_DOUBLE_EQ_CUSTOM((*m_matrix)(dof2, dof), (*dRdq_v)(dof2), 300, -1);
     }
   }
 }
@@ -273,7 +273,7 @@ TEST_F(EulerTester, JacobianSecondOrder)
 
     for (GlobalDof dof2=0; dof2 < m_disc->getNumDofs(); ++dof2)
     {
-      EXPECT_DOUBLE_EQ_CUSTOM((*m_matrix)(dof2, dof), (*dRdq_v)(dof2), 300);
+      EXPECT_DOUBLE_EQ_CUSTOM((*m_matrix)(dof2, dof), (*dRdq_v)(dof2), 300, -1);
     }
   }
 }
@@ -310,7 +310,7 @@ TEST_F(EulerTesterMultiBlock, JacobianFirstOrder)
 
     for (GlobalDof dof2=0; dof2 < m_disc2->getNumDofs(); ++dof2)
     {
-      EXPECT_DOUBLE_EQ_CUSTOM((*m_matrix2)(dof2, dof), (*dRdq_v)(dof2), 300);
+      EXPECT_DOUBLE_EQ_CUSTOM((*m_matrix2)(dof2, dof), (*dRdq_v)(dof2), 300, -1);
     }
   }
 }
@@ -347,7 +347,7 @@ TEST_F(EulerTesterMultiBlock, JacobianSecondOrder)
 
     for (GlobalDof dof2=0; dof2 < m_disc2->getNumDofs(); ++dof2)
     {
-      EXPECT_DOUBLE_EQ_CUSTOM((*m_matrix2)(dof2, dof), (*dRdq_v)(dof2), 300);
+      EXPECT_DOUBLE_EQ_CUSTOM((*m_matrix2)(dof2, dof), (*dRdq_v)(dof2), 300, -1);
     }
   }
 }

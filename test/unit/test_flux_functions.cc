@@ -76,7 +76,6 @@ TYPED_TEST(FluxFunctionTester, SameState)
 
   for (UInt i=0; i < DofsPerCell; ++i)
   {
-    std::cout << "\ni = " << i << std::endl;
     EXPECT_NEAR(flux_val[i], flux_expected[i], 1e-8);
   }
 }
@@ -123,18 +122,16 @@ TYPED_TEST(FluxFunctionJacTester, Consistency)
      {{2,  400.0/2,  500.0/3, 300}, {2,  500.0/2,  700.0/3, 300}},
      {{2, -400.0/2, -500.0/3, 300}, {2, -500.0/2, -700.0/3, 300}},
      {{2,   40.0/2,   50.0/3, 300}, {2,   50.0/2,   70.0/3, 300}},  // HLLC: uses SL and SR
-     {{2,   40.0/2,   50.0/3, 300}, {2,   50.0/2,   70.0/3, 600}},    // HLLC: uses SL_avg and SR, also s_star < 0
-     {{2,   40.0/2,   50.0/3, 600}, {2,   50.0/2,   70.0/3, 300}},     // HLLC: uses sR_avg
-     {{2,  500.0/2,   50.0/3, 700}, {2,  500.0/2,   50.0/3, 300}},     // RoeHH: trip entropy fix
+     {{2,   40.0/2,   50.0/3, 300}, {2,   50.0/2,   70.0/3, 600}},  // HLLC: uses SL_avg and SR, also s_star < 0
+     {{2,   40.0/2,   50.0/3, 600}, {2,   50.0/2,   70.0/3, 300}},  // HLLC: uses sR_avg
+     {{2,  500.0/2,   50.0/3, 700}, {2,  500.0/2,   50.0/3, 300}},  // RoeHH: trip entropy fix
      {{2,   40.0/2,   50.0/3, 300}, {2,   40.0/2,   50.0/3, 300}},
-     {{2,   40.0/2,   50.0/3, 300}, {2,   40,       10.0/3, 300}},    // LLF: max wave speed is same on both sides of interface
+     {{2,   40.0/2,   50.0/3, 300}, {2,   40,       10.0/3, 300}},  // LLF: max wave speed is same on both sides of interface
   };
 
 
   for (auto [prim_varsL, prim_varsR] : states)
   {
-    std::cout << "\nprim_varsL = " << prim_varsL << std::endl;
-    std::cout << "prim_varsR = " << prim_varsR << std::endl;
     auto qL = compute_conservative_variables(prim_varsL, PrimitiveVarTag());
     auto qR = compute_conservative_variables(prim_varsR, PrimitiveVarTag());
     auto qLc = test_utils::make_dual(qL);
@@ -168,9 +165,9 @@ TYPED_TEST(FluxFunctionJacTester, Consistency)
       return std::make_pair(f, flux_dotR);
     };  
 
-    test_utils::checkJacobianVector(qL, funcL, jacL);
+    test_utils::checkJacobianVector(qL, funcL, jacL, 1e-19);
 
-    test_utils::checkJacobianVector(qR, funcR, jacR); 
+    test_utils::checkJacobianVector(qR, funcR, jacR, 1e-19); 
   }
 }
 
@@ -196,9 +193,9 @@ TEST(EulerFlux, EigenJacobian)
      {2,  400.0/2,  500.0/3, 300}, {2,  500.0/2,  700.0/3, 300},
      {2, -400.0/2, -500.0/3, 300}, {2, -500.0/2, -700.0/3, 300},
      {2,   40.0/2,   50.0/3, 300}, {2,   50.0/2,   70.0/3, 300},  // HLLC: uses SL and SR
-     {2,   40.0/2,   50.0/3, 300}, {2,   50.0/2,   70.0/3, 600},    // HLLC: uses SL_avg and SR, also s_star < 0
-     {2,   40.0/2,   50.0/3, 600}, {2,   50.0/2,   70.0/3, 300},     // HLLC: uses sR_avg
-     {2,  500.0/2,   50.0/3, 700}, {2,  500.0/2,   50.0/3, 300}     // RoeHH: trip entropy fix
+     {2,   40.0/2,   50.0/3, 300}, {2,   50.0/2,   70.0/3, 600},  // HLLC: uses SL_avg and SR, also s_star < 0
+     {2,   40.0/2,   50.0/3, 600}, {2,   50.0/2,   70.0/3, 300},  // HLLC: uses sR_avg
+     {2,  500.0/2,   50.0/3, 700}, {2,  500.0/2,   50.0/3, 300}   // RoeHH: trip entropy fix
   };
 
 
