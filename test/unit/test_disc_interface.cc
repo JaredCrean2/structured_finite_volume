@@ -40,6 +40,8 @@ TEST_F(DiscIfaceTester, RegularInterface)
   EXPECT_EQ(iface.getOwnedBoundaryVertsR(), Range2D(2, 7, 7, 8));
   EXPECT_EQ(iface.getOwnedBoundaryCellsL(), Range2D(4, 5, 2, 6));
   EXPECT_EQ(iface.getOwnedBoundaryCellsR(), Range2D(2, 6, 6, 7));
+  EXPECT_EQ(iface.getOwnedBoundaryFacesL(), Range2D(5, 6, 2, 6));
+  EXPECT_EQ(iface.getOwnedBoundaryFacesR(), Range2D(2, 6, 7, 8));
   EXPECT_EQ(iface.getNeighborDirectionL(), NeighborDirection::East);
   EXPECT_EQ(iface.getNeighborDirectionR(), NeighborDirection::North);
 

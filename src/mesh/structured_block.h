@@ -4,16 +4,11 @@
 #include "utils/neighbor_direction.h"
 #include "utils/project_defs.h"
 #include "utils/range.h"
+#include "utils/block_type.h"
 #include "block_spec.h"
 
 namespace structured_fv {
 namespace mesh {
-
-enum class BlockType
-{
-  Regular,
-  GhostBC
-};
 
 
 class StructuredBlock

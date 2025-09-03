@@ -3,6 +3,7 @@
 #include "disc/face_field.h"
 #include "disc/vert_field.h"
 #include "disc/elem_field.h"
+#include "mesh/structured_block_interface.h"
 #include "utils/math.h"
 
 #include <iostream>

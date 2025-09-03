@@ -139,3 +139,105 @@ TEST(FaceIterPerDirection, Increment)
     EXPECT_EQ(j2, 1);
   }  
 }
+
+TEST(FaceIterPerDirection, EmptyRangeWithBoundary)
+{
+  Range2D range(0, 0, 0, 0);
+  FaceRangePerDirection face_range(range, true);
+  int nfaces = 0;
+  for ([[maybe_unused]] UInt i : face_range.getXRange(XDirTag{}))
+    for ([[maybe_unused]] UInt j : face_range.getYRange(XDirTag{}))
+      nfaces++;
+
+  for ([[maybe_unused]] UInt i : face_range.getXRange(YDirTag{}))
+    for ([[maybe_unused]] UInt j : face_range.getYRange(YDirTag{}))
+      nfaces++;
+  
+  EXPECT_EQ(nfaces, 0);
+}
+
+TEST(FaceIterPerDirection, EmptyRangeWithOutBoundary)
+{
+  Range2D range(0, 0, 0, 0);
+  FaceRangePerDirection face_range(range, false);
+  int nfaces = 0;
+  for ([[maybe_unused]] UInt i : face_range.getXRange(XDirTag{}))
+    for ([[maybe_unused]] UInt j : face_range.getYRange(XDirTag{}))
+      nfaces++;
+
+  for ([[maybe_unused]] UInt i : face_range.getXRange(YDirTag{}))
+    for ([[maybe_unused]] UInt j : face_range.getYRange(YDirTag{}))
+      nfaces++;
+  
+  EXPECT_EQ(nfaces, 0);
+}
+
+
+TEST(FaceIterPerDirection, BoundaryFlagsAllIncluded)
+{
+  Range2D range(0, 3, 0, 4);
+  FaceRangeBoundaryFlags boundary_flags;
+  FaceRangePerDirection face_range(range, boundary_flags);
+
+  EXPECT_EQ(face_range.getRange(XDirTag{}), Range2D(0, 4, 0, 4));
+  EXPECT_EQ(face_range.getRange(YDirTag{}), Range2D(0, 3, 0, 5));
+}
+
+TEST(FaceIterPerDirection, BoundaryFlagsAllNoBottom)
+{
+  Range2D range(0, 3, 0, 4);
+  FaceRangeBoundaryFlags boundary_flags;
+  boundary_flags.include_bottom = false;
+  FaceRangePerDirection face_range(range, boundary_flags);
+
+  EXPECT_EQ(face_range.getRange(XDirTag{}), Range2D(0, 4, 0, 4));
+  EXPECT_EQ(face_range.getRange(YDirTag{}), Range2D(0, 3, 1, 5));
+}
+
+TEST(FaceIterPerDirection, BoundaryFlagsAllNoLeft)
+{
+  Range2D range(0, 3, 0, 4);
+  FaceRangeBoundaryFlags boundary_flags;
+  boundary_flags.include_left = false;
+  FaceRangePerDirection face_range(range, boundary_flags);
+
+  EXPECT_EQ(face_range.getRange(XDirTag{}), Range2D(1, 4, 0, 4));
+  EXPECT_EQ(face_range.getRange(YDirTag{}), Range2D(0, 3, 0, 5));
+}
+
+TEST(FaceIterPerDirection, BoundaryFlagsAllExcluded)
+{
+  Range2D range(0, 3, 0, 4);
+  FaceRangeBoundaryFlags boundary_flags;
+  boundary_flags.include_bottom = false;
+  boundary_flags.include_top    = false;
+  boundary_flags.include_left   = false;
+  boundary_flags.include_right  = false;
+  FaceRangePerDirection face_range(range, boundary_flags);
+
+  EXPECT_EQ(face_range.getRange(XDirTag{}), Range2D(1, 3, 0, 4));
+  EXPECT_EQ(face_range.getRange(YDirTag{}), Range2D(0, 3, 1, 4));
+}
+
+TEST(FaceIterPerDirection, BoundaryFlagsEmptyRangeWithOutBoundary)
+{
+  Range2D range(0, 0, 0, 0);
+  FaceRangeBoundaryFlags boundary_flags;
+  boundary_flags.include_bottom = false;
+  boundary_flags.include_top    = false;
+  boundary_flags.include_left   = false;
+  boundary_flags.include_right  = false;  
+  FaceRangePerDirection face_range(range, boundary_flags);
+  int nfaces = 0;
+  for ([[maybe_unused]] UInt i : face_range.getXRange(XDirTag{}))
+    for ([[maybe_unused]] UInt j : face_range.getYRange(XDirTag{}))
+      nfaces++;
+
+  for ([[maybe_unused]] UInt i : face_range.getXRange(YDirTag{}))
+    for ([[maybe_unused]] UInt j : face_range.getYRange(YDirTag{}))
+      nfaces++;
+  
+  EXPECT_EQ(nfaces, 0);
+}
+
+//TODO: is first constructor still needed

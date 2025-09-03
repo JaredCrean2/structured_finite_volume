@@ -1,6 +1,7 @@
 #ifndef STRUCTURED_FINITE_VOLUME_DISC_BLOCK_H
 #define STRUCTURED_FINITE_VOLUME_DISC_BLOCK_H
 
+#include "utils/block_type.h"
 #include "utils/project_defs.h"
 #include "mesh/structured_mesh.h"
 #include "utils/face_iter_per_direction.h"
@@ -21,7 +22,7 @@ class StructuredBlock
 
     UInt getBlockId() const;
 
-    mesh::BlockType getBlockType() const;
+    BlockType getBlockType() const;
 
     FixedVec<UInt, 2> getCellDimensions() const;
 
@@ -37,6 +38,7 @@ class StructuredBlock
 
     Range2D getOwnedAndGhostCells() const;
 
+    // gets the faces in the rectangle [owned x owned]
     // owned faces is a bit misleading: it means faces of owned cells.
     // if include_boundary is true, the faces on the boundary (ie. faces shared
     // between an owned cell and a non-owned cell) are included
@@ -51,6 +53,10 @@ class StructuredBlock
     // gets all x direction faces for cells in the rectangle [ownedOrGhost x ownedAndGhost]
     FaceRangePerDirection getOwnedAndGhostFacesWithCorners(bool include_boundary=true) const;
 
+    // like getOwnedFaces, but does not include faces where the element on the right side of
+    // the face is a BC ghost element.
+    FaceRangePerDirection getOwnedFacesExceptBC() const;
+
     std::pair<UInt, UInt> meshVertToBlockVert(UInt i, UInt j) const;
 
     std::pair<UInt, UInt> blockVertToMeshVert(UInt i, UInt j) const;
@@ -61,6 +67,7 @@ class StructuredBlock
 
     const mesh::StructuredBlock& m_mesh_block;
     FixedVec<UInt, 4> m_num_ghost_cells_per_direction;
+    NeighborBlockTypes m_neighbor_block_types;
 };
 
 inline FixedVec<Real, 2> computeCellCentroid(StructuredBlock::CoordsHostView vert_coords, int i, int j)

@@ -35,6 +35,17 @@ constexpr std::pair<UInt, UInt> increment(YDirTag, UInt i, UInt j, Int offset)
   return {i, j + offset};
 }
 
+// tells whether or not to include the faces on the sides of the rectange.
+// Ex. if include_left is false, the x direction faces on the left boundary will
+//     be omitted.  Y direction faces are unaffected
+struct FaceRangeBoundaryFlags
+{
+  bool include_left   = true;
+  bool include_right  = true;
+  bool include_top    = true;
+  bool include_bottom = true;
+};
+
 class FaceRangePerDirection
 {
   public:
@@ -63,6 +74,20 @@ class FaceRangePerDirection
                                  *cell_range.getYRange().begin()+1, *cell_range.getYRange().end());
       }
     }
+
+    FaceRangePerDirection(const Range2D& cell_range, const FaceRangeBoundaryFlags& boundary_flags)
+    {
+      UInt deltaL = boundary_flags.include_left   ? 0 : 1;
+      UInt deltaR = boundary_flags.include_right  ? 0 : 1;
+      UInt deltaT = boundary_flags.include_top    ? 0 : 1;
+      UInt deltaB = boundary_flags.include_bottom ? 0 : 1;
+
+      m_face_range_x = Range2D(*cell_range.getXRange().begin() + deltaL,   *cell_range.getXRange().end()+1 - deltaR,
+                               *cell_range.getYRange().begin(),            *cell_range.getYRange().end()),
+      m_face_range_y = Range2D(*cell_range.getXRange().begin(),            *cell_range.getXRange().end(),
+                               *cell_range.getYRange().begin() + deltaB,   *cell_range.getYRange().end()+1 - deltaT);
+    }
+
 
     Range2D getRange(XDirTag) const { return m_face_range_x; }
 

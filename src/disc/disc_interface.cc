@@ -1,7 +1,18 @@
 #include "disc_interface.h"
+#include "utils/neighbor_direction.h"
 
 namespace structured_fv {
 namespace disc {
+
+Range2D cellsToFaces(const Range2D& cells, NeighborDirection dir)
+{
+  UInt xoffset = dir == NeighborDirection::East  ? 1 : 0;
+  UInt yoffset = dir == NeighborDirection::North ? 1 : 0;
+  return Range2D(*cells.getXRange().begin() + xoffset,
+                 *cells.getXRange().end()   + xoffset,
+                 *cells.getYRange().begin() + yoffset,
+                 *cells.getYRange().end()   + yoffset);  
+}
 
 StructuredBlockInterface::StructuredBlockInterface(const StructuredBlock& blockL, 
                                                    const StructuredBlock& blockR,
@@ -85,7 +96,10 @@ StructuredBlockInterface::StructuredBlockInterface(const StructuredBlock& blockL
   m_owned_boundary_vertsR = Range2D(ownedVertsXR[0], ownedVertsXR[1], ownedVertsYR[0], ownedVertsYR[1]);
 
   m_owned_boundary_cellsL = Range2D(ownedCellsXL[0], ownedCellsXL[1], ownedCellsYL[0], ownedCellsYL[1]);
-  m_owned_boundary_cellsR = Range2D(ownedCellsXR[0], ownedCellsXR[1], ownedCellsYR[0], ownedCellsYR[1]);                                                    
+  m_owned_boundary_cellsR = Range2D(ownedCellsXR[0], ownedCellsXR[1], ownedCellsYR[0], ownedCellsYR[1]);
+
+  m_owned_boundary_facesL = cellsToFaces(m_owned_boundary_cellsL, getNeighborDirectionL());
+  m_owned_boundary_facesR = cellsToFaces(m_owned_boundary_cellsR, getNeighborDirectionR());
 }
 
 UInt StructuredBlockInterface::getBlockIdL() const { return m_blockL.getBlockId(); }
@@ -99,6 +113,10 @@ const Range2D& StructuredBlockInterface::getOwnedBoundaryVertsR() const { return
 const Range2D& StructuredBlockInterface::getOwnedBoundaryCellsL() const { return m_owned_boundary_cellsL; }
 
 const Range2D& StructuredBlockInterface::getOwnedBoundaryCellsR() const { return m_owned_boundary_cellsR; }
+
+const Range2D& StructuredBlockInterface::getOwnedBoundaryFacesL() const { return m_owned_boundary_facesL; }
+
+const Range2D& StructuredBlockInterface::getOwnedBoundaryFacesR() const { return m_owned_boundary_facesR; };
 
 NeighborDirection StructuredBlockInterface::getNeighborDirectionL() const { return m_mesh_iface.getNeighborDirectionL(); }
 

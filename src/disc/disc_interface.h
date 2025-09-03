@@ -28,6 +28,10 @@ class StructuredBlockInterface
 
     const Range2D& getOwnedBoundaryCellsR() const;
 
+    const Range2D& getOwnedBoundaryFacesL() const;
+
+    const Range2D& getOwnedBoundaryFacesR() const;
+
     NeighborDirection getNeighborDirectionL() const;
 
     NeighborDirection getNeighborDirectionR() const;
@@ -54,6 +58,8 @@ class StructuredBlockInterface
     Range2D m_owned_boundary_vertsR;
     Range2D m_owned_boundary_cellsL;
     Range2D m_owned_boundary_cellsR;
+    Range2D m_owned_boundary_facesL;
+    Range2D m_owned_boundary_facesR;
     mesh::AdjacentBlockIndexer m_cell_indexerL;
     mesh::AdjacentBlockIndexer m_cell_indexerR;
     mesh::AdjacentBlockIndexer m_vert_indexerL;

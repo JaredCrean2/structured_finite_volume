@@ -1,4 +1,5 @@
 #include "disc_block.h"
+#include "utils/block_type.h"
 #include "utils/face_iter_per_direction.h"
 
 namespace structured_fv {
@@ -8,11 +9,29 @@ namespace disc {
 StructuredBlock::StructuredBlock(const mesh::StructuredMesh& mesh, const mesh::StructuredBlock& block, int nghost) :
   m_mesh_block(block),
   m_num_ghost_cells_per_direction(computeNumGhostsPerDirection(mesh, nghost))
-{}
+{
+  Vec4<Int> block_interfaces = mesh.getBlockInterfaces(getBlockId());
+  Vec4<BlockType> neighbor_block_types{BlockType::Invalid, BlockType::Invalid, BlockType::Invalid, BlockType::Invalid};
+  for (Int iface_id : block_interfaces)
+  {
+    if (iface_id >= 0)
+    {
+      const mesh::StructuredBlockInterface& iface = mesh.getBlockInterface(iface_id);
+      assert(iface.getBlockIdL() == getBlockId() || iface.getBlockIdR() == getBlockId());
+      bool am_blockL = iface.getBlockIdL() == getBlockId();
+
+      UInt other_block_id = am_blockL ? iface.getBlockIdR() : iface.getBlockIdL();
+      NeighborDirection neighbor_dir = am_blockL ? iface.getNeighborDirectionL() : iface.getNeighborDirectionR();
+      neighbor_block_types[to_int(neighbor_dir)] = mesh.getBlock(other_block_id).getBlockType();
+    }
+  }
+  
+  m_neighbor_block_types = NeighborBlockTypes(neighbor_block_types);
+}
 
 UInt StructuredBlock::getBlockId() const { return m_mesh_block.getBlockId(); }
 
-mesh::BlockType StructuredBlock::getBlockType() const { return m_mesh_block.getBlockType(); }
+BlockType StructuredBlock::getBlockType() const { return m_mesh_block.getBlockType(); }
 
 FixedVec<UInt, 2> StructuredBlock::getCellDimensions() const { return getOwnedAndGhostCells().getDimensions(); }
 
@@ -97,6 +116,18 @@ std::pair<UInt, UInt> StructuredBlock::meshVertToBlockVert(UInt i, UInt j) const
   UInt yoffset = m_num_ghost_cells_per_direction[to_int(NeighborDirection::South)];
   return {i + xoffset, j + yoffset};
 }
+
+FaceRangePerDirection StructuredBlock::getOwnedFacesExceptBC() const
+{
+  FaceRangeBoundaryFlags boundary_flags;
+  boundary_flags.include_bottom = m_neighbor_block_types.getBlockType(NeighborDirection::South) == BlockType::Regular;
+  boundary_flags.include_top    = m_neighbor_block_types.getBlockType(NeighborDirection::North) == BlockType::Regular;
+  boundary_flags.include_left   = m_neighbor_block_types.getBlockType(NeighborDirection::West)  == BlockType::Regular;
+  boundary_flags.include_right  = m_neighbor_block_types.getBlockType(NeighborDirection::East)  == BlockType::Regular;
+
+  return FaceRangePerDirection(getOwnedCells(), boundary_flags);
+}
+
 
 std::pair<UInt, UInt> StructuredBlock::blockVertToMeshVert(UInt i, UInt j) const
 {

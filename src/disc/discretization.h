@@ -70,6 +70,8 @@ class StructuredDisc
 
     const StructuredBlockInterface& getBlockInterface(UInt i) const { return m_ifaces.at(i); }
 
+    FixedVec<Int, 4> getBlockInterfaces(UInt block_id) const { return m_mesh->getBlockInterfaces(block_id); }
+
     VertexFieldPtr<Real> getCoordField() const { return m_coordField; }
 
     FaceFieldPtr<Real> getNormalField() const { return m_normalField; }

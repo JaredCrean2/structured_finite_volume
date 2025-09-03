@@ -1,4 +1,5 @@
 #include "structured_block.h"
+#include "utils/block_type.h"
 
 namespace structured_fv {
 namespace mesh {
